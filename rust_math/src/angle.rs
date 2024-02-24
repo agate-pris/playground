@@ -21,7 +21,6 @@ macro_rules! impl_angle {
 // i64 and i128 is not supported
 // because the coefficients cannot be calculated
 // with sufficient precision.
-
 impl_angle!(i8, i16, i32);
 
 fn square<T: PrimInt>(b: T, denom: T) -> T {
