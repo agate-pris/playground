@@ -19,9 +19,7 @@ use num_traits::AsPrimitive;
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
 
-use crate::angle::{
-    cos_p2, cos_p4, cos_p4o, sin_p1, sin_p2, sin_p3, sin_p4, sin_p4o, sin_p5, sin_p5o, Angle,
-};
+use crate::angle::{cos_p2, cos_p4, cos_p4o, sin_p1, sin_p3, sin_p5, sin_p5o, Angle};
 
 fn read<T>(dir: &str, file_name: &str) -> Result<Vec<T>>
 where
@@ -119,10 +117,10 @@ where
 
 fn test_and_write_all(args: &Args) -> Vec<Error> {
     [
-        test_and_write(args, sin_p2::<i16>, i16::DEFAULT_RIGHT, "sin_p2_i16.json"),
+        test_and_write(args, cos_p2::<i16>, i16::DEFAULT_RIGHT, "cos_p2_i16.json"),
         test_and_write(args, sin_p3::<i32>, i32::DEFAULT_RIGHT, "sin_p3_i32.json"),
-        test_and_write(args, sin_p4::<i32>, i32::DEFAULT_RIGHT, "sin_p4_i32.json"),
-        test_and_write(args, sin_p4o::<i32>, i32::DEFAULT_RIGHT, "sin_p4o_i32.json"),
+        test_and_write(args, cos_p4::<i32>, i32::DEFAULT_RIGHT, "cos_p4_i32.json"),
+        test_and_write(args, cos_p4o::<i32>, i32::DEFAULT_RIGHT, "cos_p4o_i32.json"),
         test_and_write(args, sin_p5::<i32>, i32::DEFAULT_RIGHT, "sin_p5_i32.json"),
         test_and_write(args, sin_p5o::<i32>, i32::DEFAULT_RIGHT, "sin_p5o_i32.json"),
     ]
