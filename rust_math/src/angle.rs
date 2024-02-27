@@ -266,7 +266,6 @@ mod tests {
         actual: Actual,
         expected: fn(f64) -> f64,
         margin: f64,
-        step: usize,
         right: T,
         one: T,
     ) where
@@ -287,7 +286,7 @@ mod tests {
             SCALE / one
         };
 
-        for x in (-full..=full).step_by(step).map(Into::into) {
+        for x in (-full..=full).map(Into::into) {
             let actual = actual(x, right);
             let expected = {
                 let x: f64 = x.as_();
@@ -320,73 +319,57 @@ mod tests {
         }
     }
 
-    fn compare_sin_f64<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
+    fn compare_sin_f64<F, T>(f: F, right: T, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
         RangeInclusive<T>: Iterator,
     {
-        compare_sin_cos_f64(f, f64::sin, margin, step, right, one);
+        compare_sin_cos_f64(f, f64::sin, margin, right, one);
     }
 
-    fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
+    fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
         RangeInclusive<T>: Iterator,
     {
-        compare_sin_cos_f64(f, f64::cos, margin, step, right, one);
+        compare_sin_cos_f64(f, f64::cos, margin, right, one);
     }
 
     #[test]
     fn test_sin_p1() {
         const MARGIN: f64 = 862.264;
-        compare_sin_f64(
-            sin_p1::<i8>,
-            i8::DEFAULT_RIGHT,
-            i8::DEFAULT_RIGHT,
-            MARGIN,
-            1,
-        );
+        compare_sin_f64(sin_p1::<i8>, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
         compare_sin_f64(
             sin_p1::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT,
             MARGIN,
-            1,
         );
         compare_sin_f64(
             sin_p1::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT,
             MARGIN,
-            1,
         );
     }
 
     #[test]
     fn test_cos_p1() {
         const MARGIN: f64 = 862.264;
-        compare_cos_f64(
-            cos_p1::<i8>,
-            i8::DEFAULT_RIGHT,
-            i8::DEFAULT_RIGHT,
-            MARGIN,
-            1,
-        );
+        compare_cos_f64(cos_p1::<i8>, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
         compare_cos_f64(
             cos_p1::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT,
             MARGIN,
-            1,
         );
         compare_cos_f64(
             cos_p1::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT,
             MARGIN,
-            1,
         );
     }
 
@@ -398,14 +381,12 @@ mod tests {
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
-            1,
         );
         compare_cos_f64(
             cos_p2::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             MARGIN,
-            1,
         );
     }
 
@@ -417,14 +398,12 @@ mod tests {
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
-            1,
         );
         compare_sin_f64(
             sin_p2::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             MARGIN,
-            1,
         );
     }
 
@@ -435,7 +414,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             82.0,
-            1,
         );
     }
 
@@ -446,7 +424,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             82.0,
-            1,
         );
     }
 
@@ -464,7 +441,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             11.5464,
-            1,
         );
     }
 
@@ -475,7 +451,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             11.5464,
-            1,
         );
     }
 
@@ -491,7 +466,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             4.80746,
-            1,
         );
     }
 
@@ -502,7 +476,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             4.80746,
-            1,
         );
     }
 
@@ -518,7 +491,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             1.73715,
-            1,
         );
     }
 
@@ -529,7 +501,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             1.73715,
-            1,
         );
     }
 
@@ -545,7 +516,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             0.925201,
-            1,
         );
     }
 
@@ -556,7 +526,6 @@ mod tests {
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             0.925201,
-            1,
         );
     }
 
@@ -569,7 +538,7 @@ mod tests {
     {
         let straight = right * 2.into();
         let full = right * 4.into();
-        for x in (-full..=full).step_by(1).map(Into::into) {
+        for x in (-full..=full).map(Into::into) {
             let sin_x = sin(x, right);
             let cos_x = cos(x, right);
             assert_eq!(sin_x, sin(x - full, right));
