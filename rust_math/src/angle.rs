@@ -277,8 +277,8 @@ mod tests {
         one: T,
     ) where
         Actual: Fn(T, T) -> T,
-        T: Angle + Display + From<<RangeInclusive<T> as Iterator>::Item>,
-        RangeInclusive<T>: Iterator,
+        T: Angle + Display,
+        RangeInclusive<T>: Iterator<Item = T>,
     {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
@@ -293,7 +293,7 @@ mod tests {
             SCALE / one
         };
 
-        for x in (-full..=full).map(Into::into) {
+        for x in -full..=full {
             let actual = actual(x, right);
             let expected = {
                 let x: f64 = x.as_();
@@ -329,8 +329,8 @@ mod tests {
     fn compare_sin_f64<F, T>(f: F, right: T, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
-        T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
-        RangeInclusive<T>: Iterator,
+        T: Angle + Debug + Display,
+        RangeInclusive<T>: Iterator<Item = T>,
     {
         compare_sin_cos_f64(f, f64::sin, margin, right, one);
     }
@@ -338,8 +338,8 @@ mod tests {
     fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
-        T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
-        RangeInclusive<T>: Iterator,
+        T: Angle + Debug + Display,
+        RangeInclusive<T>: Iterator<Item = T>,
     {
         compare_sin_cos_f64(f, f64::cos, margin, right, one);
     }
