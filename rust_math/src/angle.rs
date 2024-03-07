@@ -55,7 +55,8 @@ pub fn sin_p1<T: Angle>(x: T, right: T) -> T {
         1 => -rem + right,
         3 => rem - right,
         2 => -rem,
-        _ => rem,
+        0 => rem,
+        _ => unreachable!(),
     }
 }
 
@@ -74,7 +75,8 @@ where
         1 => -k + f(right - rem, right),
         3 => k - f(right - rem, right),
         2 => -k + f(rem, right),
-        _ => k - f(rem, right),
+        0 => k - f(rem, right),
+        _ => unreachable!(),
     }
 }
 
