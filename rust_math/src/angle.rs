@@ -126,7 +126,7 @@ where
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
-    ((1.0 - FRAC_PI_4) * right).round().as_()
+    ((1.0 - FRAC_PI_4) * right).round_ties_even().as_()
 }
 
 /// 1 - a * z ^ 2 + (a - a) * z ^ 4
@@ -153,7 +153,9 @@ where
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
-    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right).round().as_()
+    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right)
+        .round_ties_even()
+        .as_()
 }
 
 /// 1 - a * z ^ 2 + (a - a) * z ^ 4
@@ -188,7 +190,7 @@ where
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
-    (FRAC_PI_2 * right).round().as_()
+    (FRAC_PI_2 * right).round_ties_even().as_()
 }
 
 /// a * x - c * x ^ 3 + c * x ^ 5
@@ -215,7 +217,9 @@ where
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
-    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right).round().as_()
+    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right)
+        .round_ties_even()
+        .as_()
 }
 
 /// a * x - c * x ^ 3 + c * x ^ 5
