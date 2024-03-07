@@ -255,7 +255,7 @@ mod tests {
         assert_eq!(repeat(11, 10), 1);
     }
 
-    fn test_sin_cos<Actual, T>(
+    fn compare_sin_cos_f64<Actual, T>(
         actual: Actual,
         expected: fn(f64) -> f64,
         margin: f64,
@@ -281,7 +281,7 @@ mod tests {
         };
 
         for x in (-full..=full).step_by(step).map(Into::into) {
-            let actual: T = actual(x, right);
+            let actual = actual(x, right);
             let expected = {
                 let x: f64 = x.as_();
                 expected(frac_pi_straight * x)
@@ -292,16 +292,12 @@ mod tests {
             // otherwise that the sign is correct.
             if x % right == zero {
                 assert!(
-                    actual == 0.into() || actual == one || actual == -one,
-                    "actual: {}",
-                    actual
+                    actual == zero || actual == one || actual == -one,
+                    "actual: {actual}",
                 );
             } else {
-                if 0.0 < expected {
-                    assert!(zero < actual);
-                } else {
-                    assert!(zero > actual);
-                }
+                assert_eq!(0.0 < expected, zero < actual);
+                assert_eq!(0.0 > expected, zero > actual);
             }
 
             let actual = {
@@ -317,51 +313,42 @@ mod tests {
         }
     }
 
-    fn test_sin<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
+    fn compare_sin_f64<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
         RangeInclusive<T>: Iterator,
     {
-        let straight = right * 2.into();
-        let full = right * 4.into();
-        test_sin_cos(f, f64::sin, margin, step, right, one);
-        for x in (-full..=full).step_by(step).map(Into::into) {
-            let fx = f(x, right);
-            assert_eq!(fx, f(straight - x, right));
-            assert_eq!(-fx, f(straight + x, right));
-            assert_eq!(-fx, f(-x, right));
-        }
+        compare_sin_cos_f64(f, f64::sin, margin, step, right, one);
     }
 
-    fn test_cos<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
+    fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64, step: usize)
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
         RangeInclusive<T>: Iterator,
     {
-        let straight = right * 2.into();
-        let full = right * 4.into();
-        test_sin_cos(f, f64::cos, margin, step, right, one);
-        for x in (-full..=full).step_by(step).map(Into::into) {
-            let fx = f(x, right);
-            assert_eq!(fx, f(-x, right));
-            assert_eq!(fx, -f(straight - x, right));
-            assert_eq!(-fx, f(straight + x, right));
-        }
+        compare_sin_cos_f64(f, f64::cos, margin, step, right, one);
     }
 
     #[test]
     fn test_sin_p1() {
         const MARGIN: f64 = 862.264;
-        test_sin(
+        compare_sin_f64(
+            sin_p1::<i8>,
+            i8::DEFAULT_RIGHT,
+            i8::DEFAULT_RIGHT,
+            MARGIN,
+            1,
+        );
+        compare_sin_f64(
             sin_p1::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT,
             MARGIN,
             1,
         );
-        test_sin(
+        compare_sin_f64(
             sin_p1::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT,
@@ -373,14 +360,21 @@ mod tests {
     #[test]
     fn test_cos_p1() {
         const MARGIN: f64 = 862.264;
-        test_cos(
+        compare_cos_f64(
+            cos_p1::<i8>,
+            i8::DEFAULT_RIGHT,
+            i8::DEFAULT_RIGHT,
+            MARGIN,
+            1,
+        );
+        compare_cos_f64(
             cos_p1::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT,
             MARGIN,
             1,
         );
-        test_cos(
+        compare_cos_f64(
             cos_p1::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT,
@@ -392,14 +386,14 @@ mod tests {
     #[test]
     fn test_cos_p2() {
         const MARGIN: f64 = 229.416;
-        test_cos(
+        compare_cos_f64(
             cos_p2::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
             1,
         );
-        test_cos(
+        compare_cos_f64(
             cos_p2::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -411,14 +405,14 @@ mod tests {
     #[test]
     fn test_sin_p2() {
         const MARGIN: f64 = 229.416;
-        test_sin(
+        compare_sin_f64(
             sin_p2::<i16>,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
             1,
         );
-        test_sin(
+        compare_sin_f64(
             sin_p2::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -429,7 +423,7 @@ mod tests {
 
     #[test]
     fn test_sin_p3() {
-        test_sin(
+        compare_sin_f64(
             sin_p3::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -440,7 +434,7 @@ mod tests {
 
     #[test]
     fn test_cos_p3() {
-        test_cos(
+        compare_cos_f64(
             cos_p3::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -458,7 +452,7 @@ mod tests {
 
     #[test]
     fn test_cos_p4() {
-        test_cos(
+        compare_cos_f64(
             cos_p4::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -469,7 +463,7 @@ mod tests {
 
     #[test]
     fn test_sin_p4() {
-        test_sin(
+        compare_sin_f64(
             sin_p4::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -485,7 +479,7 @@ mod tests {
 
     #[test]
     fn test_cos_p4o() {
-        test_cos(
+        compare_cos_f64(
             cos_p4o::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -496,7 +490,7 @@ mod tests {
 
     #[test]
     fn test_sin_p4o() {
-        test_sin(
+        compare_sin_f64(
             sin_p4o::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -512,7 +506,7 @@ mod tests {
 
     #[test]
     fn test_sin_p5() {
-        test_sin(
+        compare_sin_f64(
             sin_p5::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -523,7 +517,7 @@ mod tests {
 
     #[test]
     fn test_cos_p5() {
-        test_cos(
+        compare_cos_f64(
             cos_p5::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -539,7 +533,7 @@ mod tests {
 
     #[test]
     fn test_sin_p5o() {
-        test_sin(
+        compare_sin_f64(
             sin_p5o::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
@@ -550,12 +544,73 @@ mod tests {
 
     #[test]
     fn test_cos_p5o() {
-        test_cos(
+        compare_cos_f64(
             cos_p5o::<i32>,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             0.925201,
             1,
         );
+    }
+
+    fn compare_sin_cos<Sin, Cos, T>(sin: Sin, cos: Cos, right: T)
+    where
+        Sin: Copy + Fn(T, T) -> T,
+        Cos: Copy + Fn(T, T) -> T,
+        T: Angle + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
+        RangeInclusive<T>: Iterator,
+    {
+        let straight = right * 2.into();
+        let full = right * 4.into();
+        for x in (-full..=full).step_by(1).map(Into::into) {
+            let sin_x = sin(x, right);
+            let cos_x = cos(x, right);
+            assert_eq!(sin_x, sin(x - full, right));
+            assert_eq!(sin_x, sin(x + full, right));
+            assert_eq!(sin_x, cos(x + right * 3.into(), right));
+            assert_eq!(sin_x, cos(x - right, right));
+            assert_eq!(cos_x, cos(x - full, right));
+            assert_eq!(cos_x, cos(x + full, right));
+            assert_eq!(cos_x, sin(x + right, right));
+            assert_eq!(cos_x, sin(x - right * 3.into(), right));
+
+            assert_eq!(sin_x, sin(straight - x, right));
+            assert_eq!(-sin_x, sin(straight + x, right));
+            assert_eq!(-sin_x, sin(-x, right));
+
+            assert_eq!(cos_x, cos(-x, right));
+            assert_eq!(-cos_x, cos(straight - x, right));
+            assert_eq!(-cos_x, cos(straight + x, right));
+        }
+    }
+
+    fn compare_sin_cos_for_all_polynominal<T>()
+    where
+        T: Angle + AsPrimitive<f64> + Debug + Display + From<<RangeInclusive<T> as Iterator>::Item>,
+        RangeInclusive<T>: Iterator,
+        f64: AsPrimitive<T>,
+    {
+        compare_sin_cos(sin_p1::<T>, cos_p1::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p2::<T>, cos_p2::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p3::<T>, cos_p3::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p4::<T>, cos_p4::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p4o::<T>, cos_p4o::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p5::<T>, cos_p5::<T>, T::DEFAULT_RIGHT);
+        compare_sin_cos(sin_p5o::<T>, cos_p5o::<T>, T::DEFAULT_RIGHT);
+    }
+
+    #[test]
+    fn test_sin_cos_for_all_polynominal_i8() {
+        compare_sin_cos_for_all_polynominal::<i8>();
+    }
+
+    #[test]
+    fn test_sin_cos_for_all_polynominal_i16() {
+        compare_sin_cos_for_all_polynominal::<i16>();
+    }
+
+    #[test]
+    fn test_sin_cos_for_all_polynominal_i32() {
+        compare_sin_cos_for_all_polynominal::<i32>();
     }
 }
