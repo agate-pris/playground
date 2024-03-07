@@ -252,6 +252,7 @@ mod tests {
 
     #[test]
     fn test_repeat() {
+        assert_eq!(repeat(-11, 10), 9);
         assert_eq!(repeat(-10, 10), 0);
         assert_eq!(repeat(-9, 10), 1);
         assert_eq!(repeat(-1, 10), 9);
