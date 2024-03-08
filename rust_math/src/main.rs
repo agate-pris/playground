@@ -80,16 +80,16 @@ fn calc_and_write_all(args: &Args) -> Vec<Error> {
     .collect()
 }
 
-fn print_max<Expected, Actual, T>(expected: Expected, actual: Actual, step: usize, right: T, one: T)
+fn print_max<Expected, Actual, T>(expected: Expected, actual: Actual)
 where
     Expected: Iterator<Item = f64>,
     Actual: Fn(T, T) -> T,
     T: Angle + AsPrimitive<f64>,
     RangeInclusive<T>: Iterator<Item = T>,
 {
-    let one: f64 = one.as_();
+    let right = T::DEFAULT_RIGHT;
+    let one: f64 = right.pow(2).as_();
     let diffs = (0.into()..=right)
-        .step_by(step)
         .map(|x| {
             let actual: f64 = actual(x, right).as_();
             actual / one
@@ -157,31 +157,24 @@ pub fn print_max_all() {
             .step_by((i32::DEFAULT_RIGHT / Type::DEFAULT_RIGHT as i32) as usize);
         let actual = cos_p2::<Type>;
         print!("cos_p2::<i16>:  ");
-        print_max(
-            expected,
-            actual,
-            1,
-            Type::DEFAULT_RIGHT,
-            Type::DEFAULT_RIGHT.pow(2),
-        );
+        print_max(expected, actual);
     }
 
     // i32
     {
         type Type = i32;
-        const ONE: Type = Type::DEFAULT_RIGHT.pow(2);
         let sin = sin.iter().cloned();
         let cos = cos.iter().cloned();
         print!("sin_p3::<i32>:  ");
-        print_max(sin.clone(), sin_p3::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin.clone(), sin_p3::<Type>);
         print!("cos_p4::<i32>:  ");
-        print_max(cos.clone(), cos_p4::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(cos.clone(), cos_p4::<Type>);
         print!("cos_p4o::<i32>: ");
-        print_max(cos, cos_p4o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(cos, cos_p4o::<Type>);
         print!("sin_p5::<i32>:  ");
-        print_max(sin.clone(), sin_p5::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin.clone(), sin_p5::<Type>);
         print!("sin_p5o::<i32>: ");
-        print_max(sin, sin_p5o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin, sin_p5o::<Type>);
     }
 }
 
