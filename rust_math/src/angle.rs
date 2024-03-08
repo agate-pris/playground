@@ -295,6 +295,8 @@ mod tests {
 
     #[test]
     fn test_cos_p4o_k() {
+        assert_eq!(2, cos_p4o_k::<i8>(i8::DEFAULT_RIGHT));
+        assert_eq!(29, cos_p4o_k::<i16>(i16::DEFAULT_RIGHT));
         assert_eq!(7384, cos_p4o_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
