@@ -97,9 +97,9 @@ struct Args {
 
 fn test_and_write<F, T>(args: &Args, f: F, right: T, file_name: &str) -> Result<()>
 where
-    F: Fn(<RangeInclusive<T> as Iterator>::Item, T) -> T,
+    F: Fn(T, T) -> T,
     T: Angle + AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
-    RangeInclusive<T>: Iterator,
+    RangeInclusive<T>: Iterator<Item = T>,
 {
     let actual: Vec<_> = (0.into()..=right).map(|x| f(x, right)).collect();
     if let Some(dir) = &args.input {
@@ -130,23 +130,18 @@ fn test_and_write_all(args: &Args) -> Vec<Error> {
     .collect()
 }
 
-fn print_max<'a, Expected, Actual, T>(
-    expected: Expected,
-    actual: Actual,
-    step: usize,
-    right: T,
-    one: T,
-) where
-    Expected: Iterator<Item = &'a f64>,
+fn print_max<Expected, Actual, T>(expected: Expected, actual: Actual, step: usize, right: T, one: T)
+where
+    Expected: Iterator<Item = f64>,
     Actual: Fn(T, T) -> T,
-    T: Angle + AsPrimitive<f64> + From<<RangeInclusive<T> as Iterator>::Item>,
-    RangeInclusive<T>: Iterator,
+    T: Angle + AsPrimitive<f64>,
+    RangeInclusive<T>: Iterator<Item = T>,
 {
     let one: f64 = one.as_();
     let diffs = (0.into()..=right)
         .step_by(step)
         .map(|x| {
-            let actual: f64 = actual(x.into(), right).as_();
+            let actual: f64 = actual(x, right).as_();
             actual / one
         })
         .zip(expected)
@@ -208,6 +203,7 @@ pub fn print_max_all() {
         type Type = i8;
         let expected = sin
             .iter()
+            .cloned()
             .step_by((i32::DEFAULT_RIGHT / Type::DEFAULT_RIGHT as i32) as usize);
         let actual = sin_p1::<Type>;
         print!("sin_p1::<i8>:   ");
@@ -225,6 +221,7 @@ pub fn print_max_all() {
         type Type = i16;
         let expected = cos
             .iter()
+            .cloned()
             .step_by((i32::DEFAULT_RIGHT / Type::DEFAULT_RIGHT as i32) as usize);
         let actual = cos_p2::<Type>;
         print!("cos_p2::<i16>:  ");
@@ -241,16 +238,18 @@ pub fn print_max_all() {
     {
         type Type = i32;
         const ONE: Type = Type::DEFAULT_RIGHT.pow(2);
+        let sin = sin.iter().cloned();
+        let cos = cos.iter().cloned();
         print!("sin_p3::<i32>:  ");
-        print_max(sin.iter(), sin_p3::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin.clone(), sin_p3::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
         print!("cos_p4::<i32>:  ");
-        print_max(cos.iter(), cos_p4::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(cos.clone(), cos_p4::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
         print!("cos_p4o::<i32>: ");
-        print_max(cos.iter(), cos_p4o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(cos, cos_p4o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
         print!("sin_p5::<i32>:  ");
-        print_max(sin.iter(), sin_p5::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin.clone(), sin_p5::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
         print!("sin_p5o::<i32>: ");
-        print_max(sin.iter(), sin_p5o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
+        print_max(sin, sin_p5o::<Type>, 1, Type::DEFAULT_RIGHT, ONE);
     }
 }
 
