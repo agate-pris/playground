@@ -302,6 +302,8 @@ mod tests {
 
     #[test]
     fn test_sin_p5o_k() {
+        assert_eq!(13, sin_p5o_k::<i8>(i8::DEFAULT_RIGHT));
+        assert_eq!(201, sin_p5o_k::<i16>(i16::DEFAULT_RIGHT));
         assert_eq!(51437, sin_p5o_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
