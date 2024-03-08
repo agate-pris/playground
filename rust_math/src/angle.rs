@@ -257,13 +257,6 @@ mod tests {
         ops::Range,
     };
 
-    #[test]
-    fn test_default_right() {
-        assert_eq!(i8::DEFAULT_RIGHT, 2_i8.pow(i8::BITS / 2 - 1));
-        assert_eq!(i16::DEFAULT_RIGHT, 2_i16.pow(i16::BITS / 2 - 1));
-        assert_eq!(i32::DEFAULT_RIGHT, 2_i32.pow(i32::BITS / 2 - 1));
-    }
-
     use super::*;
 
     #[test]
@@ -277,6 +270,13 @@ mod tests {
         assert_eq!(repeat(9, 10), 9);
         assert_eq!(repeat(10, 10), 0);
         assert_eq!(repeat(11, 10), 1);
+    }
+
+    #[test]
+    fn test_default_right() {
+        assert_eq!(i8::DEFAULT_RIGHT, 2_i8.pow(i8::BITS / 2 - 1));
+        assert_eq!(i16::DEFAULT_RIGHT, 2_i16.pow(i16::BITS / 2 - 1));
+        assert_eq!(i32::DEFAULT_RIGHT, 2_i32.pow(i32::BITS / 2 - 1));
     }
 
     fn compare_sin_cos_f64<Actual, T>(
