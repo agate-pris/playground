@@ -351,16 +351,19 @@ mod tests {
                 assert_eq!(0.0 > expected, zero > actual);
             }
 
-            let actual = {
-                let actual: f64 = actual.as_();
-                frac_scale_one * actual
-            };
-            let expected = SCALE * expected;
-            let diff = expected - actual;
-            assert!(
-                diff.abs() < margin,
-                "x: {x}, expected: {expected}, actual: {actual}"
-            );
+            // Check that the value is close to the expected value.
+            {
+                let actual = {
+                    let actual: f64 = actual.as_();
+                    frac_scale_one * actual
+                };
+                let expected = SCALE * expected;
+                let diff = expected - actual;
+                assert!(
+                    diff.abs() < margin,
+                    "x: {x}, expected: {expected}, actual: {actual}"
+                );
+            }
         }
     }
 
