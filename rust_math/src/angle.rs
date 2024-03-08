@@ -364,6 +364,9 @@ mod tests {
                     "x: {x}, expected: {expected}, actual: {actual}"
                 );
             }
+
+            // The value can be greater than 1 or less than -1
+            //assert!(actual.abs() <= one, "actual: {actual}, one: {one}");
         }
     }
 
