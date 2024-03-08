@@ -391,50 +391,30 @@ mod tests {
     #[test]
     fn test_sin_p1() {
         const MARGIN: f64 = 862.264;
-        compare_sin_f64(sin_p1::<i8>, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
-        compare_sin_f64(
-            sin_p1::<i16>,
-            i16::DEFAULT_RIGHT,
-            i16::DEFAULT_RIGHT,
-            MARGIN,
-        );
-        compare_sin_f64(
-            sin_p1::<i32>,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT,
-            MARGIN,
-        );
+        compare_sin_f64(sin_p1, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, i16::DEFAULT_RIGHT, i16::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT, MARGIN);
     }
 
     #[test]
     fn test_cos_p1() {
         const MARGIN: f64 = 862.264;
-        compare_cos_f64(cos_p1::<i8>, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
-        compare_cos_f64(
-            cos_p1::<i16>,
-            i16::DEFAULT_RIGHT,
-            i16::DEFAULT_RIGHT,
-            MARGIN,
-        );
-        compare_cos_f64(
-            cos_p1::<i32>,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT,
-            MARGIN,
-        );
+        compare_cos_f64(cos_p1, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, i16::DEFAULT_RIGHT, i16::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT, MARGIN);
     }
 
     #[test]
     fn test_cos_p2() {
         const MARGIN: f64 = 229.416;
         compare_cos_f64(
-            cos_p2::<i16>,
+            cos_p2,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
         );
         compare_cos_f64(
-            cos_p2::<i32>,
+            cos_p2,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             MARGIN,
@@ -445,13 +425,13 @@ mod tests {
     fn test_sin_p2() {
         const MARGIN: f64 = 229.416;
         compare_sin_f64(
-            sin_p2::<i16>,
+            sin_p2,
             i16::DEFAULT_RIGHT,
             i16::DEFAULT_RIGHT.pow(2),
             MARGIN,
         );
         compare_sin_f64(
-            sin_p2::<i32>,
+            sin_p2,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             MARGIN,
@@ -460,28 +440,18 @@ mod tests {
 
     #[test]
     fn test_sin_p3() {
-        compare_sin_f64(
-            sin_p3::<i32>,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            82.0,
-        );
+        compare_sin_f64(sin_p3, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT.pow(2), 82.0);
     }
 
     #[test]
     fn test_cos_p3() {
-        compare_cos_f64(
-            cos_p3::<i32>,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            82.0,
-        );
+        compare_cos_f64(cos_p3, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT.pow(2), 82.0);
     }
 
     #[test]
     fn test_cos_p4() {
         compare_cos_f64(
-            cos_p4::<i32>,
+            cos_p4,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             11.5464,
@@ -491,7 +461,7 @@ mod tests {
     #[test]
     fn test_sin_p4() {
         compare_sin_f64(
-            sin_p4::<i32>,
+            sin_p4,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             11.5464,
@@ -501,7 +471,7 @@ mod tests {
     #[test]
     fn test_cos_p4o() {
         compare_cos_f64(
-            cos_p4o::<i32>,
+            cos_p4o,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             4.80746,
@@ -511,7 +481,7 @@ mod tests {
     #[test]
     fn test_sin_p4o() {
         compare_sin_f64(
-            sin_p4o::<i32>,
+            sin_p4o,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             4.80746,
@@ -521,7 +491,7 @@ mod tests {
     #[test]
     fn test_sin_p5() {
         compare_sin_f64(
-            sin_p5::<i32>,
+            sin_p5,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             1.73715,
@@ -531,7 +501,7 @@ mod tests {
     #[test]
     fn test_cos_p5() {
         compare_cos_f64(
-            cos_p5::<i32>,
+            cos_p5,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             1.73715,
@@ -541,7 +511,7 @@ mod tests {
     #[test]
     fn test_sin_p5o() {
         compare_sin_f64(
-            sin_p5o::<i32>,
+            sin_p5o,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             0.925201,
@@ -551,7 +521,7 @@ mod tests {
     #[test]
     fn test_cos_p5o() {
         compare_cos_f64(
-            cos_p5o::<i32>,
+            cos_p5o,
             i32::DEFAULT_RIGHT,
             i32::DEFAULT_RIGHT.pow(2),
             0.925201,
