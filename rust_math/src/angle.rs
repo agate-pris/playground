@@ -279,6 +279,13 @@ mod tests {
         assert_eq!(i32::DEFAULT_RIGHT, 2_i32.pow(i32::BITS / 2 - 1));
     }
 
+    #[test]
+    fn test_cos_p4_k() {
+        assert_eq!(2, cos_p4_k::<i8>(i8::DEFAULT_RIGHT));
+        assert_eq!(27, cos_p4_k::<i16>(i16::DEFAULT_RIGHT));
+        assert_eq!(7032, cos_p4_k::<i32>(i32::DEFAULT_RIGHT));
+    }
+
     fn compare_sin_cos_f64<Actual, T>(
         actual: Actual,
         expected: fn(f64) -> f64,
@@ -442,13 +449,6 @@ mod tests {
             i32::DEFAULT_RIGHT.pow(2),
             82.0,
         );
-    }
-
-    #[test]
-    fn test_cos_p4_k() {
-        assert_eq!(2, cos_p4_k::<i8>(i8::DEFAULT_RIGHT));
-        assert_eq!(27, cos_p4_k::<i16>(i16::DEFAULT_RIGHT));
-        assert_eq!(7032, cos_p4_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
     #[test]
