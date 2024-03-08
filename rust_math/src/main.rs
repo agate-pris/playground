@@ -1,5 +1,6 @@
 pub mod angle;
 pub mod bits;
+pub mod min_max;
 pub mod round_bits;
 pub mod round_bits_ties_even;
 
