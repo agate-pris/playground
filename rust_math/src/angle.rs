@@ -288,6 +288,8 @@ mod tests {
 
     #[test]
     fn test_sin_p5_k() {
+        assert_eq!(13, sin_p5_k::<i8>(i8::DEFAULT_RIGHT));
+        assert_eq!(201, sin_p5_k::<i16>(i16::DEFAULT_RIGHT));
         assert_eq!(51472, sin_p5_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
