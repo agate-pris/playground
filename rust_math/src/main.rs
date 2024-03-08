@@ -20,7 +20,7 @@ use num_traits::AsPrimitive;
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
 
-use crate::angle::{cos_p2, cos_p4, cos_p4o, sin_p1, sin_p3, sin_p5, sin_p5o, Angle};
+use crate::angle::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
 
 fn serialize<T>(actual: &Vec<T>) -> Result<Vec<u8>>
 where
@@ -146,24 +146,6 @@ pub fn print_max_all() {
             .map(|x| (FRAC_PI_STRAIGHT * x as f64).cos())
             .chain(once(FRAC_PI_2.cos().round()))
             .collect();
-    }
-
-    // sin_p1::<i8>
-    {
-        type Type = i8;
-        let expected = sin
-            .iter()
-            .cloned()
-            .step_by((i32::DEFAULT_RIGHT / Type::DEFAULT_RIGHT as i32) as usize);
-        let actual = sin_p1::<Type>;
-        print!("sin_p1::<i8>:   ");
-        print_max(
-            expected,
-            actual,
-            1,
-            Type::DEFAULT_RIGHT,
-            Type::DEFAULT_RIGHT,
-        );
     }
 
     // cos_p2::<i16>
