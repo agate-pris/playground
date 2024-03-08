@@ -254,7 +254,7 @@ where
 mod tests {
     use std::{
         fmt::{Debug, Display},
-        ops::RangeInclusive,
+        ops::Range,
     };
 
     #[test]
@@ -288,12 +288,12 @@ mod tests {
     ) where
         Actual: Fn(T, T) -> T,
         T: Angle + Display,
-        RangeInclusive<T>: Iterator<Item = T>,
+        Range<T>: Iterator<Item = T>,
     {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
         let zero: T = 0.into();
-        let full = calc_full(right);
+        let straight = right * 2.into();
         let frac_pi_straight = {
             let right: f64 = right.as_();
             FRAC_PI_2 / right
@@ -303,7 +303,7 @@ mod tests {
             SCALE / one
         };
 
-        for x in -full..=full {
+        for x in -straight..straight {
             let actual = actual(x, right);
             let expected = {
                 let x: f64 = x.as_();
@@ -340,7 +340,7 @@ mod tests {
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display,
-        RangeInclusive<T>: Iterator<Item = T>,
+        Range<T>: Iterator<Item = T>,
     {
         compare_sin_cos_f64(f, f64::sin, margin, right, one);
     }
@@ -349,7 +349,7 @@ mod tests {
     where
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display,
-        RangeInclusive<T>: Iterator<Item = T>,
+        Range<T>: Iterator<Item = T>,
     {
         compare_sin_cos_f64(f, f64::cos, margin, right, one);
     }
