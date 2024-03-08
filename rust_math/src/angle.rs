@@ -1,4 +1,7 @@
-use std::f64::consts::{FRAC_2_PI, FRAC_PI_2, FRAC_PI_4};
+use std::{
+    f64::consts::{FRAC_2_PI, FRAC_PI_2, FRAC_PI_4},
+    ops::Mul,
+};
 
 use num_traits::{AsPrimitive, PrimInt, Signed};
 
@@ -36,16 +39,23 @@ fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
     }
 }
 
+fn calc_full<T>(right: T) -> T
+where
+    T: From<i8> + Mul<Output = T>,
+{
+    right * 4.into()
+}
+
 fn calc_quadrant<T: Angle>(x: T, right: T) -> i8 {
-    (repeat(x, right * 4.into()) / right).as_()
+    (repeat(x, calc_full(right)) / right).as_()
 }
 
 fn odd_cos_impl<T: Angle>(x: T, right: T) -> T {
-    (x % (right * 4.into())) + right
+    (x % calc_full(right)) + right
 }
 
 fn even_sin_impl<T: Angle>(x: T, right: T) -> T {
-    (x % (right * 4.into())) - right
+    (x % calc_full(right)) - right
 }
 
 /// x
@@ -283,7 +293,7 @@ mod tests {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
         let zero: T = 0.into();
-        let full = right * 4.into();
+        let full = calc_full(right);
         let frac_pi_straight = {
             let right: f64 = right.as_();
             FRAC_PI_2 / right
