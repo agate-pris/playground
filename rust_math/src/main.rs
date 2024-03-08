@@ -8,60 +8,19 @@ use std::{
     f64::consts::FRAC_PI_2,
     fmt::Display,
     fs::File,
-    io::{BufReader, BufWriter, Write},
+    io::{BufWriter, Write},
     iter::once,
     ops::RangeInclusive,
     path::Path,
 };
 
-use anyhow::{anyhow, ensure, Error, Result};
+use anyhow::{Error, Result};
 use clap::Parser;
 use num_traits::AsPrimitive;
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
 
 use crate::angle::{cos_p2, cos_p4, cos_p4o, sin_p1, sin_p3, sin_p5, sin_p5o, Angle};
-
-fn read<T>(dir: &str, file_name: &str) -> Result<Vec<T>>
-where
-    T: DeserializeOwned,
-{
-    let path = Path::new(dir).join(file_name);
-    let inner = File::open(path)?;
-    let rdr = BufReader::new(inner);
-    Ok(serde_json::from_reader(rdr)?)
-}
-
-fn test<T>(expected: &[T], actual: &[T], right: T) -> Result<Vec<Error>>
-where
-    T: Angle + AsPrimitive<usize> + Display,
-{
-    let errors: Vec<_> = {
-        let len = {
-            let right: usize = right.as_();
-            right + 1
-        };
-        ensure!(expected.len() == len);
-        ensure!(actual.len() == len);
-        (0..len)
-            .filter_map(|i| {
-                let expected = &expected[i];
-                let actual = &actual[i];
-                (expected != actual)
-                    .then(|| anyhow!("i: {i}, expected: {expected}, actual: {actual}"))
-            })
-            .collect()
-    };
-    Ok(errors)
-}
-
-fn read_and_test<T>(dir: &str, file_name: &str, actual: &[T], right: T) -> Result<Vec<Error>>
-where
-    T: Angle + AsPrimitive<usize> + DeserializeOwned + Display,
-{
-    let expected = read::<T>(dir, file_name)?;
-    test(&expected, actual, right)
-}
 
 fn serialize<T>(actual: &Vec<T>) -> Result<Vec<u8>>
 where
@@ -87,44 +46,34 @@ where
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(short, long)]
-    input: Option<String>,
-
-    #[arg(short, long)]
     output: Option<String>,
 
     #[arg(short, long)]
     print: bool,
 }
 
-fn test_and_write<F, T>(args: &Args, f: F, right: T, file_name: &str) -> Result<()>
+fn calc_and_write<F, T>(args: &Args, f: F, right: T, file_name: &str) -> Result<()>
 where
     F: Fn(T, T) -> T,
     T: Angle + AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
     RangeInclusive<T>: Iterator<Item = T>,
 {
-    let actual: Vec<_> = (0.into()..=right).map(|x| f(x, right)).collect();
-    if let Some(dir) = &args.input {
-        let errors = read_and_test(dir, file_name, &actual, right)?;
-        for e in &errors {
-            eprintln!("{}", e);
-        }
-        ensure!(errors.is_empty());
-    }
     if let Some(dir) = &args.output {
+        let actual = (0.into()..=right).map(|x| f(x, right)).collect();
         serialize_and_write(dir, file_name, &actual)?;
     }
     Ok(())
 }
 
-fn test_and_write_all(args: &Args) -> Vec<Error> {
+fn calc_and_write_all(args: &Args) -> Vec<Error> {
     [
-        test_and_write(args, cos_p2::<i16>, i16::DEFAULT_RIGHT, "cos_p2_i16.json"),
-        test_and_write(args, cos_p2::<i32>, i32::DEFAULT_RIGHT, "cos_p2_i32.json"),
-        test_and_write(args, sin_p3::<i32>, i32::DEFAULT_RIGHT, "sin_p3_i32.json"),
-        test_and_write(args, cos_p4::<i32>, i32::DEFAULT_RIGHT, "cos_p4_i32.json"),
-        test_and_write(args, cos_p4o::<i32>, i32::DEFAULT_RIGHT, "cos_p4o_i32.json"),
-        test_and_write(args, sin_p5::<i32>, i32::DEFAULT_RIGHT, "sin_p5_i32.json"),
-        test_and_write(args, sin_p5o::<i32>, i32::DEFAULT_RIGHT, "sin_p5o_i32.json"),
+        calc_and_write(args, cos_p2::<i16>, i16::DEFAULT_RIGHT, "cos_p2_i16.json"),
+        calc_and_write(args, cos_p2::<i32>, i32::DEFAULT_RIGHT, "cos_p2_i32.json"),
+        calc_and_write(args, sin_p3::<i32>, i32::DEFAULT_RIGHT, "sin_p3_i32.json"),
+        calc_and_write(args, cos_p4::<i32>, i32::DEFAULT_RIGHT, "cos_p4_i32.json"),
+        calc_and_write(args, cos_p4o::<i32>, i32::DEFAULT_RIGHT, "cos_p4o_i32.json"),
+        calc_and_write(args, sin_p5::<i32>, i32::DEFAULT_RIGHT, "sin_p5_i32.json"),
+        calc_and_write(args, sin_p5o::<i32>, i32::DEFAULT_RIGHT, "sin_p5o_i32.json"),
     ]
     .into_iter()
     .filter_map(Result::err)
@@ -257,7 +206,7 @@ pub fn print_max_all() {
 fn main() {
     let args = Args::parse();
     {
-        let errors = test_and_write_all(&args);
+        let errors = calc_and_write_all(&args);
         for e in &errors {
             eprintln!("{e}");
         }
