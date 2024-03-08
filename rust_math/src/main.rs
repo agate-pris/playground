@@ -148,34 +148,24 @@ pub fn print_max_all() {
             .collect();
     }
 
-    // cos_p2::<i16>
+    fn f<F, T>(expected: &[f64], note: &str, actual: F)
+    where
+        T: Angle + AsPrimitive<i32>,
+        F: Fn(T, T) -> T,
+        RangeInclusive<T>: Iterator<Item = T>,
     {
-        type Type = i16;
-        let expected = cos
-            .iter()
-            .cloned()
-            .step_by((i32::DEFAULT_RIGHT / Type::DEFAULT_RIGHT as i32) as usize);
-        let actual = cos_p2::<Type>;
-        print!("cos_p2::<i16>:  ");
-        print_max(expected, actual);
+        let right: i32 = T::DEFAULT_RIGHT.as_();
+        let step = (i32::DEFAULT_RIGHT / right) as usize;
+        print!("{note}");
+        print_max(expected.iter().cloned().step_by(step), actual);
     }
 
-    // i32
-    {
-        type Type = i32;
-        let sin = sin.iter().cloned();
-        let cos = cos.iter().cloned();
-        print!("sin_p3::<i32>:  ");
-        print_max(sin.clone(), sin_p3::<Type>);
-        print!("cos_p4::<i32>:  ");
-        print_max(cos.clone(), cos_p4::<Type>);
-        print!("cos_p4o::<i32>: ");
-        print_max(cos, cos_p4o::<Type>);
-        print!("sin_p5::<i32>:  ");
-        print_max(sin.clone(), sin_p5::<Type>);
-        print!("sin_p5o::<i32>: ");
-        print_max(sin, sin_p5o::<Type>);
-    }
+    f(&cos, "cos_p2::<i16>:  ", cos_p2::<i16>);
+    f(&sin, "sin_p3::<i32>:  ", sin_p3::<i32>);
+    f(&cos, "cos_p4::<i32>:  ", cos_p4::<i32>);
+    f(&sin, "sin_p5::<i32>:  ", sin_p5::<i32>);
+    f(&cos, "cos_p4o::<i32>: ", cos_p4o::<i32>);
+    f(&sin, "sin_p5o::<i32>: ", sin_p5o::<i32>);
 }
 
 fn main() {
