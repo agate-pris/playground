@@ -286,6 +286,11 @@ mod tests {
         assert_eq!(7032, cos_p4_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
+    #[test]
+    fn test_sin_p5_k() {
+        assert_eq!(51472, sin_p5_k::<i32>(i32::DEFAULT_RIGHT));
+    }
+
     fn compare_sin_cos_f64<Actual, T>(
         actual: Actual,
         expected: fn(f64) -> f64,
@@ -494,11 +499,6 @@ mod tests {
             i32::DEFAULT_RIGHT.pow(2),
             4.80746,
         );
-    }
-
-    #[test]
-    fn test_sin_p5_k() {
-        assert_eq!(51472, sin_p5_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
     #[test]
