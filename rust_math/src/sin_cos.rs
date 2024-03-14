@@ -110,6 +110,18 @@ where
         .as_()
 }
 
+/// 4 * (3 / pi - 9 / 16)
+fn sin_p5o_k<T>(right: T) -> T
+where
+    T: AsPrimitive<f64>,
+    f64: AsPrimitive<T>,
+{
+    let right: f64 = right.as_();
+    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right)
+        .round_ties_even()
+        .as_()
+}
+
 fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
 where
     T: PrimInt,
@@ -279,18 +291,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p5(odd_cos_impl(x, right), right)
-}
-
-/// 4 * (3 / pi - 9 / 16)
-fn sin_p5o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right)
-        .round_ties_even()
-        .as_()
 }
 
 /// a * x - c * x ^ 3 + c * x ^ 5
