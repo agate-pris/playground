@@ -4,8 +4,7 @@ use std::{
 };
 
 use num_traits::{AsPrimitive, PrimInt, Signed};
-
-use crate::bits::Bits;
+use rust_math::bits::Bits;
 
 pub trait Angle: Bits + AsPrimitive<f64> + AsPrimitive<i8> + From<i8> + PrimInt + Signed {
     const DEFAULT_RIGHT: Self;
