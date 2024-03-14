@@ -238,8 +238,9 @@ where
     })
 }
 
-pub fn sin_p4o<T: Angle>(x: T, right: T) -> T
+pub fn sin_p4o<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
