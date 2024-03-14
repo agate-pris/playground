@@ -248,8 +248,9 @@ where
 }
 
 /// k * x - (2 * k - 2.5) * x ^ 3 + (k - 1.5) * x ^ 5
-fn sin_p5_impl<T: Angle>(k: T, x: T, right: T) -> T
+fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
 where
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     let z = sin_p1(x, right);
