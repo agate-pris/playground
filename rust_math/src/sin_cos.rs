@@ -147,8 +147,9 @@ where
 }
 
 /// 1.5 * x - 0.5 * x ^ 3
-pub fn sin_p3<T: Angle>(x: T, right: T) -> T
+pub fn sin_p3<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     // 1.5 * x - 0.5 * x ^ 3
