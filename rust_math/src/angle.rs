@@ -138,7 +138,7 @@ where
     ((1.0 - FRAC_PI_4) * right).round_ties_even().as_()
 }
 
-/// 1 - a * z ^ 2 + (a - a) * z ^ 4
+/// 1 - a * z ^ 2 + (a - 1) * z ^ 4
 /// a = 1 - pi / 4
 pub fn cos_p4<T: Angle>(x: T, right: T) -> T
 where
