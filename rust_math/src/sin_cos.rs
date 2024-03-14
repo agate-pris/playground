@@ -336,10 +336,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        fmt::Display,
-        ops::{Neg, Range, Rem},
-    };
+    use std::{fmt::Display, ops::Range};
 
     use super::*;
 
@@ -391,27 +388,17 @@ mod tests {
         assert_eq!(51437, sin_p5o_k::<i32>(i32::DEFAULT_RIGHT));
     }
 
-    fn compare_sin_cos_f64<Actual, T>(
-        actual: Actual,
-        expected: fn(f64) -> f64,
-        margin: f64,
-        right: T,
-        one: T,
-    ) where
+    fn compare_sin_cos_f64<Actual, T>(actual: Actual, expected: fn(f64) -> f64, margin: f64, one: T)
+    where
         Actual: Fn(T, T) -> T,
-        T: Display
-            + Mul<Output = T>
-            + Neg<Output = T>
-            + PartialEq
-            + PartialOrd
-            + Rem<Output = T>
-            + AsPrimitive<f64>,
+        T: Display + AsPrimitive<f64> + Bits + PrimInt + Signed,
         Range<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
         let zero: T = 0.as_();
+        let right = calc_default_right::<T>();
         let straight = right * 2.as_();
         let frac_pi_straight = {
             let right: f64 = right.as_();
@@ -461,175 +448,103 @@ mod tests {
         }
     }
 
-    fn compare_sin_f64<F, T>(f: F, right: T, one: T, margin: f64)
+    fn compare_sin_f64<F, T>(f: F, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
-        T: Display
-            + Mul<Output = T>
-            + Neg<Output = T>
-            + PartialEq
-            + PartialOrd
-            + Rem<Output = T>
-            + AsPrimitive<f64>,
+        T: Display + AsPrimitive<f64> + Bits + PrimInt + Signed,
         Range<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
-        compare_sin_cos_f64(f, f64::sin, margin, right, one);
+        compare_sin_cos_f64(f, f64::sin, margin, one);
     }
 
-    fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64)
+    fn compare_cos_f64<F, T>(f: F, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
-        T: Display
-            + Mul<Output = T>
-            + Neg<Output = T>
-            + PartialEq
-            + PartialOrd
-            + Rem<Output = T>
-            + AsPrimitive<f64>,
+        T: Display + AsPrimitive<f64> + Bits + PrimInt + Signed,
         Range<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
-        compare_sin_cos_f64(f, f64::cos, margin, right, one);
+        compare_sin_cos_f64(f, f64::cos, margin, one);
     }
 
     #[test]
     fn test_sin_p1() {
         const MARGIN: f64 = 862.264;
-        compare_sin_f64(sin_p1, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
-        compare_sin_f64(sin_p1, i16::DEFAULT_RIGHT, i16::DEFAULT_RIGHT, MARGIN);
-        compare_sin_f64(sin_p1, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, i8::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, i16::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, i32::DEFAULT_RIGHT, MARGIN);
     }
 
     #[test]
     fn test_cos_p1() {
         const MARGIN: f64 = 862.264;
-        compare_cos_f64(cos_p1, i8::DEFAULT_RIGHT, i8::DEFAULT_RIGHT, MARGIN);
-        compare_cos_f64(cos_p1, i16::DEFAULT_RIGHT, i16::DEFAULT_RIGHT, MARGIN);
-        compare_cos_f64(cos_p1, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, i8::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, i16::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, i32::DEFAULT_RIGHT, MARGIN);
     }
 
     #[test]
     fn test_cos_p2() {
         const MARGIN: f64 = 229.416;
-        compare_cos_f64(
-            cos_p2,
-            i16::DEFAULT_RIGHT,
-            i16::DEFAULT_RIGHT.pow(2),
-            MARGIN,
-        );
-        compare_cos_f64(
-            cos_p2,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            MARGIN,
-        );
+        compare_cos_f64(cos_p2, calc_default_right::<i16>().pow(2), MARGIN);
+        compare_cos_f64(cos_p2, calc_default_right::<i32>().pow(2), MARGIN);
     }
 
     #[test]
     fn test_sin_p2() {
         const MARGIN: f64 = 229.416;
-        compare_sin_f64(
-            sin_p2,
-            i16::DEFAULT_RIGHT,
-            i16::DEFAULT_RIGHT.pow(2),
-            MARGIN,
-        );
-        compare_sin_f64(
-            sin_p2,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            MARGIN,
-        );
+        compare_sin_f64(sin_p2, calc_default_right::<i16>().pow(2), MARGIN);
+        compare_sin_f64(sin_p2, calc_default_right::<i32>().pow(2), MARGIN);
     }
 
     #[test]
     fn test_sin_p3() {
-        compare_sin_f64(sin_p3, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT.pow(2), 82.0);
+        compare_sin_f64(sin_p3, calc_default_right::<i32>().pow(2), 82.0);
     }
 
     #[test]
     fn test_cos_p3() {
-        compare_cos_f64(cos_p3, i32::DEFAULT_RIGHT, i32::DEFAULT_RIGHT.pow(2), 82.0);
+        compare_cos_f64(cos_p3, calc_default_right::<i32>().pow(2), 82.0);
     }
 
     #[test]
     fn test_cos_p4() {
-        compare_cos_f64(
-            cos_p4,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            11.5464,
-        );
+        compare_cos_f64(cos_p4, calc_default_right::<i32>().pow(2), 11.5464);
     }
 
     #[test]
     fn test_sin_p4() {
-        compare_sin_f64(
-            sin_p4,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            11.5464,
-        );
+        compare_sin_f64(sin_p4, calc_default_right::<i32>().pow(2), 11.5464);
     }
 
     #[test]
     fn test_cos_p4o() {
-        compare_cos_f64(
-            cos_p4o,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            4.80746,
-        );
+        compare_cos_f64(cos_p4o, calc_default_right::<i32>().pow(2), 4.80746);
     }
 
     #[test]
     fn test_sin_p4o() {
-        compare_sin_f64(
-            sin_p4o,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            4.80746,
-        );
+        compare_sin_f64(sin_p4o, calc_default_right::<i32>().pow(2), 4.80746);
     }
 
     #[test]
     fn test_sin_p5() {
-        compare_sin_f64(
-            sin_p5,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            1.73715,
-        );
+        compare_sin_f64(sin_p5, calc_default_right::<i32>().pow(2), 1.73715);
     }
 
     #[test]
     fn test_cos_p5() {
-        compare_cos_f64(
-            cos_p5,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            1.73715,
-        );
+        compare_cos_f64(cos_p5, calc_default_right::<i32>().pow(2), 1.73715);
     }
 
     #[test]
     fn test_sin_p5o() {
-        compare_sin_f64(
-            sin_p5o,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            0.925201,
-        );
+        compare_sin_f64(sin_p5o, calc_default_right::<i32>().pow(2), 0.925201);
     }
 
     #[test]
     fn test_cos_p5o() {
-        compare_cos_f64(
-            cos_p5o,
-            i32::DEFAULT_RIGHT,
-            i32::DEFAULT_RIGHT.pow(2),
-            0.925201,
-        );
+        compare_cos_f64(cos_p5o, calc_default_right::<i32>().pow(2), 0.925201);
     }
 }
