@@ -88,6 +88,18 @@ where
     ((1.0 - FRAC_PI_4) * right).round_ties_even().as_()
 }
 
+/// 5 * (1 - 3 / pi)
+fn cos_p4o_k<T>(right: T) -> T
+where
+    T: AsPrimitive<f64>,
+    f64: AsPrimitive<T>,
+{
+    let right: f64 = right.as_();
+    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right)
+        .round_ties_even()
+        .as_()
+}
+
 fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
 where
     T: PrimInt,
@@ -213,18 +225,6 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p4(even_sin_impl(x, right), right)
-}
-
-/// 5 * (1 - 3 / pi)
-fn cos_p4o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right)
-        .round_ties_even()
-        .as_()
 }
 
 /// 1 - a * z ^ 2 + (a - a) * z ^ 4
