@@ -63,8 +63,9 @@ where
     (x % calc_full(right)) + right
 }
 
-fn even_sin_impl<T: Angle>(x: T, right: T) -> T
+fn even_sin_impl<T>(x: T, right: T) -> T
 where
+    T: 'static + PrimInt,
     i8: AsPrimitive<T>,
 {
     (x % calc_full(right)) - right
