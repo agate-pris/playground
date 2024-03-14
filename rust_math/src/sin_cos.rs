@@ -137,8 +137,9 @@ where
 }
 
 /// 1 + k - k * x ^ 2
-fn sin_p3_impl<T: Angle>(k: T, x: T, right: T) -> T
+fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
 where
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     let z = sin_p1(x, right);
