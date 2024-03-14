@@ -78,6 +78,13 @@ where
     }
 }
 
+fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
+where
+    T: PrimInt,
+{
+    a - z_2 * b / right
+}
+
 /// x
 pub fn sin_p1<T>(x: T, right: T) -> T
 where
@@ -117,13 +124,6 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p2(even_sin_impl(x, right), right)
-}
-
-fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
-where
-    T: PrimInt,
-{
-    a - z_2 * b / right
 }
 
 /// 1 + k - k * x ^ 2
