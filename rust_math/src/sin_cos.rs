@@ -7,7 +7,7 @@ use num_traits::{AsPrimitive, PrimInt, Signed};
 
 use crate::bits::Bits;
 
-pub trait Angle: Bits + AsPrimitive<f64> + AsPrimitive<i8> + From<i8> + PrimInt + Signed {
+pub trait Angle: Bits + AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed {
     const DEFAULT_RIGHT: Self;
 }
 
@@ -49,7 +49,7 @@ where
 
 fn calc_quadrant<T>(x: T, right: T) -> i8
 where
-    T: From<i8> + AsPrimitive<i8> + PrimInt + Signed,
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     (repeat(x, calc_full(right)) / right).as_()
@@ -143,7 +143,7 @@ where
 {
     // 1.5 * x - 0.5 * x ^ 3
     // = (1.5 - 0.5 * x ^ 2) * x
-    sin_p3_impl(right / 2.into(), x, right)
+    sin_p3_impl(right / 2.as_(), x, right)
 }
 
 pub fn cos_p3<T: Angle>(x: T, right: T) -> T
@@ -229,8 +229,8 @@ where
     i8: AsPrimitive<T>,
 {
     let z = sin_p1(x, right);
-    let a = k * 2.into() - right * 5.into() / 2.into();
-    let b = k - right * 3.into() / 2.into();
+    let a = k * 2.as_() - right * 5.as_() / 2.as_();
+    let b = k - right * 3.as_() / 2.as_();
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
@@ -361,11 +361,12 @@ mod tests {
         Actual: Fn(T, T) -> T,
         T: Angle + Display,
         Range<T>: Iterator<Item = T>,
+        i8: AsPrimitive<T>,
     {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
-        let zero: T = 0.into();
-        let straight = right * 2.into();
+        let zero: T = 0.as_();
+        let straight = right * 2.as_();
         let frac_pi_straight = {
             let right: f64 = right.as_();
             FRAC_PI_2 / right
@@ -419,6 +420,7 @@ mod tests {
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display,
         Range<T>: Iterator<Item = T>,
+        i8: AsPrimitive<T>,
     {
         compare_sin_cos_f64(f, f64::sin, margin, right, one);
     }
@@ -428,6 +430,7 @@ mod tests {
         F: Copy + Fn(T, T) -> T,
         T: Angle + Debug + Display,
         Range<T>: Iterator<Item = T>,
+        i8: AsPrimitive<T>,
     {
         compare_sin_cos_f64(f, f64::cos, margin, right, one);
     }

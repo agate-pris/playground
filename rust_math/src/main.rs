@@ -50,9 +50,10 @@ where
     F: Fn(T, T) -> T,
     T: Angle + AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
     RangeInclusive<T>: Iterator<Item = T>,
+    i8: AsPrimitive<T>,
 {
     if let Some(dir) = &args.output {
-        let actual = (0.into()..=right).map(|x| f(x, right)).collect();
+        let actual = (0.as_()..=right).map(|x| f(x, right)).collect();
         serialize_and_write(dir, file_name, &actual)?;
     }
     Ok(())
@@ -79,10 +80,11 @@ where
     Actual: Fn(T, T) -> T,
     T: Angle + AsPrimitive<f64>,
     RangeInclusive<T>: Iterator<Item = T>,
+    i8: AsPrimitive<T>,
 {
     let right = T::DEFAULT_RIGHT;
     let one: f64 = right.pow(2).as_();
-    let diffs = (0.into()..=right)
+    let diffs = (0.as_()..=right)
         .map(|x| {
             let actual: f64 = actual(x, right).as_();
             actual / one
@@ -146,6 +148,7 @@ pub fn print_max_all() {
         T: Angle + AsPrimitive<i32>,
         F: Fn(T, T) -> T,
         RangeInclusive<T>: Iterator<Item = T>,
+        i8: AsPrimitive<T>,
     {
         let right: i32 = T::DEFAULT_RIGHT.as_();
         let step = (i32::DEFAULT_RIGHT / right) as usize;
