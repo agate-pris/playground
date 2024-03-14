@@ -111,6 +111,18 @@ where
     sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
 }
 
+/// k * x - (2 * k - 2.5) * x ^ 3 + (k - 1.5) * x ^ 5
+fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    let z = sin_p1(x, right);
+    let a = k * 2.as_() - right * 5.as_() / 2.as_();
+    let b = k - right * 3.as_() / 2.as_();
+    (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
+}
+
 /// x
 pub fn sin_p1<T>(x: T, right: T) -> T
 where
@@ -235,18 +247,6 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p4o(even_sin_impl(x, right), right)
-}
-
-/// k * x - (2 * k - 2.5) * x ^ 3 + (k - 1.5) * x ^ 5
-fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    let a = k * 2.as_() - right * 5.as_() / 2.as_();
-    let b = k - right * 3.as_() / 2.as_();
-    (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
 /// pi / 2
