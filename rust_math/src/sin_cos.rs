@@ -307,8 +307,9 @@ where
 /// a = 4 * (3 / pi - 9 / 16)
 /// b = 2 * a - 2.5
 /// c = a - 1.5
-pub fn sin_p5o<T: Angle>(x: T, right: T) -> T
+pub fn sin_p5o<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
