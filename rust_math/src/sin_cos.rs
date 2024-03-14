@@ -214,8 +214,9 @@ where
 }
 
 /// 5 * (1 - 3 / pi)
-fn cos_p4o_k<T: Angle>(right: T) -> T
+fn cos_p4o_k<T>(right: T) -> T
 where
+    T: AsPrimitive<f64>,
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
