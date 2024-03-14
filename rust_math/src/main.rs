@@ -48,13 +48,14 @@ struct Args {
     print: bool,
 }
 
-fn calc_and_write<F, T>(args: &Args, f: F, right: T, file_name: &str) -> Result<()>
+fn calc_and_write<F, T>(args: &Args, f: F, file_name: &str) -> Result<()>
 where
     F: Fn(T, T) -> T,
-    T: AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
+    T: Display + AsPrimitive<usize> + Bits + DeserializeOwned + PrimInt + Serialize,
     RangeInclusive<T>: Iterator<Item = T>,
     i8: AsPrimitive<T>,
 {
+    let right = calc_default_right::<T>();
     if let Some(dir) = &args.output {
         let actual = (0.as_()..=right).map(|x| f(x, right)).collect();
         serialize_and_write(dir, file_name, &actual)?;
@@ -64,13 +65,13 @@ where
 
 fn calc_and_write_all(args: &Args) -> Vec<Error> {
     [
-        calc_and_write(args, cos_p2::<i16>, i16::DEFAULT_RIGHT, "cos_p2_i16.json"),
-        calc_and_write(args, cos_p2::<i32>, i32::DEFAULT_RIGHT, "cos_p2_i32.json"),
-        calc_and_write(args, sin_p3::<i32>, i32::DEFAULT_RIGHT, "sin_p3_i32.json"),
-        calc_and_write(args, cos_p4::<i32>, i32::DEFAULT_RIGHT, "cos_p4_i32.json"),
-        calc_and_write(args, cos_p4o::<i32>, i32::DEFAULT_RIGHT, "cos_p4o_i32.json"),
-        calc_and_write(args, sin_p5::<i32>, i32::DEFAULT_RIGHT, "sin_p5_i32.json"),
-        calc_and_write(args, sin_p5o::<i32>, i32::DEFAULT_RIGHT, "sin_p5o_i32.json"),
+        calc_and_write(args, cos_p2::<i16>, "cos_p2_i16.json"),
+        calc_and_write(args, cos_p2::<i32>, "cos_p2_i32.json"),
+        calc_and_write(args, sin_p3::<i32>, "sin_p3_i32.json"),
+        calc_and_write(args, cos_p4::<i32>, "cos_p4_i32.json"),
+        calc_and_write(args, cos_p4o::<i32>, "cos_p4o_i32.json"),
+        calc_and_write(args, sin_p5::<i32>, "sin_p5_i32.json"),
+        calc_and_write(args, sin_p5o::<i32>, "sin_p5o_i32.json"),
     ]
     .into_iter()
     .filter_map(Result::err)
