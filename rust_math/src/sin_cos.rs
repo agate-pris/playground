@@ -329,7 +329,7 @@ where
 mod tests {
     use std::{
         fmt::{Debug, Display},
-        ops::Range,
+        ops::{Neg, Range, Rem},
     };
 
     use super::*;
@@ -390,7 +390,13 @@ mod tests {
         one: T,
     ) where
         Actual: Fn(T, T) -> T,
-        T: Angle + Display,
+        T: Display
+            + Mul<Output = T>
+            + Neg<Output = T>
+            + PartialEq
+            + PartialOrd
+            + Rem<Output = T>
+            + AsPrimitive<f64>,
         Range<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
