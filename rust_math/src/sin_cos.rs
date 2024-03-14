@@ -282,8 +282,9 @@ where
     sin_p5_impl(sin_p5_k::<T>(right), x, right)
 }
 
-pub fn cos_p5<T: Angle>(x: T, right: T) -> T
+pub fn cos_p5<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
