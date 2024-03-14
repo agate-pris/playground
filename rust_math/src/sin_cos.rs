@@ -41,28 +41,39 @@ fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
 
 fn calc_full<T>(right: T) -> T
 where
-    T: From<i8> + Mul<Output = T>,
+    T: 'static + Copy + Mul<Output = T>,
+    i8: AsPrimitive<T>,
 {
-    right * 4.into()
+    right * 4.as_()
 }
 
 fn calc_quadrant<T>(x: T, right: T) -> i8
 where
     T: From<i8> + AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
 {
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-fn odd_cos_impl<T: Angle>(x: T, right: T) -> T {
+fn odd_cos_impl<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     (x % calc_full(right)) + right
 }
 
-fn even_sin_impl<T: Angle>(x: T, right: T) -> T {
+fn even_sin_impl<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     (x % calc_full(right)) - right
 }
 
 /// x
-pub fn sin_p1<T: Angle>(x: T, right: T) -> T {
+pub fn sin_p1<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     let rem = repeat(x, right);
     match calc_quadrant(x, right) {
         1 => -rem + right,
@@ -73,7 +84,10 @@ pub fn sin_p1<T: Angle>(x: T, right: T) -> T {
     }
 }
 
-pub fn cos_p1<T: Angle>(x: T, right: T) -> T {
+pub fn cos_p1<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     sin_p1(odd_cos_impl(x, right), right)
 }
 
@@ -81,6 +95,7 @@ fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
 where
     T: Angle,
     F: Fn(T, T) -> T,
+    i8: AsPrimitive<T>,
 {
     let rem = repeat(x, right);
     let k = right.pow(2);
@@ -94,11 +109,17 @@ where
 }
 
 /// 1 - x ^ 2
-pub fn cos_p2<T: Angle>(x: T, right: T) -> T {
+pub fn cos_p2<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     even_cos_impl(x, right, |z, _| z.pow(2))
 }
 
-pub fn sin_p2<T: Angle>(x: T, right: T) -> T {
+pub fn sin_p2<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     cos_p2(even_sin_impl(x, right), right)
 }
 
@@ -107,19 +128,28 @@ fn sin_p3_cos_p4_impl<T: Angle>(a: T, b: T, z_2: T, right: T) -> T {
 }
 
 /// 1 + k - k * x ^ 2
-fn sin_p3_impl<T: Angle>(k: T, x: T, right: T) -> T {
+fn sin_p3_impl<T: Angle>(k: T, x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     let z = sin_p1(x, right);
     sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
 }
 
 /// 1.5 * x - 0.5 * x ^ 3
-pub fn sin_p3<T: Angle>(x: T, right: T) -> T {
+pub fn sin_p3<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     // 1.5 * x - 0.5 * x ^ 3
     // = (1.5 - 0.5 * x ^ 2) * x
     sin_p3_impl(right / 2.into(), x, right)
 }
 
-pub fn cos_p3<T: Angle>(x: T, right: T) -> T {
+pub fn cos_p3<T: Angle>(x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     sin_p3(odd_cos_impl(x, right), right)
 }
 
@@ -147,6 +177,7 @@ where
 pub fn cos_p4<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     even_cos_impl(x, right, |z, right| {
         cos_p4_impl(cos_p4_k::<T>(right), z, right)
@@ -156,6 +187,7 @@ where
 pub fn sin_p4<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     cos_p4(even_sin_impl(x, right), right)
 }
@@ -176,6 +208,7 @@ where
 pub fn cos_p4o<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     even_cos_impl(x, right, |z, right| {
         cos_p4_impl(cos_p4o_k::<T>(right), z, right)
@@ -185,12 +218,16 @@ where
 pub fn sin_p4o<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     cos_p4o(even_sin_impl(x, right), right)
 }
 
 /// k * x - (2 * k - 2.5) * x ^ 3 + (k - 1.5) * x ^ 5
-fn sin_p5_impl<T: Angle>(k: T, x: T, right: T) -> T {
+fn sin_p5_impl<T: Angle>(k: T, x: T, right: T) -> T
+where
+    i8: AsPrimitive<T>,
+{
     let z = sin_p1(x, right);
     let a = k * 2.into() - right * 5.into() / 2.into();
     let b = k - right * 3.into() / 2.into();
@@ -213,6 +250,7 @@ where
 pub fn sin_p5<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     sin_p5_impl(sin_p5_k::<T>(right), x, right)
 }
@@ -220,6 +258,7 @@ where
 pub fn cos_p5<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     sin_p5(odd_cos_impl(x, right), right)
 }
@@ -242,6 +281,7 @@ where
 pub fn sin_p5o<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     sin_p5_impl(sin_p5o_k::<T>(right), x, right)
 }
@@ -249,6 +289,7 @@ where
 pub fn cos_p5o<T: Angle>(x: T, right: T) -> T
 where
     f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
 {
     sin_p5o(odd_cos_impl(x, right), right)
 }
