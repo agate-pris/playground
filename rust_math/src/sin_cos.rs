@@ -97,7 +97,7 @@ where
 
 fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
 where
-    T: Angle,
+    T: AsPrimitive<i8> + PrimInt + Signed,
     F: Fn(T, T) -> T,
     i8: AsPrimitive<T>,
 {
