@@ -85,6 +85,14 @@ where
     a - z_2 * b / right
 }
 
+fn cos_p4_sin_p5_impl<T>(a: T, b: T, z: T, right: T) -> T
+where
+    T: PrimInt,
+{
+    let z_2 = square(z, right);
+    sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
+}
+
 /// x
 pub fn sin_p1<T>(x: T, right: T) -> T
 where
@@ -153,14 +161,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p3(odd_cos_impl(x, right), right)
-}
-
-fn cos_p4_sin_p5_impl<T>(a: T, b: T, z: T, right: T) -> T
-where
-    T: PrimInt,
-{
-    let z_2 = square(z, right);
-    sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
 /// (k + 1) * z ^ 2 - k * z ^ 4
