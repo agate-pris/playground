@@ -46,7 +46,10 @@ where
     right * 4.into()
 }
 
-fn calc_quadrant<T: Angle>(x: T, right: T) -> i8 {
+fn calc_quadrant<T>(x: T, right: T) -> i8
+where
+    T: From<i8> + AsPrimitive<i8> + PrimInt + Signed,
+{
     (repeat(x, calc_full(right)) / right).as_()
 }
 
