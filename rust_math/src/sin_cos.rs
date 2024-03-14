@@ -61,6 +61,23 @@ where
     (x % calc_full(right)) - right
 }
 
+fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    F: Fn(T, T) -> T,
+    i8: AsPrimitive<T>,
+{
+    let rem = repeat(x, right);
+    let k = right.pow(2);
+    match calc_quadrant(x, right) {
+        1 => -k + f(right - rem, right),
+        3 => k - f(right - rem, right),
+        2 => -k + f(rem, right),
+        0 => k - f(rem, right),
+        _ => unreachable!(),
+    }
+}
+
 /// x
 pub fn sin_p1<T>(x: T, right: T) -> T
 where
@@ -83,23 +100,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p1(odd_cos_impl(x, right), right)
-}
-
-fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    F: Fn(T, T) -> T,
-    i8: AsPrimitive<T>,
-{
-    let rem = repeat(x, right);
-    let k = right.pow(2);
-    match calc_quadrant(x, right) {
-        1 => -k + f(right - rem, right),
-        3 => k - f(right - rem, right),
-        2 => -k + f(rem, right),
-        0 => k - f(rem, right),
-        _ => unreachable!(),
-    }
 }
 
 /// 1 - x ^ 2
