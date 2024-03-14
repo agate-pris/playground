@@ -129,7 +129,10 @@ where
     cos_p2(even_sin_impl(x, right), right)
 }
 
-fn sin_p3_cos_p4_impl<T: Angle>(a: T, b: T, z_2: T, right: T) -> T {
+fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
+where
+    T: PrimInt,
+{
     a - z_2 * b / right
 }
 
