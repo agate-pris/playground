@@ -1,8 +1,3 @@
-pub mod angle;
-pub mod min_max;
-pub mod round_bits;
-pub mod round_bits_ties_even;
-
 use std::{
     f64::consts::FRAC_PI_2,
     fmt::Display,
@@ -16,10 +11,9 @@ use std::{
 use anyhow::{Error, Result};
 use clap::Parser;
 use num_traits::AsPrimitive;
+use rust_math::angle::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
-
-use crate::angle::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
 
 fn serialize<T>(actual: &Vec<T>) -> Result<Vec<u8>>
 where
