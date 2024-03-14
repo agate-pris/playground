@@ -174,7 +174,10 @@ where
 }
 
 /// (k + 1) * z ^ 2 - k * z ^ 4
-fn cos_p4_impl<T: Angle>(k: T, z: T, right: T) -> T {
+fn cos_p4_impl<T>(k: T, z: T, right: T) -> T
+where
+    T: PrimInt,
+{
     cos_p4_sin_p5_impl(k + right, k, z, right)
 }
 
