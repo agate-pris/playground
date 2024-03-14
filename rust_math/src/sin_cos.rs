@@ -55,8 +55,9 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-fn odd_cos_impl<T: Angle>(x: T, right: T) -> T
+fn odd_cos_impl<T>(x: T, right: T) -> T
 where
+    T: 'static + PrimInt,
     i8: AsPrimitive<T>,
 {
     (x % calc_full(right)) + right
