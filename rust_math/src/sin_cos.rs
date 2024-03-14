@@ -231,7 +231,7 @@ where
 /// a = 1 - pi / 4
 pub fn cos_p4<T>(x: T, right: T) -> T
 where
-    T: PrimInt + AsPrimitive<f64> + AsPrimitive<i8> + Signed,
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
