@@ -48,7 +48,7 @@ struct Args {
 fn calc_and_write<F, T>(args: &Args, f: F, right: T, file_name: &str) -> Result<()>
 where
     F: Fn(T, T) -> T,
-    T: Angle + AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
+    T: AsPrimitive<usize> + DeserializeOwned + Display + Serialize,
     RangeInclusive<T>: Iterator<Item = T>,
     i8: AsPrimitive<T>,
 {
