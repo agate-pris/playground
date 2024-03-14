@@ -204,8 +204,9 @@ where
     })
 }
 
-pub fn sin_p4<T: Angle>(x: T, right: T) -> T
+pub fn sin_p4<T>(x: T, right: T) -> T
 where
+    T: PrimInt + AsPrimitive<f64> + AsPrimitive<i8> + Signed,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
