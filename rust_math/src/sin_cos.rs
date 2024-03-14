@@ -121,8 +121,9 @@ where
     even_cos_impl(x, right, |z, _| z.pow(2))
 }
 
-pub fn sin_p2<T: Angle>(x: T, right: T) -> T
+pub fn sin_p2<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     cos_p2(even_sin_impl(x, right), right)
