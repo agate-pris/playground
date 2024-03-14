@@ -328,7 +328,7 @@ where
 #[cfg(test)]
 mod tests {
     use std::{
-        fmt::{Debug, Display},
+        fmt::Display,
         ops::{Neg, Range, Rem},
     };
 
@@ -471,7 +471,13 @@ mod tests {
     fn compare_cos_f64<F, T>(f: F, right: T, one: T, margin: f64)
     where
         F: Copy + Fn(T, T) -> T,
-        T: Angle + Debug + Display,
+        T: Display
+            + Mul<Output = T>
+            + Neg<Output = T>
+            + PartialEq
+            + PartialOrd
+            + Rem<Output = T>
+            + AsPrimitive<f64>,
         Range<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
