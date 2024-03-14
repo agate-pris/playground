@@ -249,6 +249,19 @@ where
     cos_p4(even_sin_impl(x, right), right)
 }
 
+/// a * x - c * x ^ 3 + c * x ^ 5
+/// a = pi / 2
+/// b = pi - 2.5
+/// c = pi / 2 - 1.5
+pub fn sin_p5<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p5_impl(sin_p5_k::<T>(right), x, right)
+}
+
 /// 1 - a * z ^ 2 + (a - a) * z ^ 4
 /// a = 5 * (1 - 3 / pi)
 pub fn cos_p4o<T>(x: T, right: T) -> T
@@ -269,19 +282,6 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p4o(even_sin_impl(x, right), right)
-}
-
-/// a * x - c * x ^ 3 + c * x ^ 5
-/// a = pi / 2
-/// b = pi - 2.5
-/// c = pi / 2 - 1.5
-pub fn sin_p5<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    sin_p5_impl(sin_p5_k::<T>(right), x, right)
 }
 
 pub fn cos_p5<T>(x: T, right: T) -> T
