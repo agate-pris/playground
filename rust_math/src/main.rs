@@ -11,7 +11,7 @@ use std::{
 use anyhow::{Error, Result};
 use clap::Parser;
 use num_traits::AsPrimitive;
-use rust_math::angle::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
+use rust_math::sin_cos::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
 
