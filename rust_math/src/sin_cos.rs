@@ -157,8 +157,9 @@ where
     sin_p3_impl(right / 2.as_(), x, right)
 }
 
-pub fn cos_p3<T: Angle>(x: T, right: T) -> T
+pub fn cos_p3<T>(x: T, right: T) -> T
 where
+    T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     sin_p3(odd_cos_impl(x, right), right)
