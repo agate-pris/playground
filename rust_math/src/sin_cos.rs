@@ -355,37 +355,37 @@ mod tests {
 
     #[test]
     fn test_default_right() {
-        assert_eq!(i8::DEFAULT_RIGHT, 2_i8.pow(i8::BITS / 2 - 1));
-        assert_eq!(i16::DEFAULT_RIGHT, 2_i16.pow(i16::BITS / 2 - 1));
-        assert_eq!(i32::DEFAULT_RIGHT, 2_i32.pow(i32::BITS / 2 - 1));
+        assert_eq!(calc_default_right::<i8>(), 2_i8.pow(i8::BITS / 2 - 1));
+        assert_eq!(calc_default_right::<i16>(), 2_i16.pow(i16::BITS / 2 - 1));
+        assert_eq!(calc_default_right::<i32>(), 2_i32.pow(i32::BITS / 2 - 1));
     }
 
     #[test]
     fn test_cos_p4_k() {
-        assert_eq!(2, cos_p4_k::<i8>(i8::DEFAULT_RIGHT));
-        assert_eq!(27, cos_p4_k::<i16>(i16::DEFAULT_RIGHT));
-        assert_eq!(7032, cos_p4_k::<i32>(i32::DEFAULT_RIGHT));
+        assert_eq!(2, cos_p4_k::<i8>(calc_default_right::<i8>()));
+        assert_eq!(27, cos_p4_k::<i16>(calc_default_right::<i16>()));
+        assert_eq!(7032, cos_p4_k::<i32>(calc_default_right::<i32>()));
     }
 
     #[test]
     fn test_sin_p5_k() {
-        assert_eq!(13, sin_p5_k::<i8>(i8::DEFAULT_RIGHT));
-        assert_eq!(201, sin_p5_k::<i16>(i16::DEFAULT_RIGHT));
-        assert_eq!(51472, sin_p5_k::<i32>(i32::DEFAULT_RIGHT));
+        assert_eq!(13, sin_p5_k::<i8>(calc_default_right::<i8>()));
+        assert_eq!(201, sin_p5_k::<i16>(calc_default_right::<i16>()));
+        assert_eq!(51472, sin_p5_k::<i32>(calc_default_right::<i32>()));
     }
 
     #[test]
     fn test_cos_p4o_k() {
-        assert_eq!(2, cos_p4o_k::<i8>(i8::DEFAULT_RIGHT));
-        assert_eq!(29, cos_p4o_k::<i16>(i16::DEFAULT_RIGHT));
-        assert_eq!(7384, cos_p4o_k::<i32>(i32::DEFAULT_RIGHT));
+        assert_eq!(2, cos_p4o_k::<i8>(calc_default_right::<i8>()));
+        assert_eq!(29, cos_p4o_k::<i16>(calc_default_right::<i16>()));
+        assert_eq!(7384, cos_p4o_k::<i32>(calc_default_right::<i32>()));
     }
 
     #[test]
     fn test_sin_p5o_k() {
-        assert_eq!(13, sin_p5o_k::<i8>(i8::DEFAULT_RIGHT));
-        assert_eq!(201, sin_p5o_k::<i16>(i16::DEFAULT_RIGHT));
-        assert_eq!(51437, sin_p5o_k::<i32>(i32::DEFAULT_RIGHT));
+        assert_eq!(13, sin_p5o_k::<i8>(calc_default_right::<i8>()));
+        assert_eq!(201, sin_p5o_k::<i16>(calc_default_right::<i16>()));
+        assert_eq!(51437, sin_p5o_k::<i32>(calc_default_right::<i32>()));
     }
 
     fn compare_sin_cos_f64<Actual, T>(actual: Actual, expected: fn(f64) -> f64, margin: f64, one: T)
@@ -471,17 +471,17 @@ mod tests {
     #[test]
     fn test_sin_p1() {
         const MARGIN: f64 = 862.264;
-        compare_sin_f64(sin_p1, i8::DEFAULT_RIGHT, MARGIN);
-        compare_sin_f64(sin_p1, i16::DEFAULT_RIGHT, MARGIN);
-        compare_sin_f64(sin_p1, i32::DEFAULT_RIGHT, MARGIN);
+        compare_sin_f64(sin_p1, calc_default_right::<i8>(), MARGIN);
+        compare_sin_f64(sin_p1, calc_default_right::<i16>(), MARGIN);
+        compare_sin_f64(sin_p1, calc_default_right::<i32>(), MARGIN);
     }
 
     #[test]
     fn test_cos_p1() {
         const MARGIN: f64 = 862.264;
-        compare_cos_f64(cos_p1, i8::DEFAULT_RIGHT, MARGIN);
-        compare_cos_f64(cos_p1, i16::DEFAULT_RIGHT, MARGIN);
-        compare_cos_f64(cos_p1, i32::DEFAULT_RIGHT, MARGIN);
+        compare_cos_f64(cos_p1, calc_default_right::<i8>(), MARGIN);
+        compare_cos_f64(cos_p1, calc_default_right::<i16>(), MARGIN);
+        compare_cos_f64(cos_p1, calc_default_right::<i32>(), MARGIN);
     }
 
     #[test]
