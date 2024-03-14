@@ -93,6 +93,14 @@ where
     sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
+/// (k + 1) * z ^ 2 - k * z ^ 4
+fn cos_p4_impl<T>(k: T, z: T, right: T) -> T
+where
+    T: PrimInt,
+{
+    cos_p4_sin_p5_impl(k + right, k, z, right)
+}
+
 /// 1 + k - k * x ^ 2
 fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
 where
@@ -161,14 +169,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p3(odd_cos_impl(x, right), right)
-}
-
-/// (k + 1) * z ^ 2 - k * z ^ 4
-fn cos_p4_impl<T>(k: T, z: T, right: T) -> T
-where
-    T: PrimInt,
-{
-    cos_p4_sin_p5_impl(k + right, k, z, right)
 }
 
 /// 1 - pi / 4
