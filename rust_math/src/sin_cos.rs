@@ -39,6 +39,15 @@ fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
     }
 }
 
+pub fn calc_default_right<T>() -> T
+where
+    T: 'static + Copy + Bits + PrimInt,
+    i8: AsPrimitive<T>,
+{
+    let base = 2.as_();
+    base.pow(T::BITS / 2 - 1)
+}
+
 fn calc_full<T>(right: T) -> T
 where
     T: 'static + Copy + Mul<Output = T>,
