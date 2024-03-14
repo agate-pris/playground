@@ -89,8 +89,6 @@ pub fn atan2_p4_default(y: i32, x: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use std::backtrace;
-
     use super::*;
 
     #[test]
