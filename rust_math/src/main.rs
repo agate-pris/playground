@@ -148,13 +148,13 @@ pub fn print_max_all() {
 
     fn f<F, T>(expected: &[f64], note: &str, actual: F)
     where
-        T: Angle + AsPrimitive<i32>,
+        T: AsPrimitive<f64> + AsPrimitive<i32> + Bits + PrimInt,
         F: Fn(T, T) -> T,
         RangeInclusive<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
-        let right: i32 = T::DEFAULT_RIGHT.as_();
-        let step = (i32::DEFAULT_RIGHT / right) as usize;
+        let right: i32 = calc_default_right::<T>().as_();
+        let step = (calc_default_right::<i32>() / right) as usize;
         print!("{note}");
         print_max(expected.iter().cloned().step_by(step), actual);
     }
