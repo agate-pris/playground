@@ -13,7 +13,7 @@ use clap::Parser;
 use num_traits::{AsPrimitive, PrimInt};
 use rust_math::{
     bits::Bits,
-    sin_cos::{calc_default_right, cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle},
+    sin_cos::{calc_default_right, cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o},
 };
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
@@ -136,13 +136,14 @@ pub fn print_max_all() {
     let sin: Vec<_>;
     let cos: Vec<_>;
     {
-        const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / i32::DEFAULT_RIGHT as f64;
-        sin = (0..i32::DEFAULT_RIGHT)
-            .map(|x| (FRAC_PI_STRAIGHT * x as f64).sin())
+        let right = calc_default_right::<i32>();
+        let frac_pi_straight: f64 = FRAC_PI_2 / right as f64;
+        sin = (0..right)
+            .map(|x| (frac_pi_straight * x as f64).sin())
             .chain(once(FRAC_PI_2.sin().round()))
             .collect();
-        cos = (0..i32::DEFAULT_RIGHT)
-            .map(|x| (FRAC_PI_STRAIGHT * x as f64).cos())
+        cos = (0..right)
+            .map(|x| (frac_pi_straight * x as f64).cos())
             .chain(once(FRAC_PI_2.cos().round()))
             .collect();
     }
