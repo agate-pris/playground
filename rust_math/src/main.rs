@@ -10,8 +10,11 @@ use std::{
 
 use anyhow::{Error, Result};
 use clap::Parser;
-use num_traits::AsPrimitive;
-use rust_math::sin_cos::{cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle};
+use num_traits::{AsPrimitive, PrimInt};
+use rust_math::{
+    bits::Bits,
+    sin_cos::{calc_default_right, cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o, Angle},
+};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::{ser::PrettyFormatter, Serializer};
 
@@ -78,11 +81,11 @@ fn print_max<Expected, Actual, T>(expected: Expected, actual: Actual)
 where
     Expected: Iterator<Item = f64>,
     Actual: Fn(T, T) -> T,
-    T: Angle + AsPrimitive<f64>,
+    T: AsPrimitive<f64> + Bits + PrimInt,
     RangeInclusive<T>: Iterator<Item = T>,
     i8: AsPrimitive<T>,
 {
-    let right = T::DEFAULT_RIGHT;
+    let right = calc_default_right::<T>();
     let one: f64 = right.pow(2).as_();
     let diffs = (0.as_()..=right)
         .map(|x| {
