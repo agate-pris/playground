@@ -93,6 +93,16 @@ where
     sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
+/// 1 + k - k * x ^ 2
+fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    let z = sin_p1(x, right);
+    sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
+}
+
 /// x
 pub fn sin_p1<T>(x: T, right: T) -> T
 where
@@ -132,16 +142,6 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p2(even_sin_impl(x, right), right)
-}
-
-/// 1 + k - k * x ^ 2
-fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
 }
 
 /// 1.5 * x - 0.5 * x ^ 3
