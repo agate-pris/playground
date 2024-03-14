@@ -315,6 +315,126 @@ where
     sin_p5o(odd_cos_impl(x, right), right)
 }
 
+pub fn sin_p1_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    sin_p1(x, calc_default_right::<T>())
+}
+
+pub fn cos_p1_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    cos_p1(x, calc_default_right::<T>())
+}
+
+pub fn cos_p2_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    cos_p2(x, calc_default_right::<T>())
+}
+
+pub fn sin_p2_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    sin_p2(x, calc_default_right::<T>())
+}
+
+pub fn sin_p3_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    sin_p3(x, calc_default_right::<T>())
+}
+
+pub fn cos_p3_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    cos_p3(x, calc_default_right::<T>())
+}
+
+pub fn cos_p4_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p4(x, calc_default_right::<T>())
+}
+
+pub fn sin_p4_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p4(x, calc_default_right::<T>())
+}
+
+pub fn sin_p5_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p5(x, calc_default_right::<T>())
+}
+
+pub fn cos_p5_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p5(x, calc_default_right::<T>())
+}
+
+pub fn cos_p4o_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p4o(x, calc_default_right::<T>())
+}
+
+pub fn sin_p4o_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p4o(x, calc_default_right::<T>())
+}
+
+pub fn sin_p5o_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p5o(x, calc_default_right::<T>())
+}
+
+pub fn cos_p5o_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p5o(x, calc_default_right::<T>())
+}
+
 #[cfg(test)]
 mod tests {
     use std::{fmt::Display, ops::Range};
