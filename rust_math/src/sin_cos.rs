@@ -292,8 +292,9 @@ where
 }
 
 /// 4 * (3 / pi - 9 / 16)
-fn sin_p5o_k<T: Angle>(right: T) -> T
+fn sin_p5o_k<T>(right: T) -> T
 where
+    T: AsPrimitive<f64>,
     f64: AsPrimitive<T>,
 {
     let right: f64 = right.as_();
