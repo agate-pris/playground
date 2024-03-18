@@ -435,10 +435,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        fmt::{Debug, Display},
-        ops::Range,
-    };
+    use std::{fmt::Display, ops::Range};
 
     use anyhow::Result;
 
@@ -539,28 +536,6 @@ mod tests {
         test(|x| sin_p5(x, right), one);
         test(|x| sin_p4o(x, right), one);
         test(|x| sin_p5o(x, right), one);
-
-        fn test_default<T>(x: T)
-        where
-            T: Debug + PartialEq + AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
-            f64: AsPrimitive<T>,
-            i8: AsPrimitive<T>,
-        {
-            let right = calc_default_right::<T>();
-            assert_eq!(sin_p2_default(x), sin_p2(x, right));
-            assert_eq!(sin_p3_default(x), sin_p3(x, right));
-            assert_eq!(sin_p4_default(x), sin_p4(x, right));
-            assert_eq!(sin_p5_default(x), sin_p5(x, right));
-            assert_eq!(sin_p4o_default(x), sin_p4o(x, right));
-            assert_eq!(sin_p5o_default(x), sin_p5o(x, right));
-        }
-
-        test_default(100_i8);
-        test_default(-100_i8);
-        test_default(10000_i16);
-        test_default(-10000_i16);
-        test_default(10000.pow(2));
-        test_default(-(10000.pow(2)));
     }
 
     #[test]
@@ -592,28 +567,39 @@ mod tests {
         test(|x| cos_p5(x, right), one);
         test(|x| cos_p4o(x, right), one);
         test(|x| cos_p5o(x, right), one);
+    }
 
-        fn test_default<T>(x: T)
-        where
-            T: Debug + PartialEq + AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
-            f64: AsPrimitive<T>,
-            i8: AsPrimitive<T>,
-        {
-            let right = calc_default_right::<T>();
-            assert_eq!(cos_p2_default(x), cos_p2(x, right));
-            assert_eq!(cos_p3_default(x), cos_p3(x, right));
-            assert_eq!(cos_p4_default(x), cos_p4(x, right));
-            assert_eq!(cos_p5_default(x), cos_p5(x, right));
-            assert_eq!(cos_p4o_default(x), cos_p4o(x, right));
-            assert_eq!(cos_p5o_default(x), cos_p5o(x, right));
-        }
+    #[test]
+    fn test_default() {
+        use std::i32::{MAX, MIN};
 
-        test_default(100_i8);
-        test_default(-100_i8);
-        test_default(10000_i16);
-        test_default(-10000_i16);
-        test_default(10000.pow(2));
-        test_default(-(10000.pow(2)));
+        // 17th mersenne prime
+        const STEP: usize = 131071;
+
+        let right = calc_default_right::<i32>();
+        let full = calc_full(right);
+
+        (-full - 1..=full + 1)
+            .chain((MIN..=MAX).step_by(STEP))
+            .chain((MIN..=MAX).rev().step_by(STEP))
+            .chain(MAX - full..=MAX)
+            .chain(MIN..=MIN + full + 1)
+            .for_each(|x| {
+                assert_eq!(sin_p1_default(x), sin_p1(x, right));
+                assert_eq!(sin_p2_default(x), sin_p2(x, right));
+                assert_eq!(sin_p3_default(x), sin_p3(x, right));
+                assert_eq!(sin_p4_default(x), sin_p4(x, right));
+                assert_eq!(sin_p5_default(x), sin_p5(x, right));
+                assert_eq!(cos_p1_default(x), cos_p1(x, right));
+                assert_eq!(cos_p2_default(x), cos_p2(x, right));
+                assert_eq!(cos_p3_default(x), cos_p3(x, right));
+                assert_eq!(cos_p4_default(x), cos_p4(x, right));
+                assert_eq!(cos_p5_default(x), cos_p5(x, right));
+                assert_eq!(sin_p4o_default(x), sin_p4o(x, right));
+                assert_eq!(sin_p5o_default(x), sin_p5o(x, right));
+                assert_eq!(cos_p4o_default(x), cos_p4o(x, right));
+                assert_eq!(cos_p5o_default(x), cos_p5o(x, right));
+            });
     }
 
     #[test]
