@@ -435,28 +435,51 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Display, ops::Range};
+    use std::{
+        fmt::{Debug, Display},
+        ops::Range,
+    };
+
+    use anyhow::Result;
+
+    use crate::tests::read_data;
 
     use super::*;
 
     #[test]
     fn test_repeat() {
-        assert_eq!(repeat(-11, 10), 9);
-        assert_eq!(repeat(-10, 10), 0);
-        assert_eq!(repeat(-9, 10), 1);
-        assert_eq!(repeat(-1, 10), 9);
-        assert_eq!(repeat(0, 10), 0);
-        assert_eq!(repeat(1, 10), 1);
-        assert_eq!(repeat(9, 10), 9);
-        assert_eq!(repeat(10, 10), 0);
-        assert_eq!(repeat(11, 10), 1);
+        const LENGTH: i32 = 10;
+        for i in -9..=9 {
+            #[rustfmt::skip] assert_eq!(9, repeat(LENGTH * i - 1, LENGTH));
+            #[rustfmt::skip] assert_eq!(0, repeat(LENGTH * i,     LENGTH));
+            #[rustfmt::skip] assert_eq!(1, repeat(LENGTH * i + 1, LENGTH));
+        }
+    }
+
+    #[test]
+    fn test_calc_quadrant() {
+        const RIGHT: i32 = 25;
+        for i in -9..=9 {
+            let offset = 4 * i * RIGHT;
+            for expected in 0_i8..4 {
+                #[rustfmt::skip]
+                let actuals = [
+                    calc_quadrant(offset + RIGHT * (expected as i32    ),     RIGHT),
+                    calc_quadrant(offset + RIGHT * (expected as i32    ) + 1, RIGHT),
+                    calc_quadrant(offset + RIGHT * (expected as i32 + 1) - 1, RIGHT),
+                ];
+                for &actual in actuals.iter() {
+                    assert_eq!(expected, actual);
+                }
+            }
+        }
     }
 
     #[test]
     fn test_default_right() {
-        assert_eq!(calc_default_right::<i8>(), 2_i8.pow(i8::BITS / 2 - 1));
-        assert_eq!(calc_default_right::<i16>(), 2_i16.pow(i16::BITS / 2 - 1));
-        assert_eq!(calc_default_right::<i32>(), 2_i32.pow(i32::BITS / 2 - 1));
+        assert_eq!(calc_default_right::<i8>(), 8);
+        assert_eq!(calc_default_right::<i16>(), 128);
+        assert_eq!(calc_default_right::<i32>(), 32768);
     }
 
     #[test]
@@ -486,6 +509,270 @@ mod tests {
         assert_eq!(201, sin_p5o_k::<i16>(calc_default_right::<i16>()));
         assert_eq!(51437, sin_p5o_k::<i32>(calc_default_right::<i32>()));
     }
+
+    #[test]
+    fn test_sin() {
+        fn test<F>(f: F, one: i32)
+        where
+            F: Fn(i32) -> i32,
+        {
+            let right = calc_default_right::<i32>();
+            #[rustfmt::skip] assert_eq!(f(         0),    0);
+            #[rustfmt::skip] assert_eq!(f( 2 * right),    0);
+            #[rustfmt::skip] assert_eq!(f(-2 * right),    0);
+            #[rustfmt::skip] assert_eq!(f(     right),  one);
+            #[rustfmt::skip] assert_eq!(f(    -right), -one);
+        }
+        let right = calc_default_right::<i32>();
+        test(sin_p1_default, right);
+        let one = right.pow(2);
+        test(sin_p2_default, one);
+        test(sin_p3_default, one);
+        test(sin_p4_default, one);
+        test(sin_p5_default, one);
+        test(sin_p4o_default, one);
+        test(sin_p5o_default, one);
+
+        fn test_default<T>(x: T)
+        where
+            T: Bits + Debug + PartialEq + PrimInt + Signed + AsPrimitive<f64> + AsPrimitive<i8>,
+            f64: AsPrimitive<T>,
+            i8: AsPrimitive<T>,
+        {
+            let right = calc_default_right::<T>();
+            assert_eq!(sin_p2_default(x), sin_p2(x, right));
+            assert_eq!(sin_p3_default(x), sin_p3(x, right));
+            assert_eq!(sin_p4_default(x), sin_p4(x, right));
+            assert_eq!(sin_p5_default(x), sin_p5(x, right));
+            assert_eq!(sin_p4o_default(x), sin_p4o(x, right));
+            assert_eq!(sin_p5o_default(x), sin_p5o(x, right));
+        }
+
+        test_default(100_i8);
+        test_default(-100_i8);
+        test_default(10000_i16);
+        test_default(-10000_i16);
+        test_default(10000.pow(2));
+        test_default(-(10000.pow(2)));
+    }
+
+    #[test]
+    fn test_cos() {
+        fn test<F>(f: F, one: i32)
+        where
+            F: Fn(i32) -> i32,
+        {
+            let right = calc_default_right::<i32>();
+            #[rustfmt::skip] assert_eq!(f(         0),  one);
+            #[rustfmt::skip] assert_eq!(f(     right),    0);
+            #[rustfmt::skip] assert_eq!(f(    -right),    0);
+            #[rustfmt::skip] assert_eq!(f( 2 * right), -one);
+            #[rustfmt::skip] assert_eq!(f(-2 * right), -one);
+        }
+        let right = calc_default_right::<i32>();
+        test(cos_p1_default, right);
+        let one = right.pow(2);
+        test(cos_p2_default, one);
+        test(cos_p3_default, one);
+        test(cos_p4_default, one);
+        test(cos_p5_default, one);
+        test(cos_p4o_default, one);
+        test(cos_p5o_default, one);
+
+        fn test_default<T>(x: T)
+        where
+            T: Bits + Debug + PartialEq + PrimInt + Signed + AsPrimitive<f64> + AsPrimitive<i8>,
+            f64: AsPrimitive<T>,
+            i8: AsPrimitive<T>,
+        {
+            let right = calc_default_right::<T>();
+            assert_eq!(cos_p2_default(x), cos_p2(x, right));
+            assert_eq!(cos_p3_default(x), cos_p3(x, right));
+            assert_eq!(cos_p4_default(x), cos_p4(x, right));
+            assert_eq!(cos_p5_default(x), cos_p5(x, right));
+            assert_eq!(cos_p4o_default(x), cos_p4o(x, right));
+            assert_eq!(cos_p5o_default(x), cos_p5o(x, right));
+        }
+
+        test_default(100_i8);
+        test_default(-100_i8);
+        test_default(10000_i16);
+        test_default(-10000_i16);
+        test_default(10000.pow(2));
+        test_default(-(10000.pow(2)));
+    }
+
+    #[test]
+    fn test_sin_p1() {
+        const RIGHT: i32 = 25;
+        for i in -9..=9 {
+            #[rustfmt::skip] assert_eq!(        -1, sin_p1((4 * i    ) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         0, sin_p1((4 * i    ) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(         1, sin_p1((4 * i    ) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!( RIGHT - 1, sin_p1((4 * i + 1) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!( RIGHT,     sin_p1((4 * i + 1) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!( RIGHT - 1, sin_p1((4 * i + 1) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         1, sin_p1((4 * i + 2) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         0, sin_p1((4 * i + 2) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(        -1, sin_p1((4 * i + 2) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT,     sin_p1((4 * i + 3) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT + 1, RIGHT));
+        }
+    }
+
+    #[test]
+    fn test_cos_p1() {
+        const RIGHT: i32 = 25;
+        for i in -9..=9 {
+            #[rustfmt::skip] assert_eq!( RIGHT - 1, cos_p1((4 * i    ) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!( RIGHT,     cos_p1((4 * i    ) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!( RIGHT - 1, cos_p1((4 * i    ) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         1, cos_p1((4 * i + 1) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         0, cos_p1((4 * i + 1) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(        -1, cos_p1((4 * i + 1) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT + 1, cos_p1((4 * i + 2) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT,     cos_p1((4 * i + 2) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(-RIGHT + 1, cos_p1((4 * i + 2) * RIGHT + 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(        -1, cos_p1((4 * i + 3) * RIGHT - 1, RIGHT));
+            #[rustfmt::skip] assert_eq!(         0, cos_p1((4 * i + 3) * RIGHT,     RIGHT));
+            #[rustfmt::skip] assert_eq!(         1, cos_p1((4 * i + 3) * RIGHT + 1, RIGHT));
+        }
+    }
+
+    fn test_partial<F, G>(f: F, data_path: &str, to_period: G) -> Result<()>
+    where
+        F: Fn(i32) -> i32,
+        G: Fn(&[i32]) -> Vec<i32>,
+    {
+        use std::i32::{MAX, MIN};
+
+        let data = read_data(data_path)?;
+        let right = calc_default_right::<i32>();
+        assert_eq!(data.len(), (right + 1) as usize);
+        let data = to_period(&data);
+        let full = calc_full(right);
+        for (x, &expected) in (-full - 1..=full + 1).zip(data.iter().skip(full as usize - 1)) {
+            let actual = f(x);
+            assert_eq!(expected, actual);
+        }
+        for (x, &expected) in (MAX - full..=MAX)
+            .chain(MIN..=MIN + full + 1)
+            .zip(data.iter().skip(full as usize - 1))
+        {
+            let actual = f(x);
+            assert_eq!(expected, actual);
+        }
+        Ok(())
+    }
+
+    fn to_sin_period_odd(data: &[i32]) -> Vec<i32> {
+        let n = data.len() - 1;
+        let iter = data.iter().cloned();
+        let iter = iter.clone().take(n).chain(iter.rev().take(n));
+        iter.clone().chain(iter.map(|x| -x)).collect()
+    }
+
+    fn to_sin_period_even(data: &[i32]) -> Vec<i32> {
+        let n = data.len() - 1;
+        let iter = data.iter().cloned();
+        let iter = iter.clone().rev().take(n).chain(iter.take(n));
+        iter.clone().chain(iter.map(|x| -x)).collect()
+    }
+
+    fn to_cos_period_even(data: &[i32]) -> Vec<i32> {
+        let n = data.len() - 1;
+        let f = |x: i32| -x;
+        let iter = data.iter().cloned();
+        let iter = iter.clone().take(n).chain(iter.rev().take(n).map(f));
+        iter.clone().chain(iter.map(f)).collect()
+    }
+
+    fn to_cos_period_odd(data: &[i32]) -> Vec<i32> {
+        let n = data.len() - 1;
+        let f = |x: i32| -x;
+        let iter = data.iter().cloned();
+        let iter = iter.clone().rev().take(n).chain(iter.take(n).map(f));
+        iter.clone().chain(iter.map(f)).collect()
+    }
+
+    #[rustfmt::skip] #[test] fn test_sin_p2_partial()  { test_partial(sin_p2_default,  "data/cos_p2.json",  to_sin_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_sin_p3_partial()  { test_partial(sin_p3_default,  "data/sin_p3.json",  to_sin_period_odd).unwrap();  }
+    #[rustfmt::skip] #[test] fn test_sin_p4_partial()  { test_partial(sin_p4_default,  "data/cos_p4.json",  to_sin_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_sin_p5_partial()  { test_partial(sin_p5_default,  "data/sin_p5.json",  to_sin_period_odd).unwrap();  }
+    #[rustfmt::skip] #[test] fn test_cos_p2_partial()  { test_partial(cos_p2_default,  "data/cos_p2.json",  to_cos_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_cos_p3_partial()  { test_partial(cos_p3_default,  "data/sin_p3.json",  to_cos_period_odd).unwrap();  }
+    #[rustfmt::skip] #[test] fn test_cos_p4_partial()  { test_partial(cos_p4_default,  "data/cos_p4.json",  to_cos_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_cos_p5_partial()  { test_partial(cos_p5_default,  "data/sin_p5.json",  to_cos_period_odd).unwrap();  }
+    #[rustfmt::skip] #[test] fn test_sin_p4o_partial() { test_partial(sin_p4o_default, "data/cos_p4o.json", to_sin_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o_partial() { test_partial(sin_p5o_default, "data/sin_p5o.json", to_sin_period_odd).unwrap();  }
+    #[rustfmt::skip] #[test] fn test_cos_p4o_partial() { test_partial(cos_p4o_default, "data/cos_p4o.json", to_cos_period_even).unwrap(); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o_partial() { test_partial(cos_p5o_default, "data/sin_p5o.json", to_cos_period_odd).unwrap();  }
+
+    fn test_periodicity<F>(f: F)
+    where
+        F: Fn(i32) -> i32,
+    {
+        let right = calc_default_right::<i32>();
+        let full = calc_full(right);
+        let x = (0..4)
+            .flat_map(|i| {
+                let i_right = i * right;
+                [i_right, i_right + 1, i_right + right - 1]
+            })
+            .collect::<Vec<_>>();
+        for x in x {
+            let expected = f(x);
+            for x in (x + std::i32::MIN..=std::i32::MAX).step_by(full as usize) {
+                assert_eq!(expected, f(x));
+            }
+        }
+    }
+
+    #[rustfmt::skip] #[test] fn test_sin_p1_periodicity()  { test_periodicity(sin_p1_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p2_periodicity()  { test_periodicity(sin_p2_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p3_periodicity()  { test_periodicity(sin_p3_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p4_periodicity()  { test_periodicity(sin_p4_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p5_periodicity()  { test_periodicity(sin_p5_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p1_periodicity()  { test_periodicity(cos_p1_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p2_periodicity()  { test_periodicity(cos_p2_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p3_periodicity()  { test_periodicity(cos_p3_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p4_periodicity()  { test_periodicity(cos_p4_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p5_periodicity()  { test_periodicity(cos_p5_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p4o_periodicity() { test_periodicity(sin_p4o_default); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o_periodicity() { test_periodicity(sin_p5o_default); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o_periodicity() { test_periodicity(sin_p4o_default); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o_periodicity() { test_periodicity(sin_p5o_default); }
+
+    fn test_with_steps<F>(f: F)
+    where
+        F: Fn(i32) -> i32,
+    {
+        use std::i32::{MAX, MIN};
+
+        // 17th mersenne prime
+        const STEP: usize = 131071;
+
+        let full = calc_full(calc_default_right::<i32>());
+        let assert = |x| assert_eq!(f(x), f(x % full));
+        (MIN..=MAX).step_by(STEP).for_each(assert);
+        (MIN..=MAX).rev().step_by(STEP).for_each(assert);
+    }
+
+    #[rustfmt::skip] #[test] fn test_sin_p1_with_steps()  { test_with_steps(sin_p1_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p2_with_steps()  { test_with_steps(sin_p2_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p3_with_steps()  { test_with_steps(sin_p3_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p4_with_steps()  { test_with_steps(sin_p4_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p5_with_steps()  { test_with_steps(sin_p5_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p1_with_steps()  { test_with_steps(cos_p1_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p2_with_steps()  { test_with_steps(cos_p2_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p3_with_steps()  { test_with_steps(cos_p3_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p4_with_steps()  { test_with_steps(cos_p4_default);  }
+    #[rustfmt::skip] #[test] fn test_cos_p5_with_steps()  { test_with_steps(cos_p5_default);  }
+    #[rustfmt::skip] #[test] fn test_sin_p4o_with_steps() { test_with_steps(sin_p4o_default); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o_with_steps() { test_with_steps(sin_p5o_default); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o_with_steps() { test_with_steps(cos_p4o_default); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o_with_steps() { test_with_steps(cos_p5o_default); }
 
     fn compare_sin_cos_f64<Actual, T>(actual: Actual, expected: fn(f64) -> f64, margin: f64, one: T)
     where
@@ -565,22 +852,6 @@ mod tests {
         i8: AsPrimitive<T>,
     {
         compare_sin_cos_f64(f, f64::cos, margin, one);
-    }
-
-    #[test]
-    fn test_sin_p1() {
-        const MARGIN: f64 = 862.264;
-        compare_sin_f64(sin_p1, calc_default_right::<i8>(), MARGIN);
-        compare_sin_f64(sin_p1, calc_default_right::<i16>(), MARGIN);
-        compare_sin_f64(sin_p1, calc_default_right::<i32>(), MARGIN);
-    }
-
-    #[test]
-    fn test_cos_p1() {
-        const MARGIN: f64 = 862.264;
-        compare_cos_f64(cos_p1, calc_default_right::<i8>(), MARGIN);
-        compare_cos_f64(cos_p1, calc_default_right::<i16>(), MARGIN);
-        compare_cos_f64(cos_p1, calc_default_right::<i32>(), MARGIN);
     }
 
     #[test]
