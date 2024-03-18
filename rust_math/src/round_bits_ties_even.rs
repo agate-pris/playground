@@ -9,6 +9,7 @@ use num_traits::{PrimInt, Signed};
 /// # Examples
 ///
 /// ```
+/// use rust_math::round_bits_ties_even::*;
 /// assert_eq!(round_bits_ties_even(-6, 2), -2);
 /// assert_eq!(round_bits_ties_even(-5, 2), -1);
 /// assert_eq!(round_bits_ties_even(-3, 2), -1);

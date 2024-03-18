@@ -7,6 +7,7 @@ use num_traits::{PrimInt, Signed};
 /// # Examples
 ///
 /// ```
+/// use rust_math::round_bits::*;
 /// assert_eq!(round_bits(-6, 2), -2);
 /// assert_eq!(round_bits(-5, 2), -1);
 /// assert_eq!(round_bits(-2, 2), -1);

@@ -40,11 +40,12 @@ pub fn atan_p2(x: i32, k: i32, a: i32) -> i32 {
 }
 
 /// ```rust
-/// let exp = i32::BITS / 2 - 1;
-/// let result = rust_math::atan_p2::atan_p2_default(1732 * k / 1000);
+/// const EXP: u32 = i32::BITS / 2 - 1;
+/// const K: i32 = 2_i32.pow(EXP);
+/// let result = rust_math::atan_p2::atan_p2_default(1732 * K / 1000);
 /// approx::relative_eq!(
 ///     std::f64::consts::PI / 6.0,
-///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(2 * exp as i32)
+///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(2 * EXP as i32)
 /// );
 /// ```
 pub fn atan_p2_default(x: i32) -> i32 {
