@@ -535,7 +535,7 @@ mod tests {
 
         fn test_default<T>(x: T)
         where
-            T: Bits + Debug + PartialEq + PrimInt + Signed + AsPrimitive<f64> + AsPrimitive<i8>,
+            T: Debug + PartialEq + AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
             f64: AsPrimitive<T>,
             i8: AsPrimitive<T>,
         {
@@ -581,7 +581,7 @@ mod tests {
 
         fn test_default<T>(x: T)
         where
-            T: Bits + Debug + PartialEq + PrimInt + Signed + AsPrimitive<f64> + AsPrimitive<i8>,
+            T: Debug + PartialEq + AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
             f64: AsPrimitive<T>,
             i8: AsPrimitive<T>,
         {
