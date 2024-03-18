@@ -438,6 +438,7 @@ mod tests {
     use std::{fmt::Display, ops::Range};
 
     use anyhow::Result;
+    use approx::assert_abs_diff_eq;
 
     use crate::tests::read_data;
 
@@ -813,11 +814,7 @@ mod tests {
                     frac_scale_one * actual
                 };
                 let expected = SCALE * expected;
-                let diff = expected - actual;
-                assert!(
-                    diff.abs() < margin,
-                    "x: {x}, expected: {expected}, actual: {actual}"
-                );
+                assert_abs_diff_eq!(expected, actual, epsilon = margin);
             }
 
             // The value can be greater than 1 or less than -1
