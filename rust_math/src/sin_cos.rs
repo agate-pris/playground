@@ -524,14 +524,21 @@ mod tests {
             #[rustfmt::skip] assert_eq!(f(    -right), -one);
         }
         let right = calc_default_right::<i32>();
-        test(sin_p1_default, right);
         let one = right.pow(2);
+        test(sin_p1_default, right);
         test(sin_p2_default, one);
         test(sin_p3_default, one);
         test(sin_p4_default, one);
         test(sin_p5_default, one);
         test(sin_p4o_default, one);
         test(sin_p5o_default, one);
+        test(|x| sin_p1(x, right), right);
+        test(|x| sin_p2(x, right), one);
+        test(|x| sin_p3(x, right), one);
+        test(|x| sin_p4(x, right), one);
+        test(|x| sin_p5(x, right), one);
+        test(|x| sin_p4o(x, right), one);
+        test(|x| sin_p5o(x, right), one);
 
         fn test_default<T>(x: T)
         where
@@ -570,14 +577,21 @@ mod tests {
             #[rustfmt::skip] assert_eq!(f(-2 * right), -one);
         }
         let right = calc_default_right::<i32>();
-        test(cos_p1_default, right);
         let one = right.pow(2);
+        test(cos_p1_default, right);
         test(cos_p2_default, one);
         test(cos_p3_default, one);
         test(cos_p4_default, one);
         test(cos_p5_default, one);
         test(cos_p4o_default, one);
         test(cos_p5o_default, one);
+        test(|x| cos_p1(x, right), right);
+        test(|x| cos_p2(x, right), one);
+        test(|x| cos_p3(x, right), one);
+        test(|x| cos_p4(x, right), one);
+        test(|x| cos_p5(x, right), one);
+        test(|x| cos_p4o(x, right), one);
+        test(|x| cos_p5o(x, right), one);
 
         fn test_default<T>(x: T)
         where
