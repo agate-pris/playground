@@ -397,15 +397,6 @@ where
     cos_p5(x, calc_default_right::<T>())
 }
 
-pub fn cos_p4o_default<T>(x: T) -> T
-where
-    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    cos_p4o(x, calc_default_right::<T>())
-}
-
 pub fn sin_p4o_default<T>(x: T) -> T
 where
     T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
@@ -422,6 +413,15 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p5o(x, calc_default_right::<T>())
+}
+
+pub fn cos_p4o_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p4o(x, calc_default_right::<T>())
 }
 
 pub fn cos_p5o_default<T>(x: T) -> T
