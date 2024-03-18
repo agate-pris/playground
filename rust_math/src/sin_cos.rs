@@ -337,23 +337,6 @@ where
     sin_p3(x, calc_default_right::<T>())
 }
 
-pub fn cos_p3_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p3(x, calc_default_right::<T>())
-}
-
-pub fn cos_p4_default<T>(x: T) -> T
-where
-    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    cos_p4(x, calc_default_right::<T>())
-}
-
 pub fn sin_p4_default<T>(x: T) -> T
 where
     T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
@@ -386,6 +369,23 @@ where
     i8: AsPrimitive<T>,
 {
     cos_p2(x, calc_default_right::<T>())
+}
+
+pub fn cos_p3_default<T>(x: T) -> T
+where
+    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    cos_p3(x, calc_default_right::<T>())
+}
+
+pub fn cos_p4_default<T>(x: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + Bits + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p4(x, calc_default_right::<T>())
 }
 
 pub fn cos_p5_default<T>(x: T) -> T
