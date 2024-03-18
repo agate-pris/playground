@@ -1,186 +1,51 @@
-use std::{
-    f64::consts::FRAC_PI_2,
-    fmt::Display,
-    fs::File,
-    io::{BufWriter, Write},
-    iter::once,
-    ops::RangeInclusive,
-    path::Path,
-};
-
-use anyhow::{Error, Result};
 use clap::Parser;
-use num_traits::{AsPrimitive, PrimInt};
-use rust_math::{
-    bits::Bits,
-    sin_cos::{calc_default_right, cos_p2, cos_p4, cos_p4o, sin_p3, sin_p5, sin_p5o},
+use rust_math::sin_cos::{
+    cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
+    sin_p5o_default,
 };
-use serde::{de::DeserializeOwned, ser::Serialize};
-use serde_json::{ser::PrettyFormatter, Serializer};
-
-fn serialize<T>(actual: &Vec<T>) -> Result<Vec<u8>>
-where
-    T: Serialize,
-{
-    let formatter = PrettyFormatter::with_indent(&[]);
-    let mut writer = Vec::new();
-    let mut serializer = Serializer::with_formatter(&mut writer, formatter);
-    actual.serialize(&mut serializer)?;
-    Ok(writer)
-}
-
-fn serialize_and_write<T>(dir: &str, file_name: &str, actual: &Vec<T>) -> Result<()>
-where
-    T: Serialize,
-{
-    let buf = serialize(actual)?;
-    let path = Path::new(dir).join(file_name);
-    let inner = File::create(path)?;
-    Ok(BufWriter::new(inner).write_all(&buf)?)
-}
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short, long)]
-    output: Option<String>,
-
-    #[arg(short, long)]
-    print: bool,
-}
-
-fn calc_and_write<F, T>(args: &Args, f: F, file_name: &str) -> Result<()>
-where
-    F: Fn(T, T) -> T,
-    T: Display + AsPrimitive<usize> + Bits + DeserializeOwned + PrimInt + Serialize,
-    RangeInclusive<T>: Iterator<Item = T>,
-    i8: AsPrimitive<T>,
-{
-    let right = calc_default_right::<T>();
-    if let Some(dir) = &args.output {
-        let actual = (0.as_()..=right).map(|x| f(x, right)).collect();
-        serialize_and_write(dir, file_name, &actual)?;
-    }
-    Ok(())
-}
-
-fn calc_and_write_all(args: &Args) -> Vec<Error> {
-    [
-        calc_and_write(args, cos_p2::<i16>, "cos_p2_i16.json"),
-        calc_and_write(args, cos_p2::<i32>, "cos_p2_i32.json"),
-        calc_and_write(args, sin_p3::<i32>, "sin_p3_i32.json"),
-        calc_and_write(args, cos_p4::<i32>, "cos_p4_i32.json"),
-        calc_and_write(args, cos_p4o::<i32>, "cos_p4o_i32.json"),
-        calc_and_write(args, sin_p5::<i32>, "sin_p5_i32.json"),
-        calc_and_write(args, sin_p5o::<i32>, "sin_p5o_i32.json"),
-    ]
-    .into_iter()
-    .filter_map(Result::err)
-    .collect()
-}
-
-fn print_max<Expected, Actual, T>(expected: Expected, actual: Actual)
-where
-    Expected: Iterator<Item = f64>,
-    Actual: Fn(T, T) -> T,
-    T: AsPrimitive<f64> + Bits + PrimInt,
-    RangeInclusive<T>: Iterator<Item = T>,
-    i8: AsPrimitive<T>,
-{
-    let right = calc_default_right::<T>();
-    let one: f64 = right.pow(2).as_();
-    let diffs = (0.as_()..=right)
-        .map(|x| {
-            let actual: f64 = actual(x, right).as_();
-            actual / one
-        })
-        .zip(expected)
-        .map(|(actual, expected)| actual - expected)
-        .collect::<Vec<f64>>();
-    let len = diffs.len();
-    let ((min_i, min), (max_i, max), sum) = diffs.into_iter().enumerate().fold(
-        (
-            (0_usize, f64::INFINITY),
-            (0_usize, f64::NEG_INFINITY),
-            0_f64,
-        ),
-        |((min_i, min), (max_i, max), sum), (i, diff)| {
-            let min = if diff < min { (i, diff) } else { (min_i, min) };
-            let max = if diff > max { (i, diff) } else { (max_i, max) };
-            (min, max, sum + diff)
-        },
-    );
-    const SCALE: f64 = 2_i32.pow(12) as f64;
-    let right: f64 = right.as_();
-    let to_deg = 90.0 / right;
-    let min_deg = min_i as f64 * to_deg;
-    let max_deg = max_i as f64 * to_deg;
-    let average = sum / len as f64;
-    println!(
-        concat!(
-            "min: {{{:6} ({:7.3}), {:8.3} / {scale}}}, ",
-            "max: {{{:6} ({:7.3}), {:7.3} / {scale}}}, ",
-            "average: {:8.3} / {scale}",
-        ),
-        min_i,
-        min_deg,
-        SCALE * min,
-        max_i,
-        max_deg,
-        SCALE * max,
-        SCALE * average,
-        scale = SCALE
-    );
-}
-
-pub fn print_max_all() {
-    let sin: Vec<_>;
-    let cos: Vec<_>;
-    {
-        let right = calc_default_right::<i32>();
-        let frac_pi_straight: f64 = FRAC_PI_2 / right as f64;
-        sin = (0..right)
-            .map(|x| (frac_pi_straight * x as f64).sin())
-            .chain(once(FRAC_PI_2.sin().round()))
-            .collect();
-        cos = (0..right)
-            .map(|x| (frac_pi_straight * x as f64).cos())
-            .chain(once(FRAC_PI_2.cos().round()))
-            .collect();
-    }
-
-    fn f<F, T>(expected: &[f64], note: &str, actual: F)
-    where
-        T: AsPrimitive<f64> + AsPrimitive<i32> + Bits + PrimInt,
-        F: Fn(T, T) -> T,
-        RangeInclusive<T>: Iterator<Item = T>,
-        i8: AsPrimitive<T>,
-    {
-        let right: i32 = calc_default_right::<T>().as_();
-        let step = (calc_default_right::<i32>() / right) as usize;
-        print!("{note}");
-        print_max(expected.iter().cloned().step_by(step), actual);
-    }
-
-    f(&cos, "cos_p2::<i16>:  ", cos_p2::<i16>);
-    f(&sin, "sin_p3::<i32>:  ", sin_p3::<i32>);
-    f(&cos, "cos_p4::<i32>:  ", cos_p4::<i32>);
-    f(&sin, "sin_p5::<i32>:  ", sin_p5::<i32>);
-    f(&cos, "cos_p4o::<i32>: ", cos_p4o::<i32>);
-    f(&sin, "sin_p5o::<i32>: ", sin_p5o::<i32>);
+    #[rustfmt::skip] #[arg(long)] cos_p2: bool,
+    #[rustfmt::skip] #[arg(long)] sin_p3: bool,
+    #[rustfmt::skip] #[arg(long)] cos_p4: bool,
+    #[rustfmt::skip] #[arg(long)] sin_p5: bool,
+    #[rustfmt::skip] #[arg(long)] cos_p4o: bool,
+    #[rustfmt::skip] #[arg(long)] sin_p5o: bool,
 }
 
 fn main() {
     let args = Args::parse();
+
+    fn print<F>(f: F)
+    where
+        F: Fn(i32) -> i32,
     {
-        let errors = calc_and_write_all(&args);
-        for e in &errors {
-            eprintln!("{e}");
+        const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+        println!("[");
+        for x in 0..K {
+            println!("{},", f(x));
         }
-        if !errors.is_empty() {
-            panic!();
-        }
+        println!("{}", f(K));
+        print!("]");
     }
-    if args.print {
-        print_max_all();
+
+    if args.cos_p2 {
+        print(cos_p2_default);
+    }
+    if args.sin_p3 {
+        print(sin_p3_default);
+    }
+    if args.cos_p4 {
+        print(cos_p4_default);
+    }
+    if args.sin_p5 {
+        print(sin_p5_default);
+    }
+    if args.cos_p4o {
+        print(cos_p4o_default);
+    }
+    if args.sin_p5o {
+        print(sin_p5o_default);
     }
 }
