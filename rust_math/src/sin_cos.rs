@@ -122,6 +122,7 @@ where
         .as_()
 }
 
+/// a - b * z ^ 2
 fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
 where
     T: PrimInt,
@@ -129,6 +130,7 @@ where
     a - z_2 * b / right
 }
 
+/// (a - b * z ^ 2) * z ^ 2
 fn cos_p4_sin_p5_impl<T>(a: T, b: T, z: T, right: T) -> T
 where
     T: PrimInt,
@@ -137,7 +139,7 @@ where
     sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
-/// (k + 1) * z ^ 2 - k * z ^ 4
+/// (k + 1 - k * z ^ 2) * z ^ 2
 fn cos_p4_impl<T>(k: T, z: T, right: T) -> T
 where
     T: PrimInt,
@@ -145,7 +147,7 @@ where
     cos_p4_sin_p5_impl(k + right, k, z, right)
 }
 
-/// 1 + k - k * x ^ 2
+/// (1 + k - k * x ^ 2) * x
 fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
@@ -155,7 +157,7 @@ where
     sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
 }
 
-/// k * x - (2 * k - 2.5) * x ^ 3 + (k - 1.5) * x ^ 5
+/// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
 fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
@@ -208,7 +210,7 @@ where
     cos_p2(even_sin_impl(x, right), right)
 }
 
-/// 1.5 * x - 0.5 * x ^ 3
+/// (1.5 - 0.5 * x ^ 2) * x
 pub fn sin_p3<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
@@ -227,7 +229,7 @@ where
     sin_p3(odd_cos_impl(x, right), right)
 }
 
-/// 1 - a * z ^ 2 + (a - 1) * z ^ 4
+/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
 /// a = 1 - pi / 4
 pub fn cos_p4<T>(x: T, right: T) -> T
 where
@@ -249,10 +251,8 @@ where
     cos_p4(even_sin_impl(x, right), right)
 }
 
-/// a * x - c * x ^ 3 + c * x ^ 5
+/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
 /// a = pi / 2
-/// b = pi - 2.5
-/// c = pi / 2 - 1.5
 pub fn sin_p5<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
@@ -271,7 +271,7 @@ where
     sin_p5(odd_cos_impl(x, right), right)
 }
 
-/// 1 - a * z ^ 2 + (a - a) * z ^ 4
+/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
 /// a = 5 * (1 - 3 / pi)
 pub fn cos_p4o<T>(x: T, right: T) -> T
 where
@@ -293,10 +293,8 @@ where
     cos_p4o(even_sin_impl(x, right), right)
 }
 
-/// a * x - c * x ^ 3 + c * x ^ 5
+/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
 /// a = 4 * (3 / pi - 9 / 16)
-/// b = 2 * a - 2.5
-/// c = a - 1.5
 pub fn sin_p5o<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
