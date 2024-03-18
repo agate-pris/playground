@@ -185,14 +185,6 @@ where
     }
 }
 
-pub fn cos_p1<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p1(odd_cos_impl(x, right), right)
-}
-
 /// 1 - x ^ 2
 pub fn cos_p2<T>(x: T, right: T) -> T
 where
@@ -200,14 +192,6 @@ where
     i8: AsPrimitive<T>,
 {
     even_cos_impl(x, right, |z, _| z.pow(2))
-}
-
-pub fn sin_p2<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p2(even_sin_impl(x, right), right)
 }
 
 /// (1.5 - 0.5 * x ^ 2) * x
@@ -219,14 +203,6 @@ where
     // 1.5 * x - 0.5 * x ^ 3
     // = (1.5 - 0.5 * x ^ 2) * x
     sin_p3_impl(right / 2.as_(), x, right)
-}
-
-pub fn cos_p3<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p3(odd_cos_impl(x, right), right)
 }
 
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
@@ -242,15 +218,6 @@ where
     })
 }
 
-pub fn sin_p4<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    cos_p4(even_sin_impl(x, right), right)
-}
-
 /// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
 /// a = pi / 2
 pub fn sin_p5<T>(x: T, right: T) -> T
@@ -260,15 +227,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p5_impl(sin_p5_k::<T>(right), x, right)
-}
-
-pub fn cos_p5<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    sin_p5(odd_cos_impl(x, right), right)
 }
 
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
@@ -311,6 +269,48 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p5o(odd_cos_impl(x, right), right)
+}
+
+pub fn sin_p2<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    cos_p2(even_sin_impl(x, right), right)
+}
+
+pub fn sin_p4<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    cos_p4(even_sin_impl(x, right), right)
+}
+
+pub fn cos_p1<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    sin_p1(odd_cos_impl(x, right), right)
+}
+
+pub fn cos_p3<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    sin_p3(odd_cos_impl(x, right), right)
+}
+
+pub fn cos_p5<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<f64> + AsPrimitive<i8> + PrimInt + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    sin_p5(odd_cos_impl(x, right), right)
 }
 
 pub fn sin_p1_default<T>(x: T) -> T
