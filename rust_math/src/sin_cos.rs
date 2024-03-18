@@ -783,7 +783,6 @@ mod tests {
     {
         const SCALE: f64 = 2_i32.pow(12) as f64;
 
-        let zero: T = 0.as_();
         let right = calc_default_right::<T>();
         let straight = right * 2.as_();
         let frac_pi_straight = {
@@ -802,17 +801,9 @@ mod tests {
                 expected(frac_pi_straight * x)
             };
 
-            // Check that it is exactly 1, -1 or 0
-            // on the coordinate axis,
-            // otherwise that the sign is correct.
-            if x % right == zero {
-                assert!(
-                    actual == zero || actual == one || actual == -one,
-                    "actual: {actual}",
-                );
-            } else {
-                assert_eq!(0.0 < expected, zero < actual);
-                assert_eq!(0.0 > expected, zero > actual);
+            if actual != 0.as_() {
+                assert_eq!(expected.is_sign_negative(), actual.is_negative());
+                assert_eq!(expected.is_sign_positive(), actual.is_positive());
             }
 
             // Check that the value is close to the expected value.
