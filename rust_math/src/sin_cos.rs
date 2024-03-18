@@ -786,21 +786,12 @@ mod tests {
 
         let right = calc_default_right::<T>();
         let straight = right * 2.as_();
-        let frac_pi_straight = {
-            let right: f64 = right.as_();
-            FRAC_PI_2 / right
-        };
-        let frac_scale_one = {
-            let one: f64 = one.as_();
-            SCALE / one
-        };
+        let frac_pi_straight = FRAC_PI_2 / right.as_();
+        let frac_scale_one = SCALE / one.as_();
 
         for x in -straight..straight {
             let actual = actual(x, right);
-            let expected = {
-                let x: f64 = x.as_();
-                expected(frac_pi_straight * x)
-            };
+            let expected = expected(frac_pi_straight * x.as_());
 
             if actual != 0.as_() {
                 assert_eq!(expected.is_sign_negative(), actual.is_negative());
@@ -809,10 +800,7 @@ mod tests {
 
             // Check that the value is close to the expected value.
             {
-                let actual = {
-                    let actual: f64 = actual.as_();
-                    frac_scale_one * actual
-                };
+                let actual = frac_scale_one * actual.as_();
                 let expected = SCALE * expected;
                 assert_abs_diff_eq!(expected, actual, epsilon = margin);
             }
