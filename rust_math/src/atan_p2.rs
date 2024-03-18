@@ -149,10 +149,10 @@ mod tests {
         fn f(x: i32, y: i32) {
             let expected = (y as f64).atan2(x as f64);
             let actual = {
-                let actual = atan2_p2_default(y as i32, x as i32);
+                let actual = atan2_p2_default(y, x);
                 actual as f64 * PI / 2.0_f64.powi(i32::BITS as i32 / 2 * 2 - 2)
             };
-            let error = actual - expected as f64;
+            let error = actual - expected;
             assert!(
                 error.abs() < 0.0039,
                 "y: {y}, x: {x}, actual: {actual}, expected: {expected}"
