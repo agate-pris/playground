@@ -136,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn test_atan2_p2_default() {
+    fn test_atan2_p3_default() {
         fn f(x: i32, y: i32) {
             let expected = (y as f64).atan2(x as f64);
             let actual = {
