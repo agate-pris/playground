@@ -5,13 +5,13 @@ use num_traits::{AsPrimitive, PrimInt};
 use crate::atan::{atan2_impl, atan_impl};
 
 /// ```rust
-/// use rust_math::atan_p4::*;
+/// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
-/// let (a, b) = calc_default_p4_k::<i32>(EXP);
+/// let (a, b) = calc_default_p3_k::<i32>(EXP);
 /// assert_eq!(a, 2552);
 /// assert_eq!(b, 692);
 /// ```
-pub fn calc_default_p4_k<T>(exp: u32) -> (T, T)
+pub fn calc_default_p3_k<T>(exp: u32) -> (T, T)
 where
     T: 'static + Copy,
     f64: AsPrimitive<T>,
@@ -22,7 +22,7 @@ where
     (a.as_(), b.as_())
 }
 
-fn atan_p4_impl<T>(x: T, x_abs: T, k: T, a: T, b: T) -> T
+fn atan_p3_impl<T>(x: T, x_abs: T, k: T, a: T, b: T) -> T
 where
     T: 'static + Copy + PrimInt,
     i8: AsPrimitive<T>,
@@ -32,69 +32,69 @@ where
 
 /// ```rust
 /// use std::f64::consts::PI;
-/// use rust_math::atan_p4::*;
+/// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let (a, b) = calc_default_p4_k::<i32>(EXP);
-/// let result = atan_p4(1732 * K / 1000, K, a, b);
+/// let (a, b) = calc_default_p3_k::<i32>(EXP);
+/// let result = atan_p3(1732 * K / 1000, K, a, b);
 /// approx::relative_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
-pub fn atan_p4(x: i32, k: i32, a: i32, b: i32) -> i32 {
-    atan_impl(x, k, |x, x_abs| atan_p4_impl(x, x_abs, k, a, b))
+pub fn atan_p3(x: i32, k: i32, a: i32, b: i32) -> i32 {
+    atan_impl(x, k, |x, x_abs| atan_p3_impl(x, x_abs, k, a, b))
 }
 
 /// ```rust
 /// use std::f64::consts::PI;
-/// use rust_math::atan_p4::*;
+/// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p4_default(1732 * K / 1000);
+/// let result = atan_p3_default(1732 * K / 1000);
 /// approx::relative_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
-pub fn atan_p4_default(x: i32) -> i32 {
+pub fn atan_p3_default(x: i32) -> i32 {
     const EXP: u32 = i32::BITS / 2 - 1;
     const K: i32 = 2_i32.pow(EXP);
-    let (a, b) = calc_default_p4_k(EXP);
-    atan_p4(x, K, a, b)
+    let (a, b) = calc_default_p3_k(EXP);
+    atan_p3(x, K, a, b)
 }
 
 /// ```rust
 /// use std::f64::consts::PI;
-/// use rust_math::atan_p4::*;
+/// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let (a, b) = calc_default_p4_k::<i32>(EXP);
-/// let result = atan2_p4(1732, 1000, K, a, b);
+/// let (a, b) = calc_default_p3_k::<i32>(EXP);
+/// let result = atan2_p3(1732, 1000, K, a, b);
 /// approx::relative_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
-pub fn atan2_p4(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
-    atan2_impl(y, x, k, |x| atan_p4_impl(x, x, k, a, b))
+pub fn atan2_p3(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
+    atan2_impl(y, x, k, |x| atan_p3_impl(x, x, k, a, b))
 }
 
 /// ```rust
 /// use std::f64::consts::PI;
-/// use rust_math::atan_p4::*;
+/// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = atan2_p4_default(1732, 1000);
+/// let result = atan2_p3_default(1732, 1000);
 /// approx::relative_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64
 /// );
 /// ```
-pub fn atan2_p4_default(y: i32, x: i32) -> i32 {
+pub fn atan2_p3_default(y: i32, x: i32) -> i32 {
     const EXP: u32 = i32::BITS / 2 - 1;
     const K: i32 = 2_i32.pow(EXP);
-    let (a, b) = calc_default_p4_k(EXP);
-    atan2_p4(y, x, K, a, b)
+    let (a, b) = calc_default_p3_k(EXP);
+    atan2_p3(y, x, K, a, b)
 }
 
 #[cfg(test)]
@@ -105,7 +105,7 @@ mod tests {
     fn check_overflow() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
-        let (a, b) = calc_default_p4_k::<i32>(EXP);
+        let (a, b) = calc_default_p3_k::<i32>(EXP);
         assert!(a > 0);
         assert!(b > 0);
         let x = [-K, 0, K];
@@ -120,15 +120,15 @@ mod tests {
     }
 
     #[test]
-    fn test_atan_p4() {
+    fn test_atan_p3() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
 
         fn f(x: i32) -> f64 {
-            let (a, b) = calc_default_p4_k(EXP);
+            let (a, b) = calc_default_p3_k(EXP);
             let expected = (x as f64 / K as f64).atan();
             let actual = {
-                let actual = atan_p4(x, K, a, b);
+                let actual = atan_p3(x, K, a, b);
                 actual as f64 * PI / 2.0_f64.powi(2 * EXP as i32)
             };
             let error = actual - expected;
@@ -156,17 +156,17 @@ mod tests {
     }
 
     #[test]
-    fn test_atan_p4_default() {
+    fn test_atan_p3_default() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
-        let (a, b) = calc_default_p4_k(EXP);
+        let (a, b) = calc_default_p3_k(EXP);
         for degrees in -89..90 {
             let x = {
                 let x = (degrees as f64).to_radians().tan();
                 (x * K as f64).round_ties_even() as i32
             };
-            let expected = atan_p4(x, K, a, b);
-            let actual = atan_p4_default(x);
+            let expected = atan_p3(x, K, a, b);
+            let actual = atan_p3_default(x);
             assert_eq!(expected, actual);
         }
     }
@@ -176,7 +176,7 @@ mod tests {
         fn f(x: i32, y: i32) {
             let expected = (y as f64).atan2(x as f64);
             let actual = {
-                let actual = atan2_p4_default(y, x);
+                let actual = atan2_p3_default(y, x);
                 actual as f64 * PI / 2.0_f64.powi(i32::BITS as i32 / 2 * 2 - 2)
             };
             let error = actual - expected;

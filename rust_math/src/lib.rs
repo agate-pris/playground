@@ -1,6 +1,6 @@
 pub mod atan;
 pub mod atan_p2;
-pub mod atan_p4;
+pub mod atan_p3;
 pub mod bits;
 pub mod min_max;
 pub mod round_bits;
