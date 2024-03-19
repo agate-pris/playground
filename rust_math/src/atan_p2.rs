@@ -5,7 +5,9 @@ use num_traits::{AsPrimitive, PrimInt};
 use crate::atan::{atan2_impl, atan_impl};
 
 /// ```rust
-/// let result = rust_math::atan_p2::calc_default_p2_k::<i32>(i32::BITS / 2 - 1);
+/// use rust_math::atan_p2::*;
+/// const EXP: u32 = i32::BITS / 2 - 1;
+/// let result = calc_default_p2_k::<i32>(EXP);
 /// assert_eq!(result, 2847);
 /// ```
 pub fn calc_default_p2_k<T>(exp: u32) -> T
@@ -26,13 +28,15 @@ where
 }
 
 /// ```rust
-/// let exp = i32::BITS / 2 - 1;
-/// let k = 2_i32.pow(exp);
-/// let a = rust_math::atan_p2::calc_default_p2_k::<i32>(exp);
-/// let result = rust_math::atan_p2::atan_p2(1732 * k / 1000, k, a);
+/// use std::f64::consts::PI;
+/// use rust_math::atan_p2::*;
+/// const EXP: u32 = i32::BITS / 2 - 1;
+/// const K: i32 = 2_i32.pow(EXP);
+/// let a = calc_default_p2_k::<i32>(EXP);
+/// let result = atan_p2(1732 * K / 1000, K, a);
 /// approx::relative_eq!(
-///     std::f64::consts::PI / 6.0,
-///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(2 * exp as i32)
+///     PI / 6.0,
+///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
 pub fn atan_p2(x: i32, k: i32, a: i32) -> i32 {
@@ -40,12 +44,14 @@ pub fn atan_p2(x: i32, k: i32, a: i32) -> i32 {
 }
 
 /// ```rust
+/// use std::f64::consts::PI;
+/// use rust_math::atan_p2::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let result = rust_math::atan_p2::atan_p2_default(1732 * K / 1000);
+/// let result = atan_p2_default(1732 * K / 1000);
 /// approx::relative_eq!(
-///     std::f64::consts::PI / 6.0,
-///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(2 * EXP as i32)
+///     PI / 6.0,
+///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
 pub fn atan_p2_default(x: i32) -> i32 {
@@ -56,13 +62,15 @@ pub fn atan_p2_default(x: i32) -> i32 {
 }
 
 /// ```rust
-/// let exp = i32::BITS / 2 - 1;
-/// let k = 2_i32.pow(exp);
-/// let a = rust_math::atan_p2::calc_default_p2_k::<i32>(exp);
-/// let result = rust_math::atan_p2::atan2_p2(1732, 1000, k, a);
+/// use std::f64::consts::PI;
+/// use rust_math::atan_p2::*;
+/// const EXP: u32 = i32::BITS / 2 - 1;
+/// const K: i32 = 2_i32.pow(EXP);
+/// let a = calc_default_p2_k::<i32>(EXP);
+/// let result = atan2_p2(1732, 1000, K, a);
 /// approx::relative_eq!(
-///     std::f64::consts::PI / 6.0,
-///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(2 * exp as i32)
+///     PI / 6.0,
+///     result as f64 * PI / K.pow(2) as f64
 /// );
 /// ```
 pub fn atan2_p2(y: i32, x: i32, k: i32, a: i32) -> i32 {
@@ -70,10 +78,13 @@ pub fn atan2_p2(y: i32, x: i32, k: i32, a: i32) -> i32 {
 }
 
 /// ```rust
-/// let result = rust_math::atan_p2::atan2_p2_default(1732, 1000);
+/// use std::f64::consts::PI;
+/// use rust_math::atan_p2::*;
+/// const EXP: u32 = i32::BITS / 2 - 1;
+/// let result = atan2_p2_default(1732, 1000);
 /// approx::relative_eq!(
-///     std::f64::consts::PI / 6.0,
-///     result as f64 * std::f64::consts::PI / 2.0_f64.powi(30)
+///     PI / 6.0,
+///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64
 /// );
 /// ```
 pub fn atan2_p2_default(y: i32, x: i32) -> i32 {
