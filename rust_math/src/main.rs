@@ -1,7 +1,11 @@
 use clap::Parser;
-use rust_math::sin_cos::{
-    cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
-    sin_p5o_default,
+use rust_math::{
+    atan_p2::atan_p2_default,
+    atan_p4::atan_p4_default,
+    sin_cos::{
+        cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
+        sin_p5o_default,
+    },
 };
 
 #[derive(Parser, Debug)]
@@ -12,6 +16,8 @@ struct Args {
     #[rustfmt::skip] #[arg(long)] sin_p5: bool,
     #[rustfmt::skip] #[arg(long)] cos_p4o: bool,
     #[rustfmt::skip] #[arg(long)] sin_p5o: bool,
+    #[rustfmt::skip] #[arg(long)] atan_p2: bool,
+    #[rustfmt::skip] #[arg(long)] atan_p4: bool,
 }
 
 fn main() {
@@ -47,5 +53,11 @@ fn main() {
     }
     if args.sin_p5o {
         print(sin_p5o_default);
+    }
+    if args.atan_p2 {
+        print(atan_p2_default);
+    }
+    if args.atan_p4 {
+        print(atan_p4_default);
     }
 }
