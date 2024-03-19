@@ -8,7 +8,7 @@ where
     if x_abs > k as i64 {
         let signum = x.signum();
         let k_2 = k * k;
-        let x = k_2 / x_abs as i32;
+        let x = (k_2 as i64 / x_abs) as i32;
         signum * (k_2 / 2 - f(x, x))
     } else {
         f(x, x_abs as i32)
