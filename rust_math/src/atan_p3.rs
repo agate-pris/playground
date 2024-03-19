@@ -138,6 +138,8 @@ mod tests {
 
     #[test]
     fn test_atan2_p3_default() {
+        use std::i32::{MAX, MIN};
+
         fn f(x: i32, y: i32) {
             let expected = (y as f64).atan2(x as f64);
             let actual = {
@@ -150,15 +152,15 @@ mod tests {
                 "error: {error}, y: {y}, x: {x}, actual: {actual}, expected: {expected}"
             );
         }
-        f(0, 0);
-        f(0, std::i32::MAX);
-        f(0, std::i32::MIN);
-        f(std::i32::MAX, 0);
-        f(std::i32::MAX, std::i32::MAX);
-        f(std::i32::MAX, std::i32::MIN);
-        f(std::i32::MIN, 0);
-        f(std::i32::MIN, std::i32::MAX);
-        f(std::i32::MIN, std::i32::MIN);
+
+        {
+            let values = [0, MAX, MIN, MAX];
+            for x in values {
+                for y in values {
+                    f(x, y);
+                }
+            }
+        }
 
         fn g(degrees: i32) {
             const SCALE: f64 = 1000000.0;
