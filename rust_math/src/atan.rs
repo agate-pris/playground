@@ -231,4 +231,98 @@ mod tests {
 
     #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_default); }
     #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default); }
+
+    fn test_atan2_periodicity<F>(f: F, data_path: &str, acceptable_error: f64)
+    where
+        F: Fn(i32, i32) -> i32,
+    {
+        use std::i32::{MAX, MIN};
+
+        let expected = read_data::<i32>(data_path).unwrap();
+
+        const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+        for v in 1..=K {
+            let expected = expected[v as usize];
+
+            approx::assert_abs_diff_eq!(
+                expected as f64 * PI / K.pow(2) as f64,
+                (v as f64).atan2(K as f64),
+                epsilon = acceptable_error
+            );
+
+            test_atan2_symmetry(&f, v, K, acceptable_error);
+        }
+
+        let verify = |y: i32, x: i32| {
+            let actual = f(y, x);
+
+            if y != MIN && x != MIN {
+                test_atan2_symmetry(&f, y.abs(), x.abs(), acceptable_error);
+            } else {
+                approx::assert_abs_diff_eq!(
+                    actual as f64 * PI / K.pow(2) as f64,
+                    (y as f64).atan2(x as f64),
+                    epsilon = acceptable_error
+                );
+            }
+
+            if x == 0 || y == 0 {
+                assert_eq!(actual, 0);
+            } else {
+                let x_abs = (x as i64).abs();
+                let y_abs = (y as i64).abs();
+                let x_signum = x.signum();
+                let y_signum = y.signum();
+
+                let expected = if x_abs > y_abs {
+                    let new_y = y_signum * (y_abs * K as i64 / x_abs) as i32;
+                    let new_x = x_signum * K;
+                    assert!((-K..=K).contains(&new_x));
+                    assert!((-K..=K).contains(&new_y));
+
+                    let v = f(new_y, new_x);
+                    if new_y == 0 {
+                        if x.is_negative() {
+                            assert_eq!(v, K.pow(2));
+                        } else {
+                            assert_eq!(v, 0);
+                        }
+                        match (x.is_negative(), y.is_negative()) {
+                            (true, true) => -K.pow(2),
+                            (true, false) => K.pow(2),
+                            _ => 0,
+                        }
+                    } else {
+                        v
+                    }
+                } else {
+                    let new_y = y_signum * K;
+                    let new_x = x_signum * (x_abs * K as i64 / y_abs) as i32;
+                    assert!((-K..=K).contains(&new_x));
+                    assert!((-K..=K).contains(&new_y));
+                    f(new_y, new_x)
+                };
+                assert_eq!(actual, expected);
+            }
+        };
+
+        const STEPS: [usize; 2] = [16777259, 16777289];
+        for x_step in STEPS {
+            for y_step in STEPS {
+                for x in (MIN..=MAX).step_by(x_step) {
+                    for y in (MIN..=MAX).step_by(y_step) {
+                        verify(y, x);
+                    }
+                }
+                for x in (MIN..=MAX).rev().step_by(x_step) {
+                    for y in (MIN..=MAX).rev().step_by(y_step) {
+                        verify(y, x);
+                    }
+                }
+            }
+        }
+    }
+
+    #[rustfmt::skip] #[test] fn test_atan2_p2_periodicity() { test_atan2_periodicity(atan2_p2_default, "data/atan_p2.json", 0.0039); }
+    #[rustfmt::skip] #[test] fn test_atan2_p3_periodicity() { test_atan2_periodicity(atan2_p3_default, "data/atan_p3.json", 0.0017); }
 }
