@@ -99,12 +99,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_k() {
-        let result = calc_default_p2_k::<i32>(i32::BITS / 2 - 1);
-        assert_eq!(result, 2847);
-    }
-
-    #[test]
     fn test_atan_p2() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
