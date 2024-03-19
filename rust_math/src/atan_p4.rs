@@ -91,7 +91,7 @@ pub fn atan2_p4(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
 /// );
 /// ```
 pub fn atan2_p4_default(y: i32, x: i32) -> i32 {
-    const EXP: u32 = 15;
+    const EXP: u32 = i32::BITS / 2 - 1;
     const K: i32 = 2_i32.pow(EXP);
     let (a, b) = calc_default_p4_k(EXP);
     atan2_p4(y, x, K, a, b)
@@ -107,18 +107,24 @@ mod tests {
         const B_15: i32 = 692;
         const A_31: i32 = 167268423;
         const B_31: i32 = 45320378;
-        let (a, b) = calc_default_p4_k::<i32>(15);
-        assert_eq!(a, A_15);
-        assert_eq!(b, B_15);
-        let (a, b) = calc_default_p4_k::<i64>(15);
-        assert_eq!(a, A_15 as i64);
-        assert_eq!(b, B_15 as i64);
-        let (a, b) = calc_default_p4_k::<i32>(31);
-        assert_eq!(a, A_31);
-        assert_eq!(b, B_31);
-        let (a, b) = calc_default_p4_k::<i64>(31);
-        assert_eq!(a, A_31 as i64);
-        assert_eq!(b, B_31 as i64);
+        {
+            const EXP: u32 = i32::BITS / 2 - 1;
+            let (a, b) = calc_default_p4_k::<i32>(EXP);
+            assert_eq!(a, A_15);
+            assert_eq!(b, B_15);
+            let (a, b) = calc_default_p4_k::<i64>(EXP);
+            assert_eq!(a, A_15 as i64);
+            assert_eq!(b, B_15 as i64);
+        }
+        {
+            const EXP: u32 = i64::BITS / 2 - 1;
+            let (a, b) = calc_default_p4_k::<i32>(EXP);
+            assert_eq!(a, A_31);
+            assert_eq!(b, B_31);
+            let (a, b) = calc_default_p4_k::<i64>(EXP);
+            assert_eq!(a, A_31 as i64);
+            assert_eq!(b, B_31 as i64);
+        }
     }
 
     #[test]
