@@ -22,7 +22,7 @@ where
     T: 'static + Copy + PrimInt,
     i8: AsPrimitive<T>,
 {
-    x * k / 4.as_() + (k - x_abs) * x / k * a
+    x * (k / 4.as_() + a * (k - x_abs) / k)
 }
 
 /// ```rust
