@@ -123,6 +123,7 @@ mod tests {
     fn test_atan_p3_default() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
+
         let (a, b) = calc_default_p3_k(EXP);
         for degrees in -89..90 {
             let x = {
