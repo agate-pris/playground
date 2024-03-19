@@ -114,42 +114,6 @@ mod tests {
     }
 
     #[test]
-    fn test_atan_p2() {
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-
-        fn f(x: i32) -> f64 {
-            let a = calc_default_p2_k::<i32>(EXP);
-            let expected = (x as f64 / K as f64).atan();
-            let actual = {
-                let actual = atan_p2(x, K, a);
-                actual as f64 * PI / 2.0_f64.powi(2 * EXP as i32)
-            };
-            let error = actual - expected;
-            assert!(
-                error.abs() < 0.0039,
-                "error: {error}, x: {x}, expected: {expected}, actual: {actual}"
-            );
-            error
-        }
-
-        f(0);
-        f(i32::MAX);
-        f(i32::MIN);
-
-        let mut min = std::f64::INFINITY;
-        let mut max = std::f64::NEG_INFINITY;
-        for degrees in -89..90 {
-            let x = (degrees as f64).to_radians().tan();
-            let x = (x * K as f64).round_ties_even() as i32;
-            let e = f(x);
-            min = min.min(e);
-            max = max.max(e);
-        }
-        println!("min: {min}, max: {max}");
-    }
-
-    #[test]
     fn test_atan_p2_default() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
