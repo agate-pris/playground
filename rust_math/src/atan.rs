@@ -5,15 +5,13 @@ where
     F: Fn(i32, i32) -> i32,
 {
     let x_abs = (x as i64).abs();
-    match x_abs.cmp(&(k as i64)) {
-        Ordering::Equal => x.signum() * k * k / 4,
-        Ordering::Less => f(x, x_abs as i32),
-        Ordering::Greater => {
-            let signum = x.signum();
-            let k_2 = k * k;
-            let x = k_2 / x_abs as i32;
-            signum * (k_2 / 2 - f(x, x))
-        }
+    if x_abs > k as i64 {
+        let signum = x.signum();
+        let k_2 = k * k;
+        let x = k_2 / x_abs as i32;
+        signum * (k_2 / 2 - f(x, x))
+    } else {
+        f(x, x_abs as i32)
     }
 }
 
