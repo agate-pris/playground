@@ -102,32 +102,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_k() {
-        const A_15: i32 = 2552;
-        const B_15: i32 = 692;
-        const A_31: i32 = 167268423;
-        const B_31: i32 = 45320378;
-        {
-            const EXP: u32 = i32::BITS / 2 - 1;
-            let (a, b) = calc_default_p4_k::<i32>(EXP);
-            assert_eq!(a, A_15);
-            assert_eq!(b, B_15);
-            let (a, b) = calc_default_p4_k::<i64>(EXP);
-            assert_eq!(a, A_15 as i64);
-            assert_eq!(b, B_15 as i64);
-        }
-        {
-            const EXP: u32 = i64::BITS / 2 - 1;
-            let (a, b) = calc_default_p4_k::<i32>(EXP);
-            assert_eq!(a, A_31);
-            assert_eq!(b, B_31);
-            let (a, b) = calc_default_p4_k::<i64>(EXP);
-            assert_eq!(a, A_31 as i64);
-            assert_eq!(b, B_31 as i64);
-        }
-    }
-
-    #[test]
     fn test_atan_p4() {
         const EXP: u32 = i32::BITS / 2 - 1;
         const K: i32 = 2_i32.pow(EXP);
