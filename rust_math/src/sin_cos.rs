@@ -540,8 +540,8 @@ mod tests {
     ) -> Result<()> {
         use std::i32::{MAX, MIN};
 
-        // 17th mersenne prime
-        const STEP: usize = 131071;
+        // 5th mersenne prime
+        const STEP: usize = 8191;
 
         let right = calc_default_right::<i32>();
         let right_as_usize = right as usize;
