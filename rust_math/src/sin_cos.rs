@@ -448,9 +448,9 @@ mod tests {
     fn test_repeat() {
         const LENGTH: i32 = 10;
         for i in -9..=9 {
-            #[rustfmt::skip] assert_eq!(9, repeat(LENGTH * i - 1, LENGTH));
-            #[rustfmt::skip] assert_eq!(0, repeat(LENGTH * i,     LENGTH));
-            #[rustfmt::skip] assert_eq!(1, repeat(LENGTH * i + 1, LENGTH));
+            for (&expected, offset) in [9, 0, 1].iter().zip([-1, 0, 1]) {
+                assert_eq!(expected, repeat(LENGTH * i + offset, LENGTH));
+            }
         }
     }
 
