@@ -313,14 +313,6 @@ where
     sin_p5o(odd_cos_impl(x, right), right)
 }
 
-pub fn sin_p1_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p1(x, calc_default_right::<T>())
-}
-
 pub fn sin_p2_default<T>(x: T) -> T
 where
     T: AsPrimitive<i8> + Bits + PrimInt + Signed,
@@ -353,14 +345,6 @@ where
     i8: AsPrimitive<T>,
 {
     sin_p5(x, calc_default_right::<T>())
-}
-
-pub fn cos_p1_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p1(x, calc_default_right::<T>())
 }
 
 pub fn cos_p2_default<T>(x: T) -> T
@@ -516,7 +500,6 @@ mod tests {
         }
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
-        test(sin_p1_default, right);
         test(sin_p2_default, one);
         test(sin_p3_default, one);
         test(sin_p4_default, one);
@@ -540,7 +523,6 @@ mod tests {
         }
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
-        test(cos_p1_default, right);
         test(cos_p2_default, one);
         test(cos_p3_default, one);
         test(cos_p4_default, one);
