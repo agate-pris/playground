@@ -147,6 +147,22 @@ where
     cos_p4_sin_p5_impl(k + right, k, z, right)
 }
 
+/// x
+fn sin_p1<T>(x: T, right: T) -> T
+where
+    T: AsPrimitive<i8> + PrimInt + Signed,
+    i8: AsPrimitive<T>,
+{
+    let rem = repeat(x, right);
+    match calc_quadrant(x, right) {
+        1 => -rem + right,
+        3 => rem - right,
+        2 => -rem,
+        0 => rem,
+        _ => unreachable!(),
+    }
+}
+
 /// (1 + k - k * x ^ 2) * x
 fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
 where
@@ -167,22 +183,6 @@ where
     let a = k * 2.as_() - right * 5.as_() / 2.as_();
     let b = k - right * 3.as_() / 2.as_();
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
-}
-
-/// x
-fn sin_p1<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let rem = repeat(x, right);
-    match calc_quadrant(x, right) {
-        1 => -rem + right,
-        3 => rem - right,
-        2 => -rem,
-        0 => rem,
-        _ => unreachable!(),
-    }
 }
 
 /// 1 - x ^ 2
