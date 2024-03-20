@@ -55,7 +55,7 @@ mod tests {
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
         atan_p3::{atan2_p3_default, atan_p3_default},
-        atan_p5::atan2_p5_default,
+        atan_p5::{atan2_p5_default, atan_p5_default},
         tests::read_data,
     };
 
@@ -122,8 +122,9 @@ mod tests {
         }
     }
 
-    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(atan_p2_default, "data/atan_p2.json", 0.0039); }
-    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_default, "data/atan_p3.json", 0.0016); }
+    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(atan_p2_default, "data/atan_p2.json", 0.0039);  }
+    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_default, "data/atan_p3.json", 0.0016);  }
+    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(atan_p5_default, "data/atan_p5.json", 0.00092); }
 
     fn test_atan2_symmetry<F>(f: F, y_abs: i32, x_abs: i32, acceptable_error: f64)
     where
@@ -325,6 +326,7 @@ mod tests {
         }
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2_periodicity() { test_atan2_periodicity(atan2_p2_default, "data/atan_p2.json", 0.0039); }
-    #[rustfmt::skip] #[test] fn test_atan2_p3_periodicity() { test_atan2_periodicity(atan2_p3_default, "data/atan_p3.json", 0.0017); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2_periodicity() { test_atan2_periodicity(atan2_p2_default, "data/atan_p2.json", 0.0039);  }
+    #[rustfmt::skip] #[test] fn test_atan2_p3_periodicity() { test_atan2_periodicity(atan2_p3_default, "data/atan_p3.json", 0.0017);  }
+    #[rustfmt::skip] #[test] fn test_atan2_p5_periodicity() { test_atan2_periodicity(atan2_p5_default, "data/atan_p5.json", 0.00093); }
 }
