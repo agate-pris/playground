@@ -461,14 +461,12 @@ mod tests {
             let offset = 4 * i * RIGHT;
             for expected in 0_i8..4 {
                 #[rustfmt::skip]
-                let actuals = [
-                    calc_quadrant(offset + RIGHT * (expected as i32    ),     RIGHT),
-                    calc_quadrant(offset + RIGHT * (expected as i32    ) + 1, RIGHT),
-                    calc_quadrant(offset + RIGHT * (expected as i32 + 1) - 1, RIGHT),
+                let x = [
+                    offset + RIGHT * (expected as i32    ),
+                    offset + RIGHT * (expected as i32    ) + 1,
+                    offset + RIGHT * (expected as i32 + 1) - 1,
                 ];
-                for &actual in actuals.iter() {
-                    assert_eq!(expected, actual);
-                }
+                assert!(x.iter().all(|&x| calc_quadrant(x, RIGHT) == expected));
             }
         }
     }
