@@ -561,6 +561,9 @@ mod tests {
         let right = calc_default_right::<i32>();
         let full = calc_full(right);
 
+        assert_eq!(MIN % full, 0);
+        assert_eq!(MAX % full, full - 1);
+
         (-full - 1..=full + 1)
             .chain(MAX - full..=MAX)
             .chain(MIN..=MIN + full + 1)
