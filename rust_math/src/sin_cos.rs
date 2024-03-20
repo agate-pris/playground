@@ -628,6 +628,82 @@ mod tests {
         }
     }
 
+    fn test_sin_cos<F, G, H, I>(
+        data_path: &str,
+        f: F,
+        f_default: G,
+        one: i32,
+        to_period: H,
+        f_std: I,
+        acceptable_error: f64,
+    ) -> Result<()>
+    where
+        F: Fn(i32, i32) -> i32,
+        G: Fn(i32) -> i32,
+        H: Fn(&[i32]) -> Vec<i32>,
+        I: Fn(f64) -> f64,
+    {
+        use std::i32::{MAX, MIN};
+
+        // 17th mersenne prime
+        const STEP: usize = 131071;
+
+        let right = calc_default_right::<i32>();
+        let right_as_usize = right as usize;
+        let full = calc_full(right);
+
+        assert_eq!(full % right, 0);
+        assert_eq!(MIN % full, 0);
+        assert_eq!(MAX % full, full - 1);
+
+        let data = to_period(&read_data(data_path)?);
+
+        assert_eq!(data.len(), full as usize);
+
+        let x = (-full - 1..=full + 1)
+            .chain(MAX - full..=MAX)
+            .chain(MIN..=MIN + full + 1)
+            .chain((MIN..=MAX).step_by(right_as_usize))
+            .chain((MIN..=MAX).skip(1).step_by(right_as_usize))
+            .chain((MIN..=MAX).skip(right_as_usize - 1).step_by(right_as_usize))
+            .chain((MIN..=MAX).step_by(STEP))
+            .chain((MIN..=MAX).rev().step_by(STEP));
+
+        let frac_pi_straight = FRAC_PI_2 / right as f64;
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+
+        for x in x {
+            let expected = data[repeat(x, full) as usize];
+
+            // The value can be greater than 1 or less than -1
+            //assert!(expected.abs() <= one, "expected: {expected}, one: {one}");
+
+            assert_eq!(expected, f(x, right));
+            assert_eq!(expected, f_default(x));
+
+            let actual = f_std(x as f64 * frac_pi_straight);
+
+            if (x % right) != 0 || expected != 0 {
+                assert_eq!(expected.is_negative(), actual.is_sign_negative());
+                assert_eq!(expected.is_positive(), actual.is_sign_positive());
+            }
+
+            let expected = expected as f64 / one as f64;
+
+            assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
+
+            let diff = actual - expected;
+
+            min = min.min(diff);
+            max = max.max(diff);
+        }
+
+        println!("min: {min}, max: {max}");
+
+        Ok(())
+    }
+
     fn test_partial<F, G>(f: F, data_path: &str, to_period: G) -> Result<()>
     where
         F: Fn(i32) -> i32,
