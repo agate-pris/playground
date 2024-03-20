@@ -458,15 +458,12 @@ mod tests {
     fn test_calc_quadrant() {
         const RIGHT: i32 = 25;
         for i in -9..=9 {
-            let offset = 4 * i * RIGHT;
+            let x = 4 * i * RIGHT;
             for expected in 0_i8..4 {
-                #[rustfmt::skip]
-                let x = [
-                    offset + RIGHT * (expected as i32    ),
-                    offset + RIGHT * (expected as i32    ) + 1,
-                    offset + RIGHT * (expected as i32 + 1) - 1,
-                ];
-                assert!(x.iter().all(|&x| calc_quadrant(x, RIGHT) == expected));
+                let x = x + (expected as i32) * RIGHT;
+                for offset in [0, 1, RIGHT - 1] {
+                    assert_eq!(expected, calc_quadrant(offset + x, RIGHT));
+                }
             }
         }
     }
