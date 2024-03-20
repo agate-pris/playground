@@ -576,10 +576,13 @@ mod tests {
         let full = calc_full(right);
 
         (-full - 1..=full + 1)
-            .chain((MIN..=MAX).step_by(STEP))
-            .chain((MIN..=MAX).rev().step_by(STEP))
             .chain(MAX - full..=MAX)
             .chain(MIN..=MIN + full + 1)
+            .chain((MIN..=MAX).step_by(right as usize))
+            .chain((MIN..=MAX).step_by(right as usize).map(|x| x + 1))
+            .chain((MIN..=MAX).rev().step_by(right as usize))
+            .chain((MIN..=MAX).step_by(STEP))
+            .chain((MIN..=MAX).rev().step_by(STEP))
             .for_each(|x| {
                 assert_eq!(sin_p1_default(x), sin_p1(x, right));
                 assert_eq!(sin_p2_default(x), sin_p2(x, right));
