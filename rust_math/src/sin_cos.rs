@@ -546,12 +546,14 @@ mod tests {
         let right = calc_default_right::<i32>();
         let right_as_usize = right as usize;
         let full = calc_full(right);
+        let data = read_data(data_path)?;
 
+        assert_eq!(data.len(), right_as_usize + 1);
         assert_eq!(full % right, 0);
         assert_eq!(MIN % full, 0);
         assert_eq!(MAX % full, full - 1);
 
-        let data = to_period(&read_data(data_path)?);
+        let data = to_period(&data);
 
         assert_eq!(data.len(), full as usize);
 
