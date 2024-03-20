@@ -170,7 +170,7 @@ where
 }
 
 /// x
-pub fn sin_p1<T>(x: T, right: T) -> T
+fn sin_p1<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
