@@ -270,14 +270,6 @@ where
     cos_p4(even_sin_impl(x, right), right)
 }
 
-pub fn cos_p1<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p1(odd_cos_impl(x, right), right)
-}
-
 pub fn cos_p3<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
@@ -547,25 +539,6 @@ mod tests {
             #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT - 1, RIGHT));
             #[rustfmt::skip] assert_eq!(-RIGHT,     sin_p1((4 * i + 3) * RIGHT,     RIGHT));
             #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT + 1, RIGHT));
-        }
-    }
-
-    #[test]
-    fn test_cos_p1() {
-        const RIGHT: i32 = 25;
-        for i in -9..=9 {
-            #[rustfmt::skip] assert_eq!( RIGHT - 1, cos_p1((4 * i    ) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!( RIGHT,     cos_p1((4 * i    ) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!( RIGHT - 1, cos_p1((4 * i    ) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         1, cos_p1((4 * i + 1) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         0, cos_p1((4 * i + 1) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(        -1, cos_p1((4 * i + 1) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT + 1, cos_p1((4 * i + 2) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT,     cos_p1((4 * i + 2) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT + 1, cos_p1((4 * i + 2) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(        -1, cos_p1((4 * i + 3) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         0, cos_p1((4 * i + 3) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(         1, cos_p1((4 * i + 3) * RIGHT + 1, RIGHT));
         }
     }
 
