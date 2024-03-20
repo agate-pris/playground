@@ -55,6 +55,7 @@ mod tests {
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
         atan_p3::{atan2_p3_default, atan_p3_default},
+        atan_p5::atan2_p5_default,
         tests::read_data,
     };
 
@@ -231,6 +232,7 @@ mod tests {
 
     #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_default); }
     #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_default); }
 
     fn test_atan2_periodicity<F>(f: F, data_path: &str, acceptable_error: f64)
     where
