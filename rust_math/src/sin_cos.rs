@@ -479,48 +479,50 @@ mod tests {
 
     #[test]
     fn test_sin() {
-        fn test<F>(f: F, one: i32)
+        fn test<F>(f: F, right: i32, one: i32)
         where
             F: Fn(i32) -> i32,
         {
-            let right = calc_default_right::<i32>();
             #[rustfmt::skip] assert_eq!(f(         0),    0);
             #[rustfmt::skip] assert_eq!(f( 2 * right),    0);
             #[rustfmt::skip] assert_eq!(f(-2 * right),    0);
             #[rustfmt::skip] assert_eq!(f(     right),  one);
             #[rustfmt::skip] assert_eq!(f(    -right), -one);
         }
+
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
-        test(sin_p2_default, one);
-        test(sin_p3_default, one);
-        test(sin_p4_default, one);
-        test(sin_p5_default, one);
-        test(sin_p4o_default, one);
-        test(sin_p5o_default, one);
+
+        #[rustfmt::skip] test(sin_p2_default,  right, one);
+        #[rustfmt::skip] test(sin_p3_default,  right, one);
+        #[rustfmt::skip] test(sin_p4_default,  right, one);
+        #[rustfmt::skip] test(sin_p5_default,  right, one);
+        #[rustfmt::skip] test(sin_p4o_default, right, one);
+        #[rustfmt::skip] test(sin_p5o_default, right, one);
     }
 
     #[test]
     fn test_cos() {
-        fn test<F>(f: F, one: i32)
+        fn test<F>(f: F, right: i32, one: i32)
         where
             F: Fn(i32) -> i32,
         {
-            let right = calc_default_right::<i32>();
             #[rustfmt::skip] assert_eq!(f(         0),  one);
             #[rustfmt::skip] assert_eq!(f(     right),    0);
             #[rustfmt::skip] assert_eq!(f(    -right),    0);
             #[rustfmt::skip] assert_eq!(f( 2 * right), -one);
             #[rustfmt::skip] assert_eq!(f(-2 * right), -one);
         }
+
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
-        test(cos_p2_default, one);
-        test(cos_p3_default, one);
-        test(cos_p4_default, one);
-        test(cos_p5_default, one);
-        test(cos_p4o_default, one);
-        test(cos_p5o_default, one);
+
+        #[rustfmt::skip] test(cos_p2_default,  right, one);
+        #[rustfmt::skip] test(cos_p3_default,  right, one);
+        #[rustfmt::skip] test(cos_p4_default,  right, one);
+        #[rustfmt::skip] test(cos_p5_default,  right, one);
+        #[rustfmt::skip] test(cos_p4o_default, right, one);
+        #[rustfmt::skip] test(cos_p5o_default, right, one);
     }
 
     #[test]
