@@ -123,27 +123,18 @@ where
 }
 
 /// a - b * z ^ 2
-fn sin_p3_cos_p4_impl<T>(a: T, b: T, z_2: T, right: T) -> T
-where
-    T: PrimInt,
-{
+fn sin_p3_cos_p4_impl<T: PrimInt>(a: T, b: T, z_2: T, right: T) -> T {
     a - z_2 * b / right
 }
 
 /// (a - b * z ^ 2) * z ^ 2
-fn cos_p4_sin_p5_impl<T>(a: T, b: T, z: T, right: T) -> T
-where
-    T: PrimInt,
-{
+fn cos_p4_sin_p5_impl<T: PrimInt>(a: T, b: T, z: T, right: T) -> T {
     let z_2 = square(z, right);
     sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
 /// (k + 1 - k * z ^ 2) * z ^ 2
-fn cos_p4_impl<T>(k: T, z: T, right: T) -> T
-where
-    T: PrimInt,
-{
+fn cos_p4_impl<T: PrimInt>(k: T, z: T, right: T) -> T {
     cos_p4_sin_p5_impl(k + right, k, z, right)
 }
 
@@ -479,10 +470,7 @@ mod tests {
 
     #[test]
     fn test_sin() {
-        fn test<F>(f: F, right: i32, one: i32)
-        where
-            F: Fn(i32) -> i32,
-        {
+        fn test(f: impl Fn(i32) -> i32, right: i32, one: i32) {
             #[rustfmt::skip] assert_eq!(f(         0),    0);
             #[rustfmt::skip] assert_eq!(f( 2 * right),    0);
             #[rustfmt::skip] assert_eq!(f(-2 * right),    0);
@@ -503,10 +491,7 @@ mod tests {
 
     #[test]
     fn test_cos() {
-        fn test<F>(f: F, right: i32, one: i32)
-        where
-            F: Fn(i32) -> i32,
-        {
+        fn test(f: impl Fn(i32) -> i32, right: i32, one: i32) {
             #[rustfmt::skip] assert_eq!(f(         0),  one);
             #[rustfmt::skip] assert_eq!(f(     right),    0);
             #[rustfmt::skip] assert_eq!(f(    -right),    0);
@@ -544,21 +529,15 @@ mod tests {
         }
     }
 
-    fn test_sin_cos<F, G, H, I>(
+    fn test_sin_cos(
         data_path: &str,
-        f: F,
-        f_default: G,
+        f: impl Fn(i32, i32) -> i32,
+        f_default: impl Fn(i32) -> i32,
         one: i32,
-        to_period: H,
-        f_std: I,
+        to_period: impl Fn(&[i32]) -> Vec<i32>,
+        f_std: impl Fn(f64) -> f64,
         acceptable_error: f64,
-    ) -> Result<()>
-    where
-        F: Fn(i32, i32) -> i32,
-        G: Fn(i32) -> i32,
-        H: Fn(&[i32]) -> Vec<i32>,
-        I: Fn(f64) -> f64,
-    {
+    ) -> Result<()> {
         use std::i32::{MAX, MIN};
 
         // 17th mersenne prime
