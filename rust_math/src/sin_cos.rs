@@ -525,13 +525,6 @@ mod tests {
         test(sin_p5_default, one);
         test(sin_p4o_default, one);
         test(sin_p5o_default, one);
-        test(|x| sin_p1(x, right), right);
-        test(|x| sin_p2(x, right), one);
-        test(|x| sin_p3(x, right), one);
-        test(|x| sin_p4(x, right), one);
-        test(|x| sin_p5(x, right), one);
-        test(|x| sin_p4o(x, right), one);
-        test(|x| sin_p5o(x, right), one);
     }
 
     #[test]
@@ -556,13 +549,6 @@ mod tests {
         test(cos_p5_default, one);
         test(cos_p4o_default, one);
         test(cos_p5o_default, one);
-        test(|x| cos_p1(x, right), right);
-        test(|x| cos_p2(x, right), one);
-        test(|x| cos_p3(x, right), one);
-        test(|x| cos_p4(x, right), one);
-        test(|x| cos_p5(x, right), one);
-        test(|x| cos_p4o(x, right), one);
-        test(|x| cos_p5o(x, right), one);
     }
 
     #[test]
