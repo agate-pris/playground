@@ -52,6 +52,8 @@ where
 mod tests {
     use std::f64::consts::PI;
 
+    use approx::assert_abs_diff_eq;
+
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
         atan_p3::{atan2_p3_default, atan_p3_default},
@@ -99,7 +101,7 @@ mod tests {
             assert_eq!(f(inv_i), RIGHT - expected);
             assert_eq!(f(-inv_i), expected - RIGHT);
 
-            approx::assert_abs_diff_eq!(
+            assert_abs_diff_eq!(
                 fi as f64 * PI / K.pow(2) as f64,
                 (i as f64 / K as f64).atan(),
                 epsilon = acceptable_error
@@ -182,11 +184,7 @@ mod tests {
             .iter()
             .zip(expected.iter())
             .for_each(|(&actual, &expected)| {
-                approx::assert_abs_diff_eq!(
-                    actual as f64 * TO_RAD,
-                    expected,
-                    epsilon = acceptable_error
-                )
+                assert_abs_diff_eq!(actual as f64 * TO_RAD, expected, epsilon = acceptable_error)
             });
     }
 
@@ -247,7 +245,7 @@ mod tests {
         for v in 1..=K {
             let expected = expected[v as usize];
 
-            approx::assert_abs_diff_eq!(
+            assert_abs_diff_eq!(
                 expected as f64 * PI / K.pow(2) as f64,
                 (v as f64).atan2(K as f64),
                 epsilon = acceptable_error
@@ -262,7 +260,7 @@ mod tests {
             if y != MIN && x != MIN {
                 test_atan2_symmetry(&f, y.abs(), x.abs(), acceptable_error);
             } else {
-                approx::assert_abs_diff_eq!(
+                assert_abs_diff_eq!(
                     actual as f64 * PI / K.pow(2) as f64,
                     (y as f64).atan2(x as f64),
                     epsilon = acceptable_error
