@@ -402,7 +402,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
     use approx::assert_abs_diff_eq;
 
     use crate::tests::read_data;
@@ -537,7 +536,7 @@ mod tests {
         to_period: impl Fn(&[i32]) -> Vec<i32>,
         f_std: impl Fn(f64) -> f64,
         acceptable_error: f64,
-    ) -> Result<()> {
+    ) {
         use std::i32::{MAX, MIN};
 
         // 5th mersenne prime
@@ -546,7 +545,7 @@ mod tests {
         let right = calc_default_right::<i32>();
         let right_as_usize = right as usize;
         let full = calc_full(right);
-        let data = read_data(data_path)?;
+        let data = read_data(data_path).unwrap();
 
         assert_eq!(data.len(), right_as_usize + 1);
         assert_eq!(full % right, 0);
@@ -597,8 +596,6 @@ mod tests {
         }
 
         println!("min: {min}, max: {max}");
-
-        Ok(())
     }
 
     fn to_sin_period_odd(data: &[i32]) -> Vec<i32> {
@@ -631,16 +628,16 @@ mod tests {
         iter.clone().chain(iter.map(f)).collect()
     }
 
-    #[rustfmt::skip] #[test] fn test_sin_p2()  { assert!(test_sin_cos("data/cos_p2.json",  sin_p2,  sin_p2_default,  calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.056010).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_sin_p3()  { assert!(test_sin_cos("data/sin_p3.json",  sin_p3,  sin_p3_default,  calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.020017).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_sin_p4()  { assert!(test_sin_cos("data/cos_p4.json",  sin_p4,  sin_p4_default,  calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.002819).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_sin_p5()  { assert!(test_sin_cos("data/sin_p5.json",  sin_p5,  sin_p5_default,  calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.000425).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_sin_p4o() { assert!(test_sin_cos("data/cos_p4o.json", sin_p4o, sin_p4o_default, calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.001174).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_sin_p5o() { assert!(test_sin_cos("data/sin_p5o.json", sin_p5o, sin_p5o_default, calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.000226).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p2()  { assert!(test_sin_cos("data/cos_p2.json",  cos_p2,  cos_p2_default,  calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.056010).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p3()  { assert!(test_sin_cos("data/sin_p3.json",  cos_p3,  cos_p3_default,  calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.020017).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p4()  { assert!(test_sin_cos("data/cos_p4.json",  cos_p4,  cos_p4_default,  calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.002819).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p5()  { assert!(test_sin_cos("data/sin_p5.json",  cos_p5,  cos_p5_default,  calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.000425).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p4o() { assert!(test_sin_cos("data/cos_p4o.json", cos_p4o, cos_p4o_default, calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.001174).is_ok()); }
-    #[rustfmt::skip] #[test] fn test_cos_p5o() { assert!(test_sin_cos("data/sin_p5o.json", cos_p5o, cos_p5o_default, calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.000226).is_ok()); }
+    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos("data/cos_p2.json",  sin_p2,  sin_p2_default,  calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos("data/sin_p3.json",  sin_p3,  sin_p3_default,  calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos("data/cos_p4.json",  sin_p4,  sin_p4_default,  calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos("data/sin_p5.json",  sin_p5,  sin_p5_default,  calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos("data/cos_p4o.json", sin_p4o, sin_p4o_default, calc_default_right::<i32>().pow(2), to_sin_period_even, f64::sin, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos("data/sin_p5o.json", sin_p5o, sin_p5o_default, calc_default_right::<i32>().pow(2), to_sin_period_odd,  f64::sin, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos("data/cos_p2.json",  cos_p2,  cos_p2_default,  calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos("data/sin_p3.json",  cos_p3,  cos_p3_default,  calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos("data/cos_p4.json",  cos_p4,  cos_p4_default,  calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos("data/sin_p5.json",  cos_p5,  cos_p5_default,  calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos("data/cos_p4o.json", cos_p4o, cos_p4o_default, calc_default_right::<i32>().pow(2), to_cos_period_even, f64::cos, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos("data/sin_p5o.json", cos_p5o, cos_p5o_default, calc_default_right::<i32>().pow(2), to_cos_period_odd,  f64::cos, 0.000226); }
 }
