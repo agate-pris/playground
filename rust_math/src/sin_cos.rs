@@ -20,6 +20,12 @@ fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
     }
 }
 
+/// ```rust
+/// use rust_math::sin_cos::*;
+/// assert_eq!(calc_default_right::<i8 >(),     8);
+/// assert_eq!(calc_default_right::<i16>(),   128);
+/// assert_eq!(calc_default_right::<i32>(), 32768);
+/// ```
 pub fn calc_default_right<T>() -> T
 where
     T: 'static + Copy + Bits + PrimInt,
@@ -430,13 +436,6 @@ mod tests {
                 }
             }
         }
-    }
-
-    #[test]
-    fn test_default_right() {
-        assert_eq!(calc_default_right::<i8>(), 8);
-        assert_eq!(calc_default_right::<i16>(), 128);
-        assert_eq!(calc_default_right::<i32>(), 32768);
     }
 
     #[test]
