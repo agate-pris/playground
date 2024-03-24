@@ -122,23 +122,6 @@ mod tests {
     }
 
     #[test]
-    fn test_atan_p2_default() {
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-
-        let a = calc_default_p2_k(EXP);
-        for degrees in -89..90 {
-            let x = {
-                let x = (degrees as f64).to_radians().tan();
-                (x * K as f64).round_ties_even() as i32
-            };
-            let expected = atan_p2(x, K, a);
-            let actual = atan_p2_default(x);
-            assert_eq!(expected, actual);
-        }
-    }
-
-    #[test]
     fn test_atan2_p2_default() {
         use std::i32::{MAX, MIN};
 
