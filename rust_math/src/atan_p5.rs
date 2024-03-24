@@ -36,14 +36,16 @@ where
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-/// let result = atan_p5(1732 * K / 1000, K, a, b, c);
-/// approx::relative_eq!(
+/// let result = atan_p5(1000 * K / 1732, K, a, b, c);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.00085,
 /// );
 /// ```
 pub fn atan_p5(x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
@@ -52,13 +54,15 @@ pub fn atan_p5(x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p5_default(1732 * K / 1000);
-/// approx::relative_eq!(
+/// let result = atan_p5_default(1000 * K / 1732);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.00085,
 /// );
 /// ```
 pub fn atan_p5_default(x: i32) -> i32 {
@@ -70,14 +74,16 @@ pub fn atan_p5_default(x: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-/// let result = atan2_p5(1732, 1000, K, a, b, c);
-/// approx::relative_eq!(
+/// let result = atan2_p5(1000, 1732, K, a, b, c);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.00085,
 /// );
 /// ```
 pub fn atan2_p5(y: i32, x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
@@ -86,12 +92,14 @@ pub fn atan2_p5(y: i32, x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = atan2_p5_default(1732, 1000);
-/// approx::relative_eq!(
+/// let result = atan2_p5_default(1000, 1732);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64
+///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64,
+///     epsilon = 0.00085,
 /// );
 /// ```
 pub fn atan2_p5_default(y: i32, x: i32) -> i32 {

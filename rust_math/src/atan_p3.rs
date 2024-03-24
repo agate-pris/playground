@@ -32,14 +32,16 @@ where
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b) = calc_default_p3_k::<i32>(EXP);
-/// let result = atan_p3(1732 * K / 1000, K, a, b);
-/// approx::relative_eq!(
+/// let result = atan_p3(1000 * K / 1732, K, a, b);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.0016,
 /// );
 /// ```
 pub fn atan_p3(x: i32, k: i32, a: i32, b: i32) -> i32 {
@@ -48,13 +50,15 @@ pub fn atan_p3(x: i32, k: i32, a: i32, b: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p3_default(1732 * K / 1000);
-/// approx::relative_eq!(
+/// let result = atan_p3_default(1000 * K / 1732);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.0016,
 /// );
 /// ```
 pub fn atan_p3_default(x: i32) -> i32 {
@@ -66,14 +70,16 @@ pub fn atan_p3_default(x: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b) = calc_default_p3_k::<i32>(EXP);
-/// let result = atan2_p3(1732, 1000, K, a, b);
-/// approx::relative_eq!(
+/// let result = atan2_p3(1000, 1732, K, a, b);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64
+///     result as f64 * PI / K.pow(2) as f64,
+///     epsilon = 0.0016,
 /// );
 /// ```
 pub fn atan2_p3(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
@@ -82,12 +88,14 @@ pub fn atan2_p3(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
 
 /// ```rust
 /// use std::f64::consts::PI;
+/// use approx::assert_abs_diff_eq;
 /// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = atan2_p3_default(1732, 1000);
-/// approx::relative_eq!(
+/// let result = atan2_p3_default(1000, 1732);
+/// assert_abs_diff_eq!(
 ///     PI / 6.0,
-///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64
+///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64,
+///     epsilon = 0.0016,
 /// );
 /// ```
 pub fn atan2_p3_default(y: i32, x: i32) -> i32 {
