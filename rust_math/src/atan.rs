@@ -151,15 +151,12 @@ mod tests {
             #[rustfmt::skip] assert_eq!(-2 * HALF_RIGHT + actuals[0], actuals[5]);
             #[rustfmt::skip] assert_eq!(-2 * HALF_RIGHT - actuals[0], actuals[7]);
 
-            if actuals[0] == 0 && y_abs == 0 {
-                assert_eq!(
-                    4 * HALF_RIGHT + actuals[0],
-                    actuals[6],
-                    "y_abs: {y_abs}, x_abs: {x_abs}"
-                );
+            if y_abs == 0 {
+                assert_eq!(actuals[0], 0, "x_abs: {x_abs}");
+                assert_eq!(actuals[6], 4 * HALF_RIGHT, "x_abs: {x_abs}");
             } else {
                 assert_eq!(
-                    -4 * HALF_RIGHT + actuals[0],
+                    actuals[0] - 4 * HALF_RIGHT,
                     actuals[6],
                     "y_abs: {y_abs}, x_abs: {x_abs}"
                 );
