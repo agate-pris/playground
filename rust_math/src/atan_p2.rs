@@ -80,7 +80,7 @@ where
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
-    let exp: u32 = T::BITS / 2 - 1;
+    let exp = T::BITS / 2 - 1;
     let k = 2.as_().pow(exp);
     let a = calc_default_p2_k(exp);
     atan_p2(x, k, a)
