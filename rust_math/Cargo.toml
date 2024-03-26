@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 num-traits = "0.2"
+primitive_promotion = "0.1"
 
 [dev-dependencies]
 anyhow = "1"

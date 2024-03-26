@@ -154,6 +154,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "primitive_promotion"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "427e9b700a2bc50534879b34b38ac7eac5418bf3de6cb991bbbfbec9cd4e196f"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -180,6 +186,7 @@ dependencies = [
  "clap",
  "itertools",
  "num-traits",
+ "primitive_promotion",
  "serde",
  "serde_json",
 ]
