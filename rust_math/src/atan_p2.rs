@@ -1,6 +1,7 @@
 use std::f64::consts::PI;
 
-use num_traits::{AsPrimitive, PrimInt};
+use num_traits::{AsPrimitive, NumOps, Signed};
+use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
 
@@ -21,7 +22,7 @@ where
 
 fn atan_p2_impl<T>(x: T, x_abs: T, k: T, a: T) -> T
 where
-    T: 'static + Copy + PrimInt,
+    T: 'static + Copy + NumOps,
     i8: AsPrimitive<T>,
 {
     x * (k / 4.as_() + a * (k - x_abs) / k)
@@ -41,7 +42,14 @@ where
 ///     epsilon = 0.0039,
 /// );
 /// ```
-pub fn atan_p2(x: i32, k: i32, a: i32) -> i32 {
+pub fn atan_p2<T>(x: T, k: T, a: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan_impl(x, k, |x, x_abs| atan_p2_impl(x, x_abs, k, a))
 }
 
