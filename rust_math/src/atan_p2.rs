@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use num_traits::{AsPrimitive, NumOps, PrimInt, Signed};
+use num_traits::{AsPrimitive, ConstZero, NumOps, PrimInt, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
 use crate::{
@@ -100,7 +100,15 @@ where
 ///     epsilon = 0.0039,
 /// );
 /// ```
-pub fn atan2_p2(y: i32, x: i32, k: i32, a: i32) -> i32 {
+pub fn atan2_p2<T>(y: T, x: T, k: T, a: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + ConstZero
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan2_impl(y, x, k, |x| atan_p2_impl(x, x, k, a))
 }
 
