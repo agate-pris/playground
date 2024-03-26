@@ -124,11 +124,22 @@ where
 ///     epsilon = 0.0039,
 /// );
 /// ```
-pub fn atan2_p2_default(y: i32, x: i32) -> i32 {
-    const EXP: u32 = i32::BITS / 2 - 1;
-    const K: i32 = 2_i32.pow(EXP);
-    let a = calc_default_p2_k(EXP);
-    atan2_p2(y, x, K, a)
+pub fn atan2_p2_default<T>(y: T, x: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + Bits
+        + ConstZero
+        + PrimInt
+        + PrimitivePromotionExt
+        + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    let exp = T::BITS / 2 - 1;
+    let k = 2.as_().pow(exp);
+    let a = calc_default_p2_k(exp);
+    atan2_p2(y, x, k, a)
 }
 
 #[cfg(test)]
