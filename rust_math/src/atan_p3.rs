@@ -1,8 +1,12 @@
 use std::f64::consts::PI;
 
-use num_traits::{AsPrimitive, PrimInt};
+use num_traits::{AsPrimitive, ConstZero, NumOps, PrimInt, Signed};
+use primitive_promotion::PrimitivePromotionExt;
 
-use crate::atan::{atan2_impl, atan_impl};
+use crate::{
+    atan::{atan2_impl, atan_impl},
+    bits::Bits,
+};
 
 /// ```rust
 /// use rust_math::atan_p3::*;
@@ -24,7 +28,7 @@ where
 
 fn atan_p3_impl<T>(x: T, x_abs: T, k: T, a: T, b: T) -> T
 where
-    T: 'static + Copy + PrimInt,
+    T: 'static + Copy + NumOps,
     i8: AsPrimitive<T>,
 {
     x * (k / 4.as_() - (x_abs - k) * (a + x_abs * b / k) / k)
@@ -44,7 +48,14 @@ where
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan_p3(x: i32, k: i32, a: i32, b: i32) -> i32 {
+pub fn atan_p3<T>(x: T, k: T, a: T, b: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan_impl(x, k, |x, x_abs| atan_p3_impl(x, x_abs, k, a, b))
 }
 
@@ -61,11 +72,21 @@ pub fn atan_p3(x: i32, k: i32, a: i32, b: i32) -> i32 {
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan_p3_default(x: i32) -> i32 {
-    const EXP: u32 = i32::BITS / 2 - 1;
-    const K: i32 = 2_i32.pow(EXP);
-    let (a, b) = calc_default_p3_k(EXP);
-    atan_p3(x, K, a, b)
+pub fn atan_p3_default<T>(x: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + Bits
+        + PrimInt
+        + PrimitivePromotionExt
+        + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    let exp = T::BITS / 2 - 1;
+    let k = 2.as_().pow(exp);
+    let (a, b) = calc_default_p3_k(exp);
+    atan_p3(x, k, a, b)
 }
 
 /// ```rust
@@ -82,7 +103,15 @@ pub fn atan_p3_default(x: i32) -> i32 {
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan2_p3(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
+pub fn atan2_p3<T>(y: T, x: T, k: T, a: T, b: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + ConstZero
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan2_impl(y, x, k, |x| atan_p3_impl(x, x, k, a, b))
 }
 
@@ -98,11 +127,22 @@ pub fn atan2_p3(y: i32, x: i32, k: i32, a: i32, b: i32) -> i32 {
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan2_p3_default(y: i32, x: i32) -> i32 {
-    const EXP: u32 = i32::BITS / 2 - 1;
-    const K: i32 = 2_i32.pow(EXP);
-    let (a, b) = calc_default_p3_k(EXP);
-    atan2_p3(y, x, K, a, b)
+pub fn atan2_p3_default<T>(y: T, x: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + Bits
+        + ConstZero
+        + PrimInt
+        + PrimitivePromotionExt
+        + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    let exp = T::BITS / 2 - 1;
+    let k = 2.as_().pow(exp);
+    let (a, b) = calc_default_p3_k(exp);
+    atan2_p3(y, x, k, a, b)
 }
 
 #[cfg(test)]
