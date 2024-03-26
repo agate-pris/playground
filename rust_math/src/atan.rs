@@ -51,11 +51,14 @@ where
 #[cfg(test)]
 mod tests {
     use std::{
-        f64::consts::PI,
-        f64::{INFINITY, NEG_INFINITY},
+        cmp::Ordering,
+        f64::{
+            consts::{FRAC_PI_2, PI},
+            INFINITY, NEG_INFINITY,
+        },
     };
 
-    use approx::assert_abs_diff_eq;
+    use approx::{abs_diff_eq, assert_abs_diff_eq};
 
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
@@ -178,50 +181,170 @@ mod tests {
             });
     }
 
-    fn test_atan2<F>(f: F)
+    fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
         F: Fn(i32, i32) -> i32,
     {
         use std::i32::{MAX, MIN};
 
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-        const HALF_RIGHT: i32 = K.pow(2) / 4;
+        const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+        const RIGHT: i32 = K.pow(2) / 2;
+        const HALF_RIGHT: i32 = RIGHT / 2;
 
-        const ACCEPTABLE_ERROR: f64 = 0.000001;
+        // Find the largest error for each of the eight regions
+        // that are divided by the straight lines y = x, y = -x, y = 0, x = 0.
 
-        test_atan2_symmetry(&f, 0, 0, ACCEPTABLE_ERROR);
-        test_atan2_symmetry(&f, 0, 1, ACCEPTABLE_ERROR);
-        test_atan2_symmetry(&f, 0, MAX, ACCEPTABLE_ERROR);
-        test_atan2_symmetry(&f, 1, 1, ACCEPTABLE_ERROR);
-        test_atan2_symmetry(&f, 1, MAX, ACCEPTABLE_ERROR);
-        test_atan2_symmetry(&f, MAX, MAX, ACCEPTABLE_ERROR);
+        let mut max_error = NEG_INFINITY;
 
-        assert_eq!(0, f(0, 1));
-        assert_eq!(0, f(0, MAX));
-        assert_eq!(HALF_RIGHT, f(1, 1));
-        assert_eq!(HALF_RIGHT, f(MAX, MAX));
-        assert_eq!(HALF_RIGHT * 4, f(0, MIN));
-        assert_eq!(HALF_RIGHT * -2, f(MIN, 0));
-        assert_eq!(HALF_RIGHT * -3, f(MIN, MIN));
-
-        let div_check = |a: i32, b: i32, c: i32, d: i32| {
-            assert_eq!(f(a, b), f(c, d));
-            test_atan2_symmetry(&f, a, b, 0.01);
-            test_atan2_symmetry(&f, c, d, 0.01);
+        // Calculate the expected and actual value and store value.
+        let mut calc = |p: &[i32; 2]| {
+            let expected = (p[1] as f64).atan2(p[0] as f64);
+            let actual = f(p[1], p[0]);
+            {
+                let actual = actual as f64 * FRAC_PI_2 / RIGHT as f64;
+                let cond = abs_diff_eq!(expected, actual, epsilon = acceptable_error);
+                assert!(cond, "p: {p:?}, expected: {expected}, actual: {actual}");
+                max_error = max_error.max((actual - expected).abs());
+            }
+            (expected, actual)
         };
 
-        #[rustfmt::skip] div_check( 9997, 32768,  3051, 10000); //  9997.51
-        #[rustfmt::skip] div_check(10000, 32768,  3052, 10000); // 10000.79
-        #[rustfmt::skip] div_check(10004, 32768,  3053, 10000); // 10004.07
-        #[rustfmt::skip] div_check( 9999, 32768, 15258, 50000); //  9999.48
-        #[rustfmt::skip] div_check(10000, 32768, 15259, 50000); // 10000.13
-        #[rustfmt::skip] div_check(10000, 32768, 15260, 50000); // 10000.79
+        // On the straight lintes y = 0, x = 0.
+        {
+            let points = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
+
+            #[rustfmt::skip] assert_eq!(angles[0].1, 0        );
+            #[rustfmt::skip] assert_eq!(angles[1].1,     RIGHT);
+            #[rustfmt::skip] assert_eq!(angles[2].1, 2 * RIGHT);
+            #[rustfmt::skip] assert_eq!(angles[3].1,    -RIGHT);
+        }
+
+        // On the straight lines y = x, y = -x.
+        {
+            let points = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
+            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
+
+            #[rustfmt::skip] assert_eq!(angles[0].1,      HALF_RIGHT);
+            #[rustfmt::skip] assert_eq!(angles[1].1,  3 * HALF_RIGHT);
+            #[rustfmt::skip] assert_eq!(angles[2].1, -3 * HALF_RIGHT);
+            #[rustfmt::skip] assert_eq!(angles[3].1,     -HALF_RIGHT);
+        }
+
+        fn to_4_points(x: i32, y: i32) -> [[i32; 2]; 4] {
+            [[x, y], [y, x], [-y, x], [x, -y]]
+        }
+
+        fn to_8_points(x: i32, y: i32, z: i32, w: i32) -> [[i32; 2]; 8] {
+            let p = to_4_points(x, y);
+            let n = to_4_points(z, w);
+            [p[0], p[1], p[2], n[3], n[0], n[1], n[2], p[3]]
+        }
+
+        fn to_8_points_default(x: i32, y: i32) -> [[i32; 2]; 8] {
+            to_8_points(x, y, -x, -y)
+        }
+
+        let data = read_data::<i32>(data_path).unwrap();
+
+        assert_eq!(data.len(), (K + 1) as usize);
+        assert_eq!(data[0], 0);
+        assert_eq!(data[K as usize], HALF_RIGHT);
+
+        let assert_equality = |angles: &[(f64, i32)], i: usize| {
+            assert_eq!(angles.len(), 8);
+
+            #[rustfmt::skip] assert_eq!(angles[0].1,              data[i]);
+            #[rustfmt::skip] assert_eq!(angles[1].1,      RIGHT - data[i]);
+            #[rustfmt::skip] assert_eq!(angles[2].1,      RIGHT + data[i]);
+            #[rustfmt::skip] assert_eq!(angles[3].1,  2 * RIGHT - data[i]);
+            #[rustfmt::skip] assert_eq!(angles[4].1, -2 * RIGHT + data[i]);
+            #[rustfmt::skip] assert_eq!(angles[5].1,     -RIGHT - data[i]);
+            #[rustfmt::skip] assert_eq!(angles[6].1,     -RIGHT + data[i]);
+            #[rustfmt::skip] assert_eq!(angles[7].1,             -data[i]);
+        };
+
+        // (K, K - 1)
+        {
+            let points = to_8_points_default(K, K - 1);
+            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
+            assert_equality(&angles, K as usize - 1);
+        }
+
+        // (MAX, MAX - 1), (MIN, -MAX)
+        {
+            let points = to_8_points(MAX, MAX - 1, MIN, -MAX);
+            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
+
+            #[rustfmt::skip] assert_ne!(angles[0].1,      HALF_RIGHT);
+            #[rustfmt::skip] assert_ne!(angles[1].1,  3 * HALF_RIGHT);
+            #[rustfmt::skip] assert_ne!(angles[2].1, -3 * HALF_RIGHT);
+            #[rustfmt::skip] assert_ne!(angles[3].1,     -HALF_RIGHT);
+
+            assert_equality(&angles, K as usize - 1);
+        }
+
+        fn collect_most_steep_points(n: i32) -> Vec<[i32; 2]> {
+            fn compare_steep(a: &[i32; 2], b: &[i32; 2]) -> Ordering {
+                let aybx = a[1] as i64 * b[0] as i64;
+                let byax = b[1] as i64 * a[0] as i64;
+                aybx.cmp(&byax)
+            }
+
+            let count = n + 1;
+            let begin = {
+                let mut copy = count;
+                while copy % 2 == 0 && copy > 1 {
+                    copy /= 2;
+                }
+                count - copy
+            };
+
+            const OFFSET_X: i32 = MAX - K + 1;
+            let offset_y = OFFSET_X / K * count;
+
+            let positions = (begin..=n)
+                .map(|m| [OFFSET_X + K * m / count + 1, offset_y + m])
+                .collect::<Vec<_>>();
+
+            let max = positions.iter().cloned().max_by(compare_steep).unwrap();
+
+            positions
+                .into_iter()
+                .filter(|a| compare_steep(a, &max).is_eq())
+                .collect()
+        }
+
+        for n in 1..K - 1 {
+            // (K, n)
+            {
+                let angles = to_8_points_default(K, n)
+                    .iter()
+                    .map(&mut calc)
+                    .collect::<Vec<_>>();
+
+                assert_equality(&angles, n as usize);
+            }
+
+            // most steep points
+            {
+                let positions = collect_most_steep_points(n);
+
+                for position in positions.into_iter() {
+                    let positions = to_8_points_default(position[0], position[1]);
+                    let angles = positions.iter().map(&mut calc).collect::<Vec<_>>();
+
+                    assert_equality(&angles, n as usize);
+                }
+            }
+        }
+
+        println!("max error: {max_error}");
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_default); }
-    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default); }
-    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_default); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_default, "data/atan_p2.json", 0.003854); }
+    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default, "data/atan_p3.json", 0.001603); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_default, "data/atan_p5.json", 0.000928); }
 
     fn test_atan2_periodicity<F>(f: F, data_path: &str, acceptable_error: f64)
     where
