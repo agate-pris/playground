@@ -1,15 +1,23 @@
-pub(crate) fn atan_impl<F>(x: i32, k: i32, f: F) -> i32
+use num_traits::{AsPrimitive, Signed};
+use primitive_promotion::PrimitivePromotionExt;
+
+pub(crate) fn atan_impl<T, F>(x: T, k: T, f: F) -> T
 where
-    F: Fn(i32, i32) -> i32,
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + PrimitivePromotionExt
+        + Signed,
+    F: Fn(T, T) -> T,
+    i8: AsPrimitive<T>,
 {
-    let x_abs = (x as i64).abs();
-    if x_abs > k as i64 {
+    let x_abs = x.as_().abs();
+    if x_abs > k.as_() {
         let signum = x.signum();
         let k_2 = k * k;
-        let x = (k_2 as i64 / x_abs) as i32;
-        signum * (k_2 / 2 - f(x, x))
+        let x = (k_2.as_() / x_abs).as_();
+        signum * (k_2 / 2.as_() - f(x, x))
     } else {
-        f(x, x_abs as i32)
+        f(x, x_abs.as_())
     }
 }
 
