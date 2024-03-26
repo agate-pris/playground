@@ -1,8 +1,12 @@
 use std::f64::consts::PI;
 
-use num_traits::{AsPrimitive, PrimInt};
+use num_traits::{AsPrimitive, ConstZero, NumOps, PrimInt, Signed};
+use primitive_promotion::PrimitivePromotionExt;
 
-use crate::atan::{atan2_impl, atan_impl};
+use crate::{
+    atan::{atan2_impl, atan_impl},
+    bits::Bits,
+};
 
 /// ```rust
 /// use rust_math::atan_p5::*;
@@ -14,7 +18,7 @@ use crate::atan::{atan2_impl, atan_impl};
 /// ```
 pub fn calc_default_p5_k<T>(exp: u32) -> (T, T, T)
 where
-    T: 'static + Copy + PrimInt,
+    T: 'static + Copy + NumOps,
     f64: AsPrimitive<T>,
     i8: AsPrimitive<T>,
 {
@@ -28,7 +32,7 @@ where
 
 fn atan_p5_impl<T>(x: T, k: T, a: T, b: T, c: T) -> T
 where
-    T: 'static + Copy + PrimInt,
+    T: 'static + Copy + NumOps,
 {
     let x_2 = x * x / k;
     ((a * x_2 / k - b) * x_2 / k + c) * x
@@ -48,7 +52,14 @@ where
 ///     epsilon = 0.00085,
 /// );
 /// ```
-pub fn atan_p5(x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
+pub fn atan_p5<T>(x: T, k: T, a: T, b: T, c: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan_impl(x, k, |x, _| atan_p5_impl(x, k, a, b, c))
 }
 
@@ -65,11 +76,21 @@ pub fn atan_p5(x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
 ///     epsilon = 0.00085,
 /// );
 /// ```
-pub fn atan_p5_default(x: i32) -> i32 {
-    const EXP: u32 = i32::BITS / 2 - 1;
-    const K: i32 = 2_i32.pow(EXP);
-    let (a, b, c) = calc_default_p5_k(EXP);
-    atan_p5(x, K, a, b, c)
+pub fn atan_p5_default<T>(x: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + Bits
+        + PrimInt
+        + PrimitivePromotionExt
+        + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    let exp = T::BITS / 2 - 1;
+    let k = 2.as_().pow(exp);
+    let (a, b, c) = calc_default_p5_k(exp);
+    atan_p5(x, k, a, b, c)
 }
 
 /// ```rust
@@ -86,7 +107,15 @@ pub fn atan_p5_default(x: i32) -> i32 {
 ///     epsilon = 0.00085,
 /// );
 /// ```
-pub fn atan2_p5(y: i32, x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
+pub fn atan2_p5<T>(y: T, x: T, k: T, a: T, b: T, c: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + ConstZero
+        + PrimitivePromotionExt
+        + Signed,
+    i8: AsPrimitive<T>,
+{
     atan2_impl(y, x, k, |x| atan_p5_impl(x, k, a, b, c))
 }
 
@@ -102,11 +131,22 @@ pub fn atan2_p5(y: i32, x: i32, k: i32, a: i32, b: i32, c: i32) -> i32 {
 ///     epsilon = 0.00085,
 /// );
 /// ```
-pub fn atan2_p5_default(y: i32, x: i32) -> i32 {
-    const EXP: u32 = i32::BITS / 2 - 1;
-    const K: i32 = 2_i32.pow(EXP);
-    let (a, b, c) = calc_default_p5_k(EXP);
-    atan2_p5(y, x, K, a, b, c)
+pub fn atan2_p5_default<T>(y: T, x: T) -> T
+where
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + Bits
+        + ConstZero
+        + PrimInt
+        + PrimitivePromotionExt
+        + Signed,
+    f64: AsPrimitive<T>,
+    i8: AsPrimitive<T>,
+{
+    let exp = T::BITS / 2 - 1;
+    let k = 2.as_().pow(exp);
+    let (a, b, c) = calc_default_p5_k(exp);
+    atan2_p5(y, x, k, a, b, c)
 }
 
 #[cfg(test)]
