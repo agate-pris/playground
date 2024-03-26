@@ -124,63 +124,6 @@ mod tests {
     #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_default, "data/atan_p3.json", 0.001601); }
     #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(atan_p5_default, "data/atan_p5.json", 0.000922); }
 
-    fn test_atan2_symmetry<F>(f: F, y_abs: i32, x_abs: i32, acceptable_error: f64)
-    where
-        F: Fn(i32, i32) -> i32,
-    {
-        #[rustfmt::skip]
-        let args = [
-           [ y_abs,  x_abs],
-           [ x_abs,  y_abs],
-           [ y_abs, -x_abs],
-           [ x_abs, -y_abs],
-           [-y_abs,  x_abs],
-           [-x_abs,  y_abs],
-           [-y_abs, -x_abs],
-           [-x_abs, -y_abs],
-        ];
-
-        const HALF_RIGHT: i32 = 2_i32.pow(i32::BITS / 2 - 1).pow(2) / 4;
-
-        let actuals = args.iter().map(|&[y, x]| f(y, x)).collect::<Vec<_>>();
-
-        if y_abs == 0 && x_abs == 0 {
-            assert!(actuals.iter().all(|&actual| actual == 0));
-        } else {
-            #[rustfmt::skip] assert_eq!( 2 * HALF_RIGHT - actuals[0], actuals[1]);
-            #[rustfmt::skip] assert_eq!( 4 * HALF_RIGHT - actuals[0], actuals[2]);
-            #[rustfmt::skip] assert_eq!( 2 * HALF_RIGHT + actuals[0], actuals[3]);
-            #[rustfmt::skip] assert_eq!(                 -actuals[0], actuals[4]);
-            #[rustfmt::skip] assert_eq!(-2 * HALF_RIGHT + actuals[0], actuals[5]);
-            #[rustfmt::skip] assert_eq!(-2 * HALF_RIGHT - actuals[0], actuals[7]);
-
-            if y_abs == 0 {
-                assert_eq!(actuals[0], 0, "x_abs: {x_abs}");
-                assert_eq!(actuals[6], 4 * HALF_RIGHT, "x_abs: {x_abs}");
-            } else {
-                assert_eq!(
-                    actuals[0] - 4 * HALF_RIGHT,
-                    actuals[6],
-                    "y_abs: {y_abs}, x_abs: {x_abs}"
-                );
-            }
-        }
-
-        const TO_RAD: f64 = PI / 2_i32.pow(i32::BITS - 2) as f64;
-
-        let expected = args
-            .iter()
-            .map(|&[y, x]| (y as f64).atan2(x as f64))
-            .collect::<Vec<_>>();
-
-        actuals
-            .iter()
-            .zip(expected.iter())
-            .for_each(|(&actual, &expected)| {
-                assert_abs_diff_eq!(actual as f64 * TO_RAD, expected, epsilon = acceptable_error)
-            });
-    }
-
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
         F: Fn(i32, i32) -> i32,
