@@ -1,4 +1,4 @@
-use num_traits::{AsPrimitive, Signed};
+use num_traits::{AsPrimitive, ConstZero, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
 pub(crate) fn atan_impl<T, F>(x: T, k: T, f: F) -> T
@@ -21,21 +21,27 @@ where
     }
 }
 
-pub(crate) fn atan2_impl<F>(y: i32, x: i32, k: i32, f: F) -> i32
+pub(crate) fn atan2_impl<T, F>(y: T, x: T, k: T, f: F) -> T
 where
-    F: Fn(i32) -> i32,
+    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+        + ConstZero
+        + PrimitivePromotionExt
+        + Signed,
+    F: Fn(T) -> T,
+    i8: AsPrimitive<T>,
 {
-    if y == 0 && x == 0 {
-        return 0;
+    if y.is_zero() && x.is_zero() {
+        return T::ZERO;
     }
 
-    let x_abs = (x as i64).abs();
-    let y_abs = (y as i64).abs();
+    let x_abs = x.as_().abs();
+    let y_abs = y.as_().abs();
     let x_is_negative = x.is_negative();
     let y_is_negative = y.is_negative();
 
     if x_abs > y_abs {
-        let x = (y_abs * k as i64 / x_abs) as i32;
+        let x = (y_abs * k.as_() / x_abs).as_();
         let v = f(x);
         match (x_is_negative, y_is_negative) {
             (false, false) => v,
@@ -44,9 +50,9 @@ where
             (true, true) => v - k * k,
         }
     } else {
-        let x = (x_abs * k as i64 / y_abs) as i32;
+        let x = (x_abs * k.as_() / y_abs).as_();
         let v = f(x);
-        let right = k * k / 2;
+        let right = k * k / 2.as_();
         match (x_is_negative, y_is_negative) {
             (false, false) => right - v,
             (true, false) => right + v,
