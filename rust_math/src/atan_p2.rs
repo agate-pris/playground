@@ -23,12 +23,12 @@ where
     (0.273 / PI * k).round_ties_even().as_()
 }
 
-fn atan_p2_impl<T>(x: T, x_abs: T, k: T, a: T) -> T
+fn atan_p2_impl<T>(x: T, x_abs: T, x_k: T, a: T, k: T) -> T
 where
     T: 'static + Copy + NumOps,
     i8: AsPrimitive<T>,
 {
-    x * (k / 4.as_() + a * (k - x_abs) / k)
+    x * (k / 4.as_() + a * (x_k - x_abs) / x_k)
 }
 
 /// ```rust
@@ -38,14 +38,14 @@ where
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let a = calc_default_p2_k::<i32>(EXP);
-/// let result = atan_p2(1000 * K / 1732, K, a);
+/// let result = atan_p2(1000 * K / 1732, K, a, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
 ///     epsilon = 0.0039,
 /// );
 /// ```
-pub fn atan_p2<T>(x: T, k: T, a: T) -> T
+pub fn atan_p2<T>(x: T, x_k: T, a: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
     T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
@@ -53,7 +53,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan_impl(x, k, |x, x_abs| atan_p2_impl(x, x_abs, k, a))
+    atan_impl(x, x_k, |x, x_abs| atan_p2_impl(x, x_abs, x_k, a, k))
 }
 
 /// ```rust
@@ -83,7 +83,7 @@ where
     let exp = T::BITS / 2 - 1;
     let k = 2.as_().pow(exp);
     let a = calc_default_p2_k(exp);
-    atan_p2(x, k, a)
+    atan_p2(x, k, a, k)
 }
 
 /// ```rust
@@ -93,14 +93,14 @@ where
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let a = calc_default_p2_k::<i32>(EXP);
-/// let result = atan2_p2(1000, 1732, K, a);
+/// let result = atan2_p2(1000, 1732, K, a, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
 ///     epsilon = 0.0039,
 /// );
 /// ```
-pub fn atan2_p2<T>(y: T, x: T, k: T, a: T) -> T
+pub fn atan2_p2<T>(y: T, x: T, x_k: T, a: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
     T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
@@ -109,7 +109,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan2_impl(y, x, k, |x| atan_p2_impl(x, x, k, a))
+    atan2_impl(y, x, x_k, |x| atan_p2_impl(x, x, x_k, a, k))
 }
 
 /// ```rust
@@ -139,7 +139,7 @@ where
     let exp = T::BITS / 2 - 1;
     let k = 2.as_().pow(exp);
     let a = calc_default_p2_k(exp);
-    atan2_p2(y, x, k, a)
+    atan2_p2(y, x, k, a, k)
 }
 
 #[cfg(test)]
