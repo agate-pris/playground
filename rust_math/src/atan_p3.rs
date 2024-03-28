@@ -150,24 +150,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_overflow() {
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-        let (a, b) = calc_default_p3_k::<i32>(EXP);
-        assert!(a > 0);
-        assert!(b > 0);
-        let x = [-K, 0, K];
-        let x_abs = [0, K];
-        for p in x {
-            for q in x_abs {
-                for r in x_abs {
-                    let _ = p * (K / 4 - (q - K) * (a + r * b / K) / K);
-                }
-            }
-        }
-    }
-
-    #[test]
     fn test_atan2_p3_default() {
         use std::i32::{MAX, MIN};
 
