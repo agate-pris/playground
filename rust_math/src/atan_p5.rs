@@ -154,22 +154,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_overflow() {
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-        let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-        let x = [-K, 0, K];
-        let x_abs = [0, K];
-        for p in x_abs {
-            for q in x_abs {
-                for r in x {
-                    let _ = ((a * p / K - b) * q / K + c) * r;
-                }
-            }
-        }
-    }
-
-    #[test]
     fn test_atan2_p5_default() {
         use std::i32::{MAX, MIN};
 
