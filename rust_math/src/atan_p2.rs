@@ -1,5 +1,3 @@
-use std::f64::consts::PI;
-
 use fixed::{
     traits::Fixed,
     types::{
@@ -36,15 +34,6 @@ impl_atan_p2_default_fixed!(
     I14F18, 358, I13F19, 180, I12F20, 91, I11F21, 47, I10F22, 25, I9F23, 14, I8F24, 8, I7F25, 5,
     I6F26, 3
 );
-
-fn calc_default_p2_k<T>(exp: u32) -> T
-where
-    T: 'static + Copy,
-    f64: AsPrimitive<T>,
-{
-    let k = 2.0_f64.powi(exp as i32);
-    (0.273 / PI * k).round_ties_even().as_()
-}
 
 fn atan_p2_impl<T>(x: T, x_abs: T, x_k: T, a: T, k: T) -> T
 where
@@ -171,7 +160,7 @@ where
 mod tests {
     use std::{
         cmp::Ordering,
-        f64::NEG_INFINITY,
+        f64::{consts::PI, NEG_INFINITY},
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
