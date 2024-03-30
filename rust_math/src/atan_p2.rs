@@ -357,7 +357,6 @@ mod tests {
         let mut actuals = find_optimal_constants(exp);
         actuals.sort_unstable();
         assert_eq!(actuals, expected);
-        //assert!(actuals.contains(&expected));
     }
 
     #[rstest]
