@@ -121,11 +121,11 @@ where
 /// ```rust
 /// use std::f64::consts::PI;
 /// use approx::assert_abs_diff_eq;
+/// use fixed::types::I17F15;
 /// use rust_math::atan_p2::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let a = calc_default_p2_k::<i32>(EXP);
-/// let result = atan2_p2(1000, 1732, K, a, K);
+/// let result = atan2_p2(1000, 1732, K, I17F15::A, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
