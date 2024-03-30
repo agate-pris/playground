@@ -40,13 +40,7 @@ impl_atan_p2_default_fixed!(
     I6F26, 3
 );
 
-/// ```rust
-/// use rust_math::atan_p2::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = calc_default_p2_k::<i32>(EXP);
-/// assert_eq!(result, 2847);
-/// ```
-pub fn calc_default_p2_k<T>(exp: u32) -> T
+fn calc_default_p2_k<T>(exp: u32) -> T
 where
     T: 'static + Copy,
     f64: AsPrimitive<T>,
