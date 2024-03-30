@@ -176,6 +176,18 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::{
+        cmp::Ordering,
+        f64::NEG_INFINITY,
+        fmt::{Debug, Display},
+        ops::RangeInclusive,
+    };
+
+    use chrono::Utc;
+    use num_traits::ConstOne;
+    use rand::prelude::*;
+    use rstest::rstest;
+
     use super::*;
 
     #[test]
@@ -220,5 +232,215 @@ mod tests {
         for degrees in 181..195 {
             g(degrees);
         }
+    }
+
+    fn find_optimal_constants<T>(exp: u32) -> Vec<T>
+    where
+        <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+        RangeInclusive<T>: Iterator<Item = T>,
+        T: Debug
+            + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+            + AsPrimitive<f64>
+            + AsPrimitive<usize>
+            + Bits
+            + ConstOne
+            + ConstZero
+            + PrimitivePromotionExt
+            + PrimInt
+            + Signed,
+        i8: AsPrimitive<T>,
+    {
+        let (x_k, k, to_rad) = {
+            let base: T = 2.as_();
+            let to_rad = {
+                let pi: f64 = base.pow(T::BITS - 2).as_();
+                PI / pi
+            };
+            (base.pow(exp), base.pow(T::BITS - 2 - exp), to_rad)
+        };
+
+        let expected = (T::ZERO..=x_k)
+            .map(|x| {
+                let x: f64 = x.as_();
+                (x).atan2(x_k.as_())
+            })
+            .collect::<Vec<_>>();
+
+        let time = Utc::now();
+        let mut elapsed = 0;
+        let mut min_error = f64::INFINITY;
+        let mut min_sum_error = f64::INFINITY;
+        let mut optimal_constants = Vec::new();
+        let mut rng = rand::thread_rng();
+        let mut a = (T::ZERO..=k / 4.as_()).collect::<Vec<_>>();
+
+        a.shuffle(&mut rng);
+
+        for (ai, &a) in a.iter().enumerate() {
+            if (ai % 1000) == 0 {
+                let new_elapsed = Utc::now().signed_duration_since(time).num_seconds();
+                if elapsed / 30 < new_elapsed / 30 {
+                    elapsed = new_elapsed;
+                    println!("exp: {exp}, ai: {ai}");
+                }
+            }
+
+            let mut max_error = NEG_INFINITY;
+            let mut error_sum = 0.0;
+
+            for x in T::ZERO..=x_k {
+                let i: usize = x.as_();
+                let expected = expected[i];
+                let actual: f64 = atan_p2(x, x_k, a, k).as_();
+                let actual = to_rad * actual;
+                let error = actual - expected;
+                error_sum += error;
+                max_error = max_error.max(error.abs());
+                if max_error > min_error {
+                    break;
+                }
+            }
+
+            let sum_error = error_sum.abs();
+
+            match max_error.total_cmp(&min_error) {
+                Ordering::Equal => match sum_error.total_cmp(&min_sum_error) {
+                    Ordering::Less => {
+                        min_sum_error = sum_error;
+                        optimal_constants = vec![a];
+                    }
+                    Ordering::Equal => {
+                        optimal_constants.push(a);
+                    }
+                    Ordering::Greater => {}
+                },
+                Ordering::Less => {
+                    min_error = max_error;
+                    min_sum_error = sum_error;
+                    optimal_constants = vec![a];
+                }
+                Ordering::Greater => {}
+            }
+        }
+
+        println!(
+            "exp: {exp}, a: {:?} ({:?}), max error: {min_error}, error average: {}",
+            optimal_constants,
+            &optimal_constants
+                .iter()
+                .map(|&a| {
+                    let a: f64 = a.as_();
+                    let k: f64 = k.as_();
+                    PI * a / k
+                })
+                .collect::<Vec<_>>(),
+            {
+                let len: f64 = (x_k + T::ONE).as_();
+                min_sum_error / len
+            }
+        );
+
+        optimal_constants
+    }
+
+    fn test_optimal_constants<T>(exp: u32, expected: Vec<T>)
+    where
+        <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+        RangeInclusive<T>: Iterator<Item = T>,
+        T: Debug
+            + Display
+            + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+            + AsPrimitive<f64>
+            + AsPrimitive<usize>
+            + Bits
+            + ConstOne
+            + ConstZero
+            + PrimitivePromotionExt
+            + PrimInt
+            + Signed,
+        i8: AsPrimitive<T>,
+    {
+        let mut actuals = find_optimal_constants(exp);
+        actuals.sort_unstable();
+        assert_eq!(actuals, expected);
+        //assert!(actuals.contains(&expected));
+    }
+
+    #[rstest]
+    #[case(1, vec![2, 3])]
+    #[case(2, vec![3])]
+    #[case(3, vec![0, 1])]
+    #[case(4, vec![0, 1])]
+    #[case(5, vec![I3F5::A])]
+    #[case(6, vec![I2F6::A])]
+    fn test_optimal_constants_i8(#[case] exp: u32, #[case] expected: Vec<i8>) {
+        test_optimal_constants(exp, expected);
+    }
+
+    #[rstest]
+    #[case(1, vec![740, 741])]
+    #[case(2, vec![360, 361])]
+    #[case(3, vec![I13F3::A])]
+    #[case(4, vec![I12F4::A])]
+    #[case(5, vec![I11F5::A])]
+    #[case(6, vec![I10F6::A])]
+    #[case(7, vec![I9F7::A])]
+    #[case(8, vec![I8F8::A])]
+    #[case(9, vec![I7F9::A])]
+    #[case(10, vec![I6F10::A])]
+    #[case(11, vec! [0, 1] )]
+    #[case(12, vec! [0, 1] )]
+    #[case(13, vec![0])]
+    #[case(14, vec![0])]
+    fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<i16>) {
+        test_optimal_constants(exp, expected);
+    }
+
+    #[rstest]
+    #[case(6, vec![I26F6::A])]
+    #[case(7, vec![I25F7::A])]
+    #[case(8, vec![I24F8::A])]
+    #[case(9, vec![I23F9::A])]
+    #[case(10, vec![I22F10::A])]
+    #[case(11, vec![I21F11::A])]
+    #[case(12, vec![I20F12::A])]
+    #[case(13, vec![I19F13::A])]
+    #[case(14, vec![I18F14::A])]
+    #[case(15, vec![I17F15::A])]
+    #[case(16, vec![I16F16::A])]
+    #[case(17, vec![I15F17::A])]
+    #[case(18, vec![I14F18::A])]
+    #[case(19, vec![I13F19::A])]
+    #[case(20, vec![I12F20::A])]
+    #[case(21, vec![I11F21::A])]
+    #[case(22, vec![I10F22::A])]
+    fn test_optimal_constants_i32(#[case] exp: u32, #[case] expected: Vec<i32>) {
+        test_optimal_constants(exp, expected);
+    }
+
+    mod test_optiomal_constants {
+        use super::*;
+        macro_rules! define_test {
+            ($name:tt, $exp:expr, $expected:expr) => {
+                #[test]
+                #[ignore]
+                fn $name() {
+                    test_optimal_constants_i32($exp, $expected);
+                }
+            };
+        }
+        define_test!(case_1, 1, vec![48497950, 48497951]);
+        define_test!(case_2, 2, vec![23487671]);
+        define_test!(case_3, 3, vec![11671032, 11671033]);
+        define_test!(case_4, 4, vec![5835516]);
+        define_test!(case_5, 5, vec![2917056, 2917057]);
+        define_test!(case_23, 23, vec![I9F23::A]);
+        define_test!(case_24, 24, vec![I8F24::A]);
+        define_test!(case_25, 25, vec![I7F25::A]);
+        define_test!(case_26, 26, vec![I6F26::A]);
+        define_test!(case_27, 27, vec![0, 1]);
+        define_test!(case_28, 28, vec![0, 1]);
+        define_test!(case_29, 29, vec![0]);
+        define_test!(case_30, 30, vec![0]);
     }
 }
