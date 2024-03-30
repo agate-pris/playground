@@ -73,6 +73,7 @@ mod tests {
     };
 
     use approx::{abs_diff_eq, assert_abs_diff_eq};
+    use fixed::types::I17F15;
 
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
@@ -134,7 +135,7 @@ mod tests {
         println!("min: {min}, max: {max}");
     }
 
-    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(atan_p2_default, "data/atan_p2.json", 0.003852); }
+    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(|a| atan_p2_default(I17F15::from_bits(a)), "data/atan_p2.json", 0.003852); }
     #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_default, "data/atan_p3.json", 0.001601); }
     #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(atan_p5_default, "data/atan_p5.json", 0.000922); }
 
