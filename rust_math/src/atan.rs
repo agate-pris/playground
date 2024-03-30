@@ -300,7 +300,7 @@ mod tests {
         println!("max error: {max_error}");
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_default, "data/atan_p2.json", 0.003854); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(|y, x| atan2_p2_default(I17F15::from_bits(y), I17F15::from_bits(x)), "data/atan_p2.json", 0.003854); }
     #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default, "data/atan_p3.json", 0.001603); }
     #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_default, "data/atan_p5.json", 0.000928); }
 }
