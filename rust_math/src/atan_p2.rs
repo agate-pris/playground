@@ -8,6 +8,11 @@ use crate::{
     bits::Bits,
 };
 
+pub trait AtanP2Default {
+    type Bits;
+    const A: Self::Bits;
+}
+
 /// ```rust
 /// use rust_math::atan_p2::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
