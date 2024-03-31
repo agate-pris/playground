@@ -1,5 +1,3 @@
-use std::f64::consts::PI;
-
 use fixed::{
     traits::Fixed,
     types::{
@@ -38,24 +36,6 @@ impl_atan_p3_default_fixed!(
     85, I13F19, 162, 42, I12F20, 79, 26, I11F21, 38, 18, I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7,
     I7F25, 2, 5, I6F26, 2, 2
 );
-
-/// ```rust
-/// use rust_math::atan_p3::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// let (a, b) = calc_default_p3_k::<i32>(EXP);
-/// assert_eq!(a, 2552);
-/// assert_eq!(b, 692);
-/// ```
-pub fn calc_default_p3_k<T>(exp: u32) -> (T, T)
-where
-    T: 'static + Copy,
-    f64: AsPrimitive<T>,
-{
-    let k: f64 = 2.0_f64.powi(exp as i32);
-    let a = (0.2447 / PI * k).round_ties_even();
-    let b = (0.0663 / PI * k).round_ties_even();
-    (a.as_(), b.as_())
-}
 
 fn atan_p3_impl<T>(x: T, x_abs: T, x_k: T, a: T, b: T, k: T) -> T
 where
