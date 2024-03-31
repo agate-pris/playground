@@ -143,7 +143,7 @@ pub(crate) mod tests {
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(|a| atan_p2_default(I17F15::from_bits(a)), "data/atan_p2_i17f15.json", 0.003789); }
-    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_default, "data/atan_p3.json", 0.001601); }
+    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(|a| atan_p3_default(I17F15::from_bits(a)), "data/atan_p3_i17f15.json", 0.001601); }
     #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(atan_p5_default, "data/atan_p5.json", 0.000922); }
 
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
