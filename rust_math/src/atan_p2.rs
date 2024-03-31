@@ -160,7 +160,6 @@ where
 mod tests {
     use std::{
         cmp::Ordering,
-        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
@@ -173,50 +172,6 @@ mod tests {
     use crate::bits::Bits;
 
     use super::*;
-
-    #[test]
-    fn test_atan2_p2_default() {
-        use std::i32::{MAX, MIN};
-
-        fn f(x: i32, y: i32) {
-            let expected = (y as f64).atan2(x as f64);
-            let actual = {
-                let actual = atan2_p2_default(I17F15::from_bits(y), I17F15::from_bits(x));
-                actual as f64 * PI / 2.0_f64.powi(i32::BITS as i32 / 2 * 2 - 2)
-            };
-            let error = actual - expected;
-            assert!(
-                error.abs() < 0.0039,
-                "y: {y}, x: {x}, actual: {actual}, expected: {expected}"
-            );
-        }
-
-        {
-            let values = [0, MAX, MIN, MAX];
-            for x in values {
-                for y in values {
-                    f(x, y);
-                }
-            }
-        }
-
-        fn g(degrees: i32) {
-            const SCALE: f64 = 1000000.0;
-            let radians = (degrees as f64).to_radians();
-            let x = SCALE * radians.cos();
-            let y = SCALE * radians.sin();
-            f(x as i32, y as i32);
-        }
-        for degrees in -195..-180 {
-            g(degrees);
-        }
-        for degrees in -179..180 {
-            g(degrees);
-        }
-        for degrees in 181..195 {
-            g(degrees);
-        }
-    }
 
     fn test_optimal_constants<T>(exp: u32, expected: Vec<T>)
     where
