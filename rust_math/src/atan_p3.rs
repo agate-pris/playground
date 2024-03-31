@@ -8,13 +8,10 @@ use fixed::{
         I9F7,
     },
 };
-use num_traits::{AsPrimitive, ConstZero, NumOps, Pow, PrimInt, Signed};
+use num_traits::{AsPrimitive, ConstZero, NumOps, Pow, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
-use crate::{
-    atan::{atan2_impl, atan_impl},
-    bits::Bits,
-};
+use crate::atan::{atan2_impl, atan_impl};
 
 pub trait AtanP3Default {
     type Bits;
@@ -159,31 +156,39 @@ where
 /// ```rust
 /// use std::f64::consts::PI;
 /// use approx::assert_abs_diff_eq;
+/// use fixed::types::I17F15;
 /// use rust_math::atan_p3::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = atan2_p3_default(1000, 1732);
+/// let result = atan2_p3_default(I17F15::from_bits(1000), I17F15::from_bits(1732));
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64,
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan2_p3_default<T>(y: T, x: T) -> T
+pub fn atan2_p3_default<T>(y: T, x: T) -> <T as Fixed>::Bits
 where
-    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
-        + Bits
+    <<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion:
+        PartialOrd + AsPrimitive<<T as Fixed>::Bits> + Signed,
+    <T as Fixed>::Bits: AsPrimitive<<<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion>
         + ConstZero
-        + PrimInt
+        + Pow<u32, Output = <T as Fixed>::Bits>
         + PrimitivePromotionExt
         + Signed,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
+    T: AtanP3Default<Bits = <T as Fixed>::Bits> + Fixed,
+    i8: AsPrimitive<<T as Fixed>::Bits>,
 {
-    let exp = T::BITS / 2 - 1;
-    let k = 2.as_().pow(exp);
-    let (a, b) = calc_default_p3_k(exp);
-    atan2_p3(y, x, k, a, b, k)
+    let base: <T as Fixed>::Bits = 2.as_();
+    let x_k = base.pow(T::FRAC_NBITS);
+    let k = base.pow(T::INT_NBITS - 2);
+    atan2_p3(
+        y.to_bits(),
+        x.to_bits(),
+        x_k,
+        <T as AtanP3Default>::A,
+        <T as AtanP3Default>::B,
+        k,
+    )
 }
 
 #[cfg(test)]
@@ -195,10 +200,12 @@ mod tests {
         ops::RangeInclusive,
     };
 
-    use num_traits::ConstOne;
+    use num_traits::{ConstOne, PrimInt};
     use rand::prelude::*;
     use rayon::prelude::*;
     use rstest::rstest;
+
+    use crate::bits::Bits;
 
     use super::*;
 
