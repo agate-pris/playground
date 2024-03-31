@@ -1,5 +1,13 @@
 use std::f64::consts::PI;
 
+use fixed::{
+    traits::Fixed,
+    types::{
+        I10F22, I10F6, I11F21, I11F5, I12F20, I12F4, I13F19, I13F3, I14F18, I15F17, I16F16, I17F15,
+        I18F14, I19F13, I20F12, I21F11, I2F6, I3F5, I6F10, I6F26, I7F25, I7F9, I8F24, I8F8, I9F23,
+        I9F7,
+    },
+};
 use num_traits::{AsPrimitive, ConstZero, NumOps, PrimInt, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
@@ -7,6 +15,32 @@ use crate::{
     atan::{atan2_impl, atan_impl},
     bits::Bits,
 };
+
+pub trait AtanP3Default {
+    type Bits;
+    const A: Self::Bits;
+    const B: Self::Bits;
+}
+
+macro_rules! impl_atan_p3_default_fixed {
+    ($($t:ty, $a:expr, $b:expr),*) => {
+        $(
+            impl AtanP3Default for $t {
+                type Bits = <Self as Fixed>::Bits;
+                const A: Self::Bits = $a;
+                const B: Self::Bits = $b;
+            }
+        )*
+    };
+}
+
+impl_atan_p3_default_fixed!(
+    I3F5, 0, 0, I2F6, 0, 0, I13F3, 159, 46, I12F4, 80, 26, I11F5, 41, 12, I10F6, 20, 9, I9F7, 9, 8,
+    I8F8, 4, 7, I7F9, 2, 5, I6F10, 2, 2, I21F11, 40841, 11064, I20F12, 20421, 5534, I19F13, 10212,
+    2766, I18F14, 5107, 1383, I17F15, 2555, 691, I16F16, 1279, 344, I15F17, 640, 173, I14F18, 322,
+    85, I13F19, 162, 42, I12F20, 79, 26, I11F21, 38, 18, I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7,
+    I7F25, 2, 5, I6F26, 2, 2
+);
 
 /// ```rust
 /// use rust_math::atan_p3::*;
@@ -26,12 +60,12 @@ where
     (a.as_(), b.as_())
 }
 
-fn atan_p3_impl<T>(x: T, x_abs: T, k: T, a: T, b: T) -> T
+fn atan_p3_impl<T>(x: T, x_abs: T, x_k: T, a: T, b: T, k: T) -> T
 where
     T: 'static + Copy + NumOps,
     i8: AsPrimitive<T>,
 {
-    x * (k / 4.as_() - (x_abs - k) * (a + x_abs * b / k) / k)
+    x * (k / 4.as_() - (x_abs - x_k) * (a + x_abs * b / x_k) / x_k)
 }
 
 /// ```rust
@@ -41,14 +75,14 @@ where
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b) = calc_default_p3_k::<i32>(EXP);
-/// let result = atan_p3(1000 * K / 1732, K, a, b);
+/// let result = atan_p3(1000 * K / 1732, K, a, b, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan_p3<T>(x: T, k: T, a: T, b: T) -> T
+pub fn atan_p3<T>(x: T, x_k: T, a: T, b: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
     T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
@@ -56,7 +90,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan_impl(x, k, |x, x_abs| atan_p3_impl(x, x_abs, k, a, b))
+    atan_impl(x, x_k, |x, x_abs| atan_p3_impl(x, x_abs, x_k, a, b, k))
 }
 
 /// ```rust
@@ -86,7 +120,7 @@ where
     let exp = T::BITS / 2 - 1;
     let k = 2.as_().pow(exp);
     let (a, b) = calc_default_p3_k(exp);
-    atan_p3(x, k, a, b)
+    atan_p3(x, k, a, b, k)
 }
 
 /// ```rust
@@ -96,14 +130,14 @@ where
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
 /// let (a, b) = calc_default_p3_k::<i32>(EXP);
-/// let result = atan2_p3(1000, 1732, K, a, b);
+/// let result = atan2_p3(1000, 1732, K, a, b, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan2_p3<T>(y: T, x: T, k: T, a: T, b: T) -> T
+pub fn atan2_p3<T>(y: T, x: T, x_k: T, a: T, b: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
     T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
@@ -112,7 +146,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan2_impl(y, x, k, |x| atan_p3_impl(x, x, k, a, b))
+    atan2_impl(y, x, x_k, |x| atan_p3_impl(x, x, x_k, a, b, k))
 }
 
 /// ```rust
@@ -142,11 +176,23 @@ where
     let exp = T::BITS / 2 - 1;
     let k = 2.as_().pow(exp);
     let (a, b) = calc_default_p3_k(exp);
-    atan2_p3(y, x, k, a, b)
+    atan2_p3(y, x, k, a, b, k)
 }
 
 #[cfg(test)]
 mod tests {
+
+    use std::{
+        cmp::Ordering,
+        fmt::{Debug, Display},
+        ops::RangeInclusive,
+    };
+
+    use num_traits::ConstOne;
+    use rand::prelude::*;
+    use rayon::prelude::*;
+    use rstest::rstest;
+
     use super::*;
 
     #[test]
@@ -191,5 +237,146 @@ mod tests {
         for degrees in 181..195 {
             g(degrees);
         }
+    }
+
+    fn test_optimal_constants<T>(exp: u32, expected: Vec<(T, T)>)
+    where
+        <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+        RangeInclusive<T>: Iterator<Item = T>,
+        T: Debug
+            + Display
+            + Send
+            + Sync
+            + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+            + AsPrimitive<f64>
+            + AsPrimitive<usize>
+            + Bits
+            + ConstOne
+            + ConstZero
+            + PrimitivePromotionExt
+            + PrimInt
+            + Signed,
+        i8: AsPrimitive<T>,
+    {
+        let num = num_cpus::get();
+        let mut rng = rand::thread_rng();
+        let (mut a, mut b) = {
+            let base: T = 2.as_();
+            let k = base.pow(T::BITS - 2 - exp);
+            let last: T = k / 4.as_();
+            let a = (T::ZERO..=last).collect::<Vec<_>>();
+            (a.clone(), a)
+        };
+
+        a.shuffle(&mut rng);
+        b.shuffle(&mut rng);
+
+        let cmp = |(a, b): (f64, f64), (c, d)| a.total_cmp(&c).then_with(|| b.total_cmp(&d));
+
+        let atan_expected = crate::atan::tests::make_atan_data(exp);
+
+        let (mut k, max_error, error_sum) = (0..num)
+            .into_par_iter()
+            .fold(
+                || (vec![], f64::INFINITY, f64::INFINITY),
+                |(acc, min_max_error, min_error_sum), n| {
+                    let search_range = a
+                        .iter()
+                        .skip(a.len() * n / num)
+                        .take(a.len() * (n + 1) / num - a.len() * n / num)
+                        .flat_map(|&a| b.iter().map(move |&b| (a, b)));
+
+                    let (k, max_error, error_sum) = crate::atan::tests::find_optimal_constants(
+                        exp,
+                        &atan_expected,
+                        search_range,
+                        |x, x_k, ab, k| atan_p3(x, x_k, ab.0, ab.1, k),
+                    );
+
+                    match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
+                        Ordering::Equal => {
+                            (acc.into_iter().chain(k).collect(), max_error, error_sum)
+                        }
+                        Ordering::Less => (k, max_error, error_sum),
+                        Ordering::Greater => (acc, min_max_error, min_error_sum),
+                    }
+                },
+            )
+            .reduce(
+                || (vec![], f64::INFINITY, f64::INFINITY),
+                |(lhs, lmax, lsum), (rhs, rmax, rsum)| match cmp((lmax, lsum), (rmax, rsum)) {
+                    Ordering::Equal => (lhs.into_iter().chain(rhs).collect(), lmax, lsum),
+                    Ordering::Less => (lhs, lmax, lsum),
+                    Ordering::Greater => (rhs, rmax, rsum),
+                },
+            );
+
+        k.sort_unstable_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
+        assert_eq!(
+            expected, k,
+            "exp: {exp}, max_error: {max_error}, error_sum: {error_sum}"
+        );
+    }
+
+    #[rstest]
+    #[case(2, vec![(3, 0), (3, 1)])]
+    #[case(3, vec![(0, 0), (0, 1), (0, 2), (1, 0), (1, 1)])]
+    #[case(4, vec![(0, 0), (0, 1), (1, 0), (1, 1)])]
+    #[case(5, vec![(I3F5::A, I3F5::B)])]
+    #[case(6, vec![(I2F6::A, I2F6::B)])]
+    fn test_optimal_constants_i8(#[case] exp: u32, #[case] expected: Vec<(i8, i8)>) {
+        test_optimal_constants(exp, expected);
+    }
+
+    #[rstest]
+    #[case(2, vec![(323, 86), (324, 84), (324, 85), (325, 82), (325, 83)])]
+    #[case(3, vec![(I13F3::A, I13F3::B)])]
+    #[case(4, vec![(I12F4::A, I12F4::B)])]
+    #[case(5, vec![(I11F5::A, I11F5::B)])]
+    #[case(6, vec![(I10F6::A, I10F6::B)])]
+    #[case(7, vec![(I9F7::A, I9F7::B)])]
+    #[case(8, vec![(I8F8::A, I8F8::B)])]
+    #[case(9, vec![(I7F9::A, I7F9::B)])]
+    #[case(10, vec![(I6F10::A, I6F10::B)])]
+    #[case(11, vec! [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1)])]
+    #[case(12, vec! [(0, 0), (0, 1), (1, 0), (1, 1)])]
+    #[case(13, vec![(0, 0)])]
+    #[case(14, vec![(0, 0)])]
+    fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<(i16, i16)>) {
+        test_optimal_constants(exp, expected);
+    }
+
+    // Test as `cargo test -- atan_p3::tests::test_optimal_constants --ignored --nocapture --test-threads=1`
+    mod test_optimal_constants {
+        use super::*;
+        macro_rules! define_test {
+            ($name:tt, $exp:expr, $expected:expr) => {
+                #[test]
+                #[ignore]
+                fn $name() {
+                    test_optimal_constants($exp, $expected);
+                }
+            };
+        }
+        define_test!(case_01, 30, vec![(0, 0)]);
+        define_test!(case_02, 29, vec![(0, 0)]);
+        define_test!(case_03, 28, vec![(0, 0), (0, 1), (1, 0), (1, 1)]);
+        define_test!(case_04, 27, vec![(0, 0), (0, 1), (0, 2), (1, 0), (1, 1)]);
+        define_test!(case_05, 26, vec![(I6F26::A, I6F26::B)]);
+        define_test!(case_06, 25, vec![(I7F25::A, I7F25::B)]);
+        define_test!(case_07, 24, vec![(I8F24::A, I8F24::B)]);
+        define_test!(case_08, 23, vec![(I9F23::A, I9F23::B)]);
+        define_test!(case_09, 22, vec![(I10F22::A, I10F22::B)]);
+        define_test!(case_10, 21, vec![(I11F21::A, I11F21::B)]);
+        define_test!(case_11, 20, vec![(I12F20::A, I12F20::B)]);
+        define_test!(case_12, 19, vec![(I13F19::A, I13F19::B)]);
+        define_test!(case_13, 18, vec![(I14F18::A, I14F18::B)]);
+        define_test!(case_14, 17, vec![(I15F17::A, I15F17::B)]);
+        define_test!(case_15, 16, vec![(I16F16::A, I16F16::B)]);
+        define_test!(case_16, 15, vec![(I17F15::A, I17F15::B)]);
+        define_test!(case_17, 14, vec![(I18F14::A, I18F14::B)]);
+        define_test!(case_18, 13, vec![(I19F13::A, I19F13::B)]);
+        define_test!(case_19, 12, vec![(I20F12::A, I20F12::B)]);
+        define_test!(case_20, 11, vec![(I21F11::A, I21F11::B)]);
     }
 }

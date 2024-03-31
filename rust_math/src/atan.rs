@@ -63,22 +63,29 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use std::{
         cmp::Ordering,
         f64::{
             consts::{FRAC_PI_2, PI},
             INFINITY, NEG_INFINITY,
         },
+        fmt::Debug,
+        iter::once,
+        ops::RangeInclusive,
     };
 
     use approx::{abs_diff_eq, assert_abs_diff_eq};
     use fixed::types::I17F15;
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
+    use primitive_promotion::PrimitivePromotionExt;
+    use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
     use crate::{
         atan_p2::{atan2_p2_default, atan_p2_default},
         atan_p3::{atan2_p3_default, atan_p3_default},
         atan_p5::{atan2_p5_default, atan_p5_default},
+        bits::Bits,
         tests::read_data,
     };
 
@@ -303,4 +310,109 @@ mod tests {
     #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(|y, x| atan2_p2_default(I17F15::from_bits(y), I17F15::from_bits(x)), "data/atan_p2_i17f15.json", 0.003789); }
     #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_default, "data/atan_p3.json", 0.001603); }
     #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_default, "data/atan_p5.json", 0.000928); }
+
+    pub fn make_atan_data(exp: u32) -> Vec<f64> {
+        let num = num_cpus::get();
+        let k = 2_i64.pow(exp);
+        (0..num)
+            .into_par_iter()
+            .flat_map(|n| {
+                let begin = (k as i128 * n as i128 / num as i128) as i64;
+                let end = (k as i128 * (n as i128 + 1) / num as i128) as i64;
+                let f = |x| (x as f64).atan2(k as f64); // (x as f64 / k as f64).atan();
+                if n == num - 1 {
+                    (begin..=end).map(f).collect::<Vec<_>>()
+                } else {
+                    (begin..end).map(f).collect::<Vec<_>>()
+                }
+            })
+            .collect()
+    }
+
+    // Find the optimal constants for the atan2 function.
+    // The expected values are given from the out of this function
+    // because it is too large so it has to be shared over threads.
+    pub fn find_optimal_constants<T, R, F>(
+        exp: u32,
+        expected: &[f64],
+        search_range: R,
+        f: F,
+    ) -> (Vec<<R as Iterator>::Item>, f64, f64)
+    where
+        T: Debug
+            + Sync
+            + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+            + AsPrimitive<f64>
+            + AsPrimitive<usize>
+            + Bits
+            + ConstOne
+            + ConstZero
+            + PrimInt
+            + PrimitivePromotionExt
+            + Signed,
+        R: Iterator,
+        F: Fn(T, T, <R as Iterator>::Item, T) -> T,
+        <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+        <R as Iterator>::Item: Clone,
+        RangeInclusive<T>: Iterator<Item = T>,
+        i8: AsPrimitive<T>,
+    {
+        let (x_k, k, to_rad) = {
+            let base: T = 2.as_();
+            let to_rad = {
+                let pi: f64 = base.pow(T::BITS - 2).as_();
+                PI / pi
+            };
+            (base.pow(exp), base.pow(T::BITS - 2 - exp), to_rad)
+        };
+
+        let cmp = |(lmax, lsum): (f64, f64), (rmax, rsum): (f64, f64)| {
+            lmax.total_cmp(&rmax).then_with(|| lsum.total_cmp(&rsum))
+        };
+
+        let time = std::time::Instant::now();
+        let mut elapsed = 0;
+
+        search_range.enumerate().fold(
+            (vec![], f64::INFINITY, f64::INFINITY),
+            |(acc, min_max_error, min_error_sum), (i, item)| {
+                if i % 10000 == 0 {
+                    let e = time.elapsed().as_secs();
+                    if e / 30 != elapsed / 30 {
+                        elapsed = e;
+                        println!("i: {i}, elapsed: {elapsed}");
+                    }
+                }
+
+                let mut max_error = NEG_INFINITY;
+                let mut error_sum = 0.0;
+
+                for x in T::ZERO..=x_k {
+                    let i: usize = x.as_();
+                    let expected = expected[i];
+                    let actual: f64 = f(x, x_k, item.clone(), k).as_();
+                    let error = to_rad * actual - expected;
+
+                    error_sum += error;
+                    max_error = max_error.max(error.abs());
+
+                    if max_error > min_max_error {
+                        break;
+                    }
+                }
+
+                let error_sum = error_sum.abs();
+
+                match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
+                    Ordering::Equal => (
+                        acc.into_iter().chain(once(item.clone())).collect(),
+                        max_error,
+                        error_sum,
+                    ),
+                    Ordering::Less => (vec![item.clone()], max_error, error_sum),
+                    Ordering::Greater => (acc, min_max_error, min_error_sum),
+                }
+            },
+        )
+    }
 }

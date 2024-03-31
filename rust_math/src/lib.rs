@@ -1,3 +1,6 @@
+#[cfg(test)]
+extern crate num_cpus;
+
 pub mod atan;
 pub mod atan_p2;
 pub mod atan_p3;
