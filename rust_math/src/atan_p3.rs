@@ -2,8 +2,8 @@ use fixed::{
     traits::Fixed,
     types::{
         I10F22, I10F6, I11F21, I11F5, I12F20, I12F4, I13F19, I13F3, I14F18, I15F17, I16F16, I17F15,
-        I18F14, I19F13, I20F12, I21F11, I2F6, I3F5, I6F10, I6F26, I7F25, I7F9, I8F24, I8F8, I9F23,
-        I9F7,
+        I18F14, I19F13, I20F12, I21F11, I22F10, I23F9, I2F6, I3F5, I6F10, I6F26, I7F25, I7F9,
+        I8F24, I8F8, I9F23, I9F7,
     },
 };
 use num_traits::{AsPrimitive, ConstZero, NumOps, Pow, Signed};
@@ -31,10 +31,10 @@ macro_rules! impl_atan_p3_default_fixed {
 
 impl_atan_p3_default_fixed!(
     I3F5, 0, 0, I2F6, 0, 0, I13F3, 159, 46, I12F4, 80, 26, I11F5, 41, 12, I10F6, 20, 9, I9F7, 9, 8,
-    I8F8, 4, 7, I7F9, 2, 5, I6F10, 2, 2, I21F11, 40841, 11064, I20F12, 20421, 5534, I19F13, 10212,
-    2766, I18F14, 5107, 1383, I17F15, 2555, 691, I16F16, 1279, 344, I15F17, 640, 173, I14F18, 322,
-    85, I13F19, 162, 42, I12F20, 79, 26, I11F21, 38, 18, I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7,
-    I7F25, 2, 5, I6F26, 2, 2
+    I8F8, 4, 7, I7F9, 2, 5, I6F10, 2, 2, I23F9, 163355, 44265, I22F10, 81678, 22133, I21F11, 40841,
+    11064, I20F12, 20421, 5534, I19F13, 10212, 2766, I18F14, 5107, 1383, I17F15, 2555, 691, I16F16,
+    1279, 344, I15F17, 640, 173, I14F18, 322, 85, I13F19, 162, 42, I12F20, 79, 26, I11F21, 38, 18,
+    I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7, I7F25, 2, 5, I6F26, 2, 2
 );
 
 fn atan_p3_impl<T>(x: T, x_abs: T, x_k: T, a: T, b: T, k: T) -> T
@@ -338,5 +338,7 @@ mod tests {
         define_test!(case_18, 13, vec![(I19F13::A, I19F13::B)]);
         define_test!(case_19, 12, vec![(I20F12::A, I20F12::B)]);
         define_test!(case_20, 11, vec![(I21F11::A, I21F11::B)]);
+        define_test!(case_21, 10, vec![(I22F10::A, I22F10::B)]);
+        define_test!(case_22, 9, vec![(I23F9::A, I23F9::B)]);
     }
 }
