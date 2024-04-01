@@ -160,6 +160,7 @@ where
 mod tests {
     use std::{
         cmp::Ordering,
+        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
@@ -190,15 +191,29 @@ mod tests {
             + Signed,
         <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         RangeInclusive<T>: Iterator<Item = T>,
+        f64: AsPrimitive<T>,
         i8: AsPrimitive<T>,
     {
         let num = num_cpus::get();
-        let mut rng = rand::thread_rng();
-        let base: T = 2.as_();
-        let k = base.pow(T::BITS - 2 - exp);
-        let mut a = (T::ZERO..=k / 4.as_()).collect::<Vec<_>>();
-
-        a.shuffle(&mut rng);
+        let a = {
+            let mut rng = rand::thread_rng();
+            let base: T = 2.as_();
+            let k = base.pow(T::BITS - 2 - exp);
+            let mut calc = |scale: f64| -> Vec<T> {
+                let k_as_f64: f64 = k.as_();
+                let v = scale * k_as_f64;
+                let first: T = ((scale - 0.05) * k_as_f64).min(v - 1000.0).max(0.0).as_();
+                let last: T = ((scale + 0.05) * k_as_f64)
+                    .max(v + 1000.0)
+                    .min(k_as_f64 / 4.0)
+                    .as_();
+                println!("first: {}, last: {}", first, last);
+                let mut vec = (first..=last).collect::<Vec<_>>();
+                vec.shuffle(&mut rng);
+                vec
+            };
+            calc(0.273 / PI)
+        };
 
         let cmp = |(a, b): (f64, f64), (c, d)| a.total_cmp(&c).then_with(|| b.total_cmp(&d));
 
