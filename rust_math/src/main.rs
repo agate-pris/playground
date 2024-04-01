@@ -77,6 +77,6 @@ fn main() {
         print_fixed(atan_p3_default);
     }
     if args.atan_p5 {
-        print(atan_p5_default);
+        print_fixed(atan_p5_default);
     }
 }
