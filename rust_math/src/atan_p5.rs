@@ -148,8 +148,3 @@ where
     let (a, b, c) = calc_default_p5_k(exp);
     atan2_p5(y, x, k, a, b, c)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-}
