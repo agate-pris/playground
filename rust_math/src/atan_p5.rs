@@ -1,5 +1,3 @@
-use std::f64::consts::PI;
-
 use fixed::{
     traits::Fixed,
     types::{
@@ -53,28 +51,6 @@ impl_atan_p5_default_fixed_i32!(
     47632, I22F10, 25420, 95234, I23F9, 50981, 190506
 );
 
-/// ```rust
-/// use rust_math::atan_p5::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-/// assert_eq!(a, 810);
-/// assert_eq!(b, 2998);
-/// assert_eq!(c, 10380);
-/// ```
-pub fn calc_default_p5_k<T>(exp: u32) -> (T, T, T)
-where
-    T: 'static + Copy + NumOps,
-    f64: AsPrimitive<T>,
-    i8: AsPrimitive<T>,
-{
-    let k = 2.0_f64.powi(exp as i32);
-    let a: T = (0.0776509570923569 / PI * k).round_ties_even().as_();
-    let b: T = (0.287434475393028 / PI * k).round_ties_even().as_();
-    let k: T = k.as_();
-    let c = k / 4.as_() - a + b;
-    (a, b, c)
-}
-
 fn atan_p5_impl<T>(x: T, k: T, a: T, b: T, c: T) -> T
 where
     T: 'static + Copy + NumOps,
@@ -86,11 +62,11 @@ where
 /// ```rust
 /// use std::f64::consts::PI;
 /// use approx::assert_abs_diff_eq;
+/// use fixed::types::I17F15;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-/// let result = atan_p5(1000 * K / 1732, K, a, b, c);
+/// let result = atan_p5(1000 * K / 1732, K, I17F15::A, I17F15::B, I17F15::C);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
@@ -147,11 +123,11 @@ where
 /// ```rust
 /// use std::f64::consts::PI;
 /// use approx::assert_abs_diff_eq;
+/// use fixed::types::I17F15;
 /// use rust_math::atan_p5::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let (a, b, c) = calc_default_p5_k::<i32>(EXP);
-/// let result = atan2_p5(1000, 1732, K, a, b, c);
+/// let result = atan2_p5(1000, 1732, K, I17F15::A, I17F15::B, I17F15::C);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
 ///     result as f64 * PI / K.pow(2) as f64,
@@ -211,6 +187,7 @@ where
 mod tests {
     use std::{
         cmp::Ordering,
+        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
