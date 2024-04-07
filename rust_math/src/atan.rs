@@ -77,8 +77,7 @@ pub(crate) mod tests {
 
     use approx::{abs_diff_eq, assert_abs_diff_eq};
     use fixed::types::I17F15;
-    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
-    use primitive_promotion::PrimitivePromotionExt;
+    use num_traits::{ConstOne, PrimInt};
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
     use crate::{
@@ -88,6 +87,8 @@ pub(crate) mod tests {
         bits::Bits,
         tests::read_data,
     };
+
+    use super::*;
 
     fn test_atan<F>(f: F, data_path: &str, acceptable_error: f64)
     where
