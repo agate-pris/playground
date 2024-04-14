@@ -235,7 +235,7 @@ mod tests {
                         exp,
                         &atan_expected,
                         search_range,
-                        |x, x_k, a, k| atan_p2(x, x_k, a, k),
+                        |x, one, k, a| atan_p2(x, one, a, k),
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {

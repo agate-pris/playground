@@ -355,13 +355,13 @@ pub(crate) mod tests {
             + PrimitivePromotionExt
             + Signed,
         R: Iterator,
-        F: Fn(T, T, <R as Iterator>::Item, T) -> T,
+        F: Fn(T, T, T, <R as Iterator>::Item) -> T,
         <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         <R as Iterator>::Item: Clone,
         RangeInclusive<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
-        let (x_k, k, to_rad) = {
+        let (one, k, to_rad) = {
             let base: T = 2.as_();
             let to_rad = {
                 let pi: f64 = base.pow(T::BITS - 2).as_();
@@ -391,10 +391,10 @@ pub(crate) mod tests {
                 let mut max_error = NEG_INFINITY;
                 let mut error_sum = 0.0;
 
-                for x in T::ZERO..=x_k {
+                for x in T::ZERO..=one {
                     let i: usize = x.as_();
                     let expected = expected[i];
-                    let actual: f64 = f(x, x_k, item.clone(), k).as_();
+                    let actual: f64 = f(x, one, k, item.clone()).as_();
                     let error = to_rad * actual - expected;
 
                     error_sum += error;
