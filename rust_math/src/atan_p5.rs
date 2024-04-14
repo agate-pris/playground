@@ -73,7 +73,7 @@ where
 ///     epsilon = 0.00085,
 /// );
 /// ```
-pub fn atan_p5<T>(x: T, k: T, a: T, b: T, c: T) -> T
+pub fn atan_p5<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
     T: PartialOrd
@@ -82,7 +82,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan_impl(x, k, |x| atan_p5_impl(x, k, a, b, c))
+    atan_impl(x, one, |x| atan_p5_impl(x, one, a, b, c))
 }
 
 /// ```rust
