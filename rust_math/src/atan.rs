@@ -1,7 +1,7 @@
 use num_traits::{AsPrimitive, ConstZero, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
-pub(crate) fn atan_impl<T, F>(x: T, k: T, f: F) -> T
+pub(crate) fn atan_impl<T, F>(x: T, one: T, f: F) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
     T: PartialOrd
@@ -11,12 +11,12 @@ where
     F: Fn(T) -> T,
     i8: AsPrimitive<T>,
 {
-    if x < -k {
-        let k_2 = k * k;
+    if x < -one {
+        let k_2 = one * one;
         let x = k_2 / x;
         -k_2 / 2.as_() - f(x)
-    } else if x > k {
-        let k_2 = k * k;
+    } else if x > one {
+        let k_2 = one * one;
         let x = k_2 / x;
         k_2 / 2.as_() - f(x)
     } else {
