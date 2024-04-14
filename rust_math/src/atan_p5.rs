@@ -76,12 +76,13 @@ where
 pub fn atan_p5<T>(x: T, k: T, a: T, b: T, c: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+    T: PartialOrd
+        + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
         + PrimitivePromotionExt
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan_impl(x, k, |x, _| atan_p5_impl(x, k, a, b, c))
+    atan_impl(x, k, |x| atan_p5_impl(x, k, a, b, c))
 }
 
 /// ```rust

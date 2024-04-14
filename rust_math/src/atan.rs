@@ -4,20 +4,23 @@ use primitive_promotion::PrimitivePromotionExt;
 pub(crate) fn atan_impl<T, F>(x: T, k: T, f: F) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+    T: PartialOrd
+        + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
         + PrimitivePromotionExt
         + Signed,
-    F: Fn(T, T) -> T,
+    F: Fn(T) -> T,
     i8: AsPrimitive<T>,
 {
-    let x_abs = x.as_().abs();
-    if x_abs > k.as_() {
-        let signum = x.signum();
+    if x < -k {
         let k_2 = k * k;
-        let x = (k_2.as_() / x_abs).as_();
-        signum * (k_2 / 2.as_() - f(x, x))
+        let x = k_2 / x;
+        -k_2 / 2.as_() - f(x)
+    } else if x > k {
+        let k_2 = k * k;
+        let x = k_2 / x;
+        k_2 / 2.as_() - f(x)
     } else {
-        f(x, x_abs.as_())
+        f(x)
     }
 }
 
