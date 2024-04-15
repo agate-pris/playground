@@ -1,10 +1,12 @@
+use std::ops::{Add, Div, Mul, Sub};
+
 use fixed::{
     traits::Fixed,
     types::{
         I10F6, I11F5, I12F4, I13F3, I17F15, I18F14, I19F13, I20F12, I21F11, I22F10, I23F9, I9F7,
     },
 };
-use num_traits::{AsPrimitive, ConstZero, NumOps, Pow, Signed};
+use num_traits::{AsPrimitive, ConstZero, Pow, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
@@ -53,7 +55,7 @@ impl_atan_p5_default_fixed_i32!(
 
 fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
-    T: 'static + Copy + NumOps,
+    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
 {
     let x_2 = x * x / one;
     ((a * x_2 / one - b) * x_2 / one + c) * x
