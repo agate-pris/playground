@@ -11,6 +11,14 @@ use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
 
+fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
+where
+    T: Copy + Signed,
+{
+    let x_abs = x.abs();
+    x * (frac_k_4 - (x_abs - one) * (a + x_abs * b / one) / one)
+}
+
 pub trait AtanP3Default {
     type Bits;
     const A: Self::Bits;
@@ -36,14 +44,6 @@ impl_atan_p3_default_fixed!(
     1279, 344, I15F17, 640, 173, I14F18, 322, 85, I13F19, 162, 42, I12F20, 79, 26, I11F21, 38, 18,
     I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7, I7F25, 2, 5, I6F26, 2, 2
 );
-
-fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
-where
-    T: Copy + Signed,
-{
-    let x_abs = x.abs();
-    x * (frac_k_4 - (x_abs - one) * (a + x_abs * b / one) / one)
-}
 
 /// ```rust
 /// use std::f64::consts::PI;
