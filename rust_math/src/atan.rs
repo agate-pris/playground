@@ -23,11 +23,8 @@ where
 
 pub(crate) fn atan2_impl<T, F>(y: T, x: T, k: T, f: F) -> T
 where
-    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
-        + ConstZero
-        + PrimitivePromotionExt
-        + Signed,
+    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
     F: Fn(T) -> T,
     i8: AsPrimitive<T>,
 {
