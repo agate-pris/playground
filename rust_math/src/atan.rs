@@ -114,8 +114,9 @@ pub(crate) mod tests {
                 let actual = expected as f64 * PI / K_2 as f64;
                 let expected = (x as f64 / K as f64).atan();
                 assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
-                min = min.min(actual - expected);
-                max = max.max(actual - expected);
+                let diff = actual - expected;
+                min = min.min(diff);
+                max = max.max(diff);
             };
             f(x, expected);
             if neg {
