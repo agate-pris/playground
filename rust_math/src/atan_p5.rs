@@ -200,13 +200,13 @@ mod tests {
 
     fn test_optimal_constants<T>(exp: u32, expected: Vec<(T, T)>)
     where
-        <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+        T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         RangeInclusive<T>: Iterator<Item = T>,
         T: Debug
             + Display
             + Send
             + Sync
-            + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
+            + AsPrimitive<T::PrimitivePromotion>
             + AsPrimitive<f64>
             + AsPrimitive<usize>
             + Bits
