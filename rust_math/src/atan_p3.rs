@@ -121,11 +121,8 @@ where
 /// ```
 pub fn atan2_p3<T>(y: T, x: T, one: T, a: T, b: T, k: T) -> T
 where
-    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
-        + ConstZero
-        + PrimitivePromotionExt
-        + Signed,
+    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
     i8: AsPrimitive<T>,
 {
     atan2_impl(y, x, one, |x| atan_p3_impl(x, one, k / 4.as_(), a, b))
