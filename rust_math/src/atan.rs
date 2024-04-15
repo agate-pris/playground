@@ -153,8 +153,10 @@ pub(crate) mod tests {
         use std::i32::{MAX, MIN};
 
         const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-        const RIGHT: i32 = K.pow(2) / 2;
+        const STRAIGHT: i32 = K.pow(2);
+        const RIGHT: i32 = STRAIGHT / 2;
         const HALF_RIGHT: i32 = RIGHT / 2;
+        const NEG_RIGHT: i32 = -RIGHT;
 
         // Find the largest error for each of the eight regions
         // that are divided by the straight lines y = x, y = -x, y = 0, x = 0.
@@ -179,11 +181,8 @@ pub(crate) mod tests {
         {
             let points = [[1, 0], [0, 1], [-1, 0], [0, -1]];
             let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-
-            #[rustfmt::skip] assert_eq!(angles[0].1, 0        );
-            #[rustfmt::skip] assert_eq!(angles[1].1,     RIGHT);
-            #[rustfmt::skip] assert_eq!(angles[2].1, 2 * RIGHT);
-            #[rustfmt::skip] assert_eq!(angles[3].1,    -RIGHT);
+            let e = [0, RIGHT, STRAIGHT, NEG_RIGHT];
+            angles.iter().zip(e).for_each(|(a, e)| assert_eq!(a.1, e));
         }
 
         // On the straight lines y = x, y = -x.
