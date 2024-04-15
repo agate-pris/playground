@@ -6,7 +6,7 @@ use fixed::{
         I8F24, I8F8, I9F23, I9F7,
     },
 };
-use num_traits::{AsPrimitive, ConstZero, NumOps, Pow, Signed};
+use num_traits::{AsPrimitive, ConstZero, Pow, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
@@ -37,12 +37,12 @@ impl_atan_p3_default_fixed!(
     I10F22, 18, 13, I9F23, 6, 13, I8F24, 4, 7, I7F25, 2, 5, I6F26, 2, 2
 );
 
-fn atan_p3_impl<T>(x: T, x_abs: T, x_k: T, a: T, b: T, k: T) -> T
+fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
 where
-    T: 'static + Copy + NumOps,
-    i8: AsPrimitive<T>,
+    T: Copy + Signed,
 {
-    x * (k / 4.as_() - (x_abs - x_k) * (a + x_abs * b / x_k) / x_k)
+    let x_abs = x.abs();
+    x * (frac_k_4 - (x_abs - one) * (a + x_abs * b / one) / one)
 }
 
 /// ```rust
@@ -59,7 +59,7 @@ where
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan_p3<T>(x: T, x_k: T, a: T, b: T, k: T) -> T
+pub fn atan_p3<T>(x: T, one: T, a: T, b: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
     T: PartialOrd
@@ -68,7 +68,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan_impl(x, x_k, |x| atan_p3_impl(x, x.abs(), x_k, a, b, k))
+    atan_impl(x, one, |x| atan_p3_impl(x, one, k / 4.as_(), a, b))
 }
 
 /// ```rust
@@ -122,7 +122,7 @@ where
 ///     epsilon = 0.0016,
 /// );
 /// ```
-pub fn atan2_p3<T>(y: T, x: T, x_k: T, a: T, b: T, k: T) -> T
+pub fn atan2_p3<T>(y: T, x: T, one: T, a: T, b: T, k: T) -> T
 where
     <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
     T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
@@ -131,7 +131,7 @@ where
         + Signed,
     i8: AsPrimitive<T>,
 {
-    atan2_impl(y, x, x_k, |x| atan_p3_impl(x, x, x_k, a, b, k))
+    atan2_impl(y, x, one, |x| atan_p3_impl(x, one, k / 4.as_(), a, b))
 }
 
 /// ```rust
