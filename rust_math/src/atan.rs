@@ -148,6 +148,8 @@ pub(crate) mod tests {
     where
         F: Fn(i32, i32) -> i32,
     {
+        assert_eq!(f(0, 0), 0);
+
         use std::i32::{MAX, MIN};
 
         const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
