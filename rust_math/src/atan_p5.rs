@@ -51,12 +51,12 @@ impl_atan_p5_default_fixed_i32!(
     47632, I22F10, 25420, 95234, I23F9, 50981, 190506
 );
 
-fn atan_p5_impl<T>(x: T, k: T, a: T, b: T, c: T) -> T
+fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
     T: 'static + Copy + NumOps,
 {
-    let x_2 = x * x / k;
-    ((a * x_2 / k - b) * x_2 / k + c) * x
+    let x_2 = x * x / one;
+    ((a * x_2 / one - b) * x_2 / one + c) * x
 }
 
 /// ```rust
