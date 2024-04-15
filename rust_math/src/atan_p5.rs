@@ -11,6 +11,14 @@ use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
 
+fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
+where
+    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+{
+    let x_2 = x * x / one;
+    ((a * x_2 / one - b) * x_2 / one + c) * x
+}
+
 pub trait AtanP5Default {
     type Bits;
     const A: Self::Bits;
@@ -52,14 +60,6 @@ impl_atan_p5_default_fixed_i32!(
     I17F15, 787, 2968, I18F14, 1582, 5947, I19F13, 3169, 11901, I20F12, 6348, 23813, I21F11, 12707,
     47632, I22F10, 25420, 95234, I23F9, 50981, 190506
 );
-
-fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
-where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
-{
-    let x_2 = x * x / one;
-    ((a * x_2 / one - b) * x_2 / one + c) * x
-}
 
 /// ```rust
 /// use std::f64::consts::PI;
