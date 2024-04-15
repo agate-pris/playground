@@ -156,7 +156,11 @@ pub(crate) mod tests {
         const STRAIGHT: i32 = K.pow(2);
         const RIGHT: i32 = STRAIGHT / 2;
         const HALF_RIGHT: i32 = RIGHT / 2;
+        const NEG_STRAIGHT: i32 = -STRAIGHT;
         const NEG_RIGHT: i32 = -RIGHT;
+        const NEG_HALF_RIGHT: i32 = -HALF_RIGHT;
+        const OPPOSITE_HALF_RIGHT: i32 = NEG_STRAIGHT + HALF_RIGHT;
+        const OPPOSITE_NEG_HALF_RIGHT: i32 = STRAIGHT + NEG_HALF_RIGHT;
 
         // Find the largest error for each of the eight regions
         // that are divided by the straight lines y = x, y = -x, y = 0, x = 0.
@@ -189,11 +193,13 @@ pub(crate) mod tests {
         {
             let points = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
             let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-
-            #[rustfmt::skip] assert_eq!(angles[0].1,      HALF_RIGHT);
-            #[rustfmt::skip] assert_eq!(angles[1].1,  3 * HALF_RIGHT);
-            #[rustfmt::skip] assert_eq!(angles[2].1, -3 * HALF_RIGHT);
-            #[rustfmt::skip] assert_eq!(angles[3].1,     -HALF_RIGHT);
+            let e = [
+                HALF_RIGHT,
+                OPPOSITE_NEG_HALF_RIGHT,
+                OPPOSITE_HALF_RIGHT,
+                NEG_HALF_RIGHT,
+            ];
+            angles.iter().zip(e).for_each(|(a, e)| assert_eq!(a.1, e));
         }
 
         fn to_4_points(x: i32, y: i32) -> [[i32; 2]; 4] {
