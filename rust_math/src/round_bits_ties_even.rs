@@ -23,6 +23,8 @@ pub fn round_bits_ties_even<I>(i: I, bits: u32) -> I
 where
     I: From<i8> + PrimInt + Signed,
 {
+    use Ordering::*;
+
     // Returns the original value if bits is 0.
     if bits == 0 {
         return i;
@@ -36,7 +38,7 @@ where
         // Negative
         match rem.cmp(&(-pow / 2.into())) {
             // Round to even if rem is just -0.5.
-            Ordering::Equal => {
+            Equal => {
                 // -0.5 -> 0, -1.5 -> -2, -2.5 -> -2, -3.5 -> -4
                 if div % 2.into() == 0.into() {
                     div
@@ -45,15 +47,15 @@ where
                 }
             }
             // Round down if rem is less than -0.5.
-            Ordering::Less => div - 1.into(),
+            Less => div - 1.into(),
             // Round towards 0 if rem is greater than -0.5.
-            Ordering::Greater => div,
+            Greater => div,
         }
     } else {
         // 0 or Positive
         match rem.cmp(&(pow / 2.into())) {
             // Round to even if rem is just 0.5.
-            Ordering::Equal => {
+            Equal => {
                 // 0.5 -> 0, 1.5 -> 2, 2.5 -> 2, 3.5 -> 4
                 if div % 2.into() == 0.into() {
                     div
@@ -62,9 +64,9 @@ where
                 }
             }
             // Round up if rem is greater than 0.5.
-            Ordering::Greater => div + 1.into(),
+            Greater => div + 1.into(),
             // Round towards 0 if rem is less than 0.5.
-            Ordering::Less => div,
+            Less => div,
         }
     }
 }

@@ -205,6 +205,8 @@ mod tests {
         f64: AsPrimitive<T>,
         i8: AsPrimitive<T>,
     {
+        use Ordering::*;
+
         let num = num_cpus::get();
         let (a, b) = {
             let mut rng = rand::thread_rng();
@@ -249,20 +251,18 @@ mod tests {
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
-                        Ordering::Equal => {
-                            (acc.into_iter().chain(k).collect(), max_error, error_sum)
-                        }
-                        Ordering::Less => (k, max_error, error_sum),
-                        Ordering::Greater => (acc, min_max_error, min_error_sum),
+                        Equal => (acc.into_iter().chain(k).collect(), max_error, error_sum),
+                        Less => (k, max_error, error_sum),
+                        Greater => (acc, min_max_error, min_error_sum),
                     }
                 },
             )
             .reduce(
                 || (vec![], f64::INFINITY, f64::INFINITY),
                 |(lhs, lmax, lsum), (rhs, rmax, rsum)| match cmp((lmax, lsum), (rmax, rsum)) {
-                    Ordering::Equal => (lhs.into_iter().chain(rhs).collect(), lmax, lsum),
-                    Ordering::Less => (lhs, lmax, lsum),
-                    Ordering::Greater => (rhs, rmax, rsum),
+                    Equal => (lhs.into_iter().chain(rhs).collect(), lmax, lsum),
+                    Less => (lhs, lmax, lsum),
+                    Greater => (rhs, rmax, rsum),
                 },
             );
 

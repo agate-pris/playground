@@ -363,6 +363,8 @@ pub(crate) mod tests {
         RangeInclusive<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
+        use Ordering::*;
+
         let (one, k, to_rad) = {
             let base: T = 2.as_();
             let to_rad = {
@@ -410,13 +412,13 @@ pub(crate) mod tests {
                 let error_sum = error_sum.abs();
 
                 match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
-                    Ordering::Equal => (
+                    Equal => (
                         acc.into_iter().chain(once(item.clone())).collect(),
                         max_error,
                         error_sum,
                     ),
-                    Ordering::Less => (vec![item.clone()], max_error, error_sum),
-                    Ordering::Greater => (acc, min_max_error, min_error_sum),
+                    Less => (vec![item.clone()], max_error, error_sum),
+                    Greater => (acc, min_max_error, min_error_sum),
                 }
             },
         )
