@@ -113,11 +113,8 @@ where
 /// ```
 pub fn atan2_p2<T>(y: T, x: T, one: T, a: T, k: T) -> T
 where
-    <T as PrimitivePromotionExt>::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
-        + ConstZero
-        + PrimitivePromotionExt
-        + Signed,
+    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
+    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
     i8: AsPrimitive<T>,
 {
     let frac_k_4 = k / 4.as_();
