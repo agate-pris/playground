@@ -110,7 +110,7 @@ pub(crate) mod tests {
 
         let mut verify = |x: i32, expected: i32, neg: bool| {
             let mut f = |x: i32, expected: i32| {
-                assert_eq!(f(x), expected);
+                assert_eq!(f(x), expected, "x: {x}");
                 let actual = expected as f64 * PI / K_2 as f64;
                 let expected = (x as f64 / K as f64).atan();
                 assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
