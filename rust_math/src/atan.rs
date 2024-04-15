@@ -107,6 +107,8 @@ pub(crate) mod tests {
 
         let mut min = INFINITY;
         let mut max = NEG_INFINITY;
+        let mut sum = 0.0;
+        let mut count = 0_usize;
 
         let mut verify = |x: i32, expected: i32, neg: bool| {
             let mut f = |x: i32, expected: i32| {
@@ -115,6 +117,8 @@ pub(crate) mod tests {
                 let expected = (x as f64 / K as f64).atan();
                 assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
                 let diff = actual - expected;
+                sum += diff;
+                count += 1;
                 min = min.min(diff);
                 max = max.max(diff);
             };
@@ -125,10 +129,6 @@ pub(crate) mod tests {
         };
 
         verify(0, 0, false);
-        verify(MAX, RIGHT, false);
-        verify(MIN, -RIGHT, false);
-        verify(K_2 + 1, RIGHT, true);
-        verify(K, HALF_RIGHT, true);
 
         for i in 1..K {
             let expected = expected[i as usize];
@@ -138,7 +138,14 @@ pub(crate) mod tests {
             verify(K * K / (i + 1) + 1, inv, true);
         }
 
-        println!("min: {min}, max: {max}");
+        verify(MAX, RIGHT, false);
+        verify(MIN, -RIGHT, false);
+        verify(K_2 + 1, RIGHT, true);
+        verify(K, HALF_RIGHT, true);
+
+        let avg = sum / count as f64;
+
+        println!("min: {min}, max: {max}, avg: {avg}");
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(|a| atan_p2_default(I17F15::from_bits(a)), "data/atan_p2_i17f15.json", 0.003789); }
