@@ -166,7 +166,8 @@ pub(crate) mod tests {
             let expected = (p[1] as f64).atan2(p[0] as f64);
             let actual = f(p[1], p[0]);
             {
-                let actual = actual as f64 * FRAC_PI_2 / RIGHT as f64;
+                const SCALE: f64 = FRAC_PI_2 / RIGHT as f64;
+                let actual = actual as f64 * SCALE;
                 let cond = abs_diff_eq!(expected, actual, epsilon = acceptable_error);
                 assert!(cond, "p: {p:?}, expected: {expected}, actual: {actual}");
                 max_error = max_error.max((actual - expected).abs());
