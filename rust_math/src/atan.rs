@@ -3,11 +3,8 @@ use primitive_promotion::PrimitivePromotionExt;
 
 pub(crate) fn atan_impl<T, F>(x: T, one: T, f: F) -> T
 where
-    <T as PrimitivePromotionExt>::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: PartialOrd
-        + AsPrimitive<<T as PrimitivePromotionExt>::PrimitivePromotion>
-        + PrimitivePromotionExt
-        + Signed,
+    T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
+    T: PartialOrd + AsPrimitive<T::PrimitivePromotion> + PrimitivePromotionExt + Signed,
     F: Fn(T) -> T,
     i8: AsPrimitive<T>,
 {
