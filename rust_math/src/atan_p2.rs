@@ -23,6 +23,12 @@ pub trait AtanP2Consts<T> {
     }
 }
 
+impl AtanP2Consts<i32> for i32 {
+    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
+    const A: i32 = 2850;
+}
+
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
     T: Copy + Signed,
