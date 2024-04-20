@@ -29,6 +29,11 @@ impl AtanP2Consts<i32> for i32 {
     const A: i32 = 2850;
 }
 
+pub trait AtanP2 {
+    type Output;
+    fn atan_p2(self) -> Self::Output;
+}
+
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
     T: Copy + Signed,
