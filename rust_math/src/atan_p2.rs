@@ -8,10 +8,7 @@ use fixed::{
         I6F26, I7F25, I7F9, I8F24, I8F8, I9F23, I9F7,
     },
 };
-use num_traits::{AsPrimitive, ConstZero, Signed};
-use primitive_promotion::PrimitivePromotionExt;
-
-use crate::atan::atan2_impl;
+use num_traits::{ConstZero, Signed};
 
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
@@ -142,30 +139,6 @@ impl_atan_p2_default_fixed!(
     I6F26, 3
 );
 
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p2::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan2_p2(1000, 1732, K, I17F15::A, K);
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.0039,
-/// );
-/// ```
-pub fn atan2_p2<T>(y: T, x: T, one: T, a: T, k: T) -> T
-where
-    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let frac_k_4 = k / 4.as_();
-    atan2_impl(y, x, one, |x| atan_p2_impl(x, one, frac_k_4, a))
-}
-
 #[cfg(test)]
 mod tests {
     use std::{
@@ -174,7 +147,8 @@ mod tests {
         ops::RangeInclusive,
     };
 
-    use num_traits::{ConstOne, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, PrimInt};
+    use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::*;
     use rayon::prelude::*;
     use rstest::rstest;
