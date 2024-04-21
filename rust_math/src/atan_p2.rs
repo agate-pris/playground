@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use fixed::{
     traits::Fixed,
     types::{
@@ -39,6 +41,7 @@ impl AtanP2Consts<i32> for i32 {
 pub trait AtanP2 {
     type Output;
     fn atan_p2(self) -> Self::Output;
+    fn atan2_p2(self, other: Self) -> Self::Output;
 }
 
 impl AtanP2 for i32 {
@@ -60,6 +63,57 @@ impl AtanP2 for i32 {
             RIGHT - i32::calc(inv(self))
         } else {
             i32::calc(self)
+        }
+    }
+    fn atan2_p2(self, other: i32) -> Self::Output {
+        use Ordering::*;
+
+        const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
+        const NEG_STRAIGHT: i32 = -STRAIGHT;
+        const RIGHT: i32 = STRAIGHT / 2;
+        const NEG_RIGHT: i32 = -RIGHT;
+
+        match (self.cmp(&Self::ZERO), other.cmp(&Self::ZERO)) {
+            (Less, Less) => {
+                if self < other {
+                    let x = other * Self::ONE / self;
+                    NEG_RIGHT - x.atan_p2()
+                } else {
+                    let x = self * Self::ONE / other;
+                    NEG_STRAIGHT + x.atan_p2()
+                }
+            }
+            (Less, Equal) => NEG_RIGHT,
+            (Less, Greater) => {
+                if self < -other {
+                    let x = other * Self::ONE / self;
+                    NEG_RIGHT - x.atan_p2()
+                } else {
+                    let x = self * Self::ONE / other;
+                    x.atan_p2()
+                }
+            }
+            (Equal, Less) => STRAIGHT,
+            (Greater, Less) => {
+                if -self < other {
+                    let x = other * Self::ONE / self;
+                    x.atan_p2()
+                } else {
+                    let x = self * Self::ONE / other;
+                    STRAIGHT + x.atan_p2()
+                }
+            }
+            (Greater, Equal) => RIGHT,
+            (Greater, Greater) => {
+                if self < other {
+                    let x = self * Self::ONE / other;
+                    x.atan_p2()
+                } else {
+                    let x = other * Self::ONE / self;
+                    RIGHT - x.atan_p2()
+                }
+            }
+            _ => Self::ZERO,
         }
     }
 }
@@ -146,7 +200,6 @@ where
 #[cfg(test)]
 mod tests {
     use std::{
-        cmp::Ordering,
         f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
