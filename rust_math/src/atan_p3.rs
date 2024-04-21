@@ -32,6 +32,13 @@ pub trait AtanP3Consts<T> {
     }
 }
 
+impl AtanP3Consts<i32> for i32 {
+    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
+    const A: i32 = 2555;
+    const B: i32 = 691;
+}
+
 pub trait AtanP3Default {
     type Bits;
     const A: Self::Bits;
