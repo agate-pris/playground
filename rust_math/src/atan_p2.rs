@@ -9,7 +9,7 @@ use fixed::{
 use num_traits::{AsPrimitive, ConstZero, Pow, Signed};
 use primitive_promotion::PrimitivePromotionExt;
 
-use crate::atan::{atan2_impl, atan_impl};
+use crate::atan::atan2_impl;
 
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
@@ -87,30 +87,6 @@ impl_atan_p2_default_fixed!(
     I14F18, 358, I13F19, 180, I12F20, 91, I11F21, 47, I10F22, 25, I9F23, 14, I8F24, 8, I7F25, 5,
     I6F26, 3
 );
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p2::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p2(1000 * K / 1732, K, I17F15::A, K);
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.0039,
-/// );
-/// ```
-pub fn atan_p2<T>(x: T, one: T, a: T, k: T) -> T
-where
-    T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: PartialOrd + AsPrimitive<T::PrimitivePromotion> + PrimitivePromotionExt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let frac_k_4 = k / 4.as_();
-    atan_impl(x, one, |x| atan_p2_impl(x, one, frac_k_4, a))
-}
 
 /// ```rust
 /// use std::f64::consts::PI;
