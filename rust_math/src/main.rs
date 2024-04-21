@@ -2,7 +2,7 @@ use clap::Parser;
 use fixed::types::I17F15;
 use rust_math::{
     atan_p2::AtanP2,
-    atan_p3::atan_p3_default,
+    atan_p3::AtanP3,
     atan_p5::atan_p5_default,
     sin_cos::{
         cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
@@ -74,7 +74,7 @@ fn main() {
         print(AtanP2::atan_p2);
     }
     if args.atan_p3 {
-        print_fixed(atan_p3_default);
+        print(AtanP3::atan_p3);
     }
     if args.atan_p5 {
         print_fixed(atan_p5_default);
