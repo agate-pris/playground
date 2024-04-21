@@ -19,6 +19,19 @@ where
     ((a * x_2 / one - b) * x_2 / one + c) * x
 }
 
+pub trait AtanP5Consts<T> {
+    const ONE: T;
+    const A: T;
+    const B: T;
+    const C: T;
+    fn calc(x: T) -> T
+    where
+        T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+    {
+        atan_p5_impl(x, Self::ONE, Self::A, Self::B, Self::C)
+    }
+}
+
 pub trait AtanP5Default {
     type Bits;
     const A: Self::Bits;
