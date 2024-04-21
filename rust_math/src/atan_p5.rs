@@ -32,6 +32,13 @@ pub trait AtanP5Consts<T> {
     }
 }
 
+impl AtanP5Consts<i32> for i32 {
+    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const A: i32 = 787;
+    const B: i32 = 2968;
+    const C: i32 = 10373;
+}
+
 pub trait AtanP5 {
     type Output;
     fn atan_p5(self) -> Self::Output;
