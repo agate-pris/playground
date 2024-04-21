@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use fixed::{
     traits::Fixed,
     types::{
@@ -43,6 +45,80 @@ pub trait AtanP3 {
     type Output;
     fn atan_p3(self) -> Self::Output;
     fn atan2_p3(self, other: Self) -> Self::Output;
+}
+
+impl AtanP3 for i32 {
+    type Output = i32;
+
+    fn atan_p3(self) -> Self::Output {
+        fn inv(x: i32) -> i32 {
+            const K: i32 = 2_i32.pow(i32::BITS - 2);
+            K / x
+        }
+
+        const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
+        const NEG_ONE: i32 = -<i32 as AtanP3Consts<i32>>::ONE;
+
+        if self < NEG_ONE {
+            const NEG_RIGHT: i32 = -RIGHT;
+            NEG_RIGHT - i32::calc(inv(self))
+        } else if self > <i32 as AtanP3Consts<i32>>::ONE {
+            RIGHT - i32::calc(inv(self))
+        } else {
+            i32::calc(self)
+        }
+    }
+    fn atan2_p3(self, other: i32) -> Self::Output {
+        use Ordering::*;
+
+        const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
+        const NEG_STRAIGHT: i32 = -STRAIGHT;
+        const RIGHT: i32 = STRAIGHT / 2;
+        const NEG_RIGHT: i32 = -RIGHT;
+
+        match (self.cmp(&Self::ZERO), other.cmp(&Self::ZERO)) {
+            (Less, Less) => {
+                if self < other {
+                    let x = other * Self::ONE / self;
+                    NEG_RIGHT - x.atan_p3()
+                } else {
+                    let x = self * Self::ONE / other;
+                    NEG_STRAIGHT + x.atan_p3()
+                }
+            }
+            (Less, Equal) => NEG_RIGHT,
+            (Less, Greater) => {
+                if self < -other {
+                    let x = other * Self::ONE / self;
+                    NEG_RIGHT - x.atan_p3()
+                } else {
+                    let x = self * Self::ONE / other;
+                    x.atan_p3()
+                }
+            }
+            (Equal, Less) => STRAIGHT,
+            (Greater, Less) => {
+                if -self < other {
+                    let x = other * Self::ONE / self;
+                    x.atan_p3()
+                } else {
+                    let x = self * Self::ONE / other;
+                    STRAIGHT + x.atan_p3()
+                }
+            }
+            (Greater, Equal) => RIGHT,
+            (Greater, Greater) => {
+                if self < other {
+                    let x = self * Self::ONE / other;
+                    x.atan_p3()
+                } else {
+                    let x = other * Self::ONE / self;
+                    RIGHT - x.atan_p3()
+                }
+            }
+            _ => Self::ZERO,
+        }
+    }
 }
 
 pub trait AtanP3Default {
@@ -194,9 +270,7 @@ where
 
 #[cfg(test)]
 mod tests {
-
     use std::{
-        cmp::Ordering,
         f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
