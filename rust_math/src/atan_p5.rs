@@ -30,7 +30,7 @@ impl AtanP5Consts<i32> for i32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const A: i32 = 787;
     const B: i32 = 2968;
-    const C: i32 = 10373;
+    const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
 }
 
 pub trait AtanP5 {
