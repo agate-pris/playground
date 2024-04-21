@@ -78,7 +78,7 @@ pub(crate) mod tests {
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
     use crate::{
-        atan_p2::{atan2_p2_default, atan_p2_default},
+        atan_p2::{atan2_p2_default, AtanP2},
         atan_p3::{atan2_p3_default, atan_p3_default},
         atan_p5::{atan2_p5_default, atan_p5_default},
         bits::Bits,
@@ -148,7 +148,7 @@ pub(crate) mod tests {
         println!("min: {min}, max: {max}, avg: {avg}");
     }
 
-    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(|a| atan_p2_default(I17F15::from_bits(a)), "data/atan_p2_i17f15.json", 0.003789); }
+    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003789); }
     #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(|a| atan_p3_default(I17F15::from_bits(a)), "data/atan_p3_i17f15.json", 0.001601); }
     #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(|a| atan_p5_default(I17F15::from_bits(a)), "data/atan_p5_i17f15.json", 0.000922); }
 

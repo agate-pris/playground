@@ -119,37 +119,6 @@ where
 /// use rust_math::atan_p2::*;
 /// const EXP: u32 = i32::BITS / 2 - 1;
 /// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p2_default(I17F15::from_bits(1000 * K / 1732));
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.0039,
-/// );
-/// ```
-pub fn atan_p2_default<T>(x: T) -> <T as Fixed>::Bits
-where
-    <<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion:
-        PartialOrd + AsPrimitive<<T as Fixed>::Bits> + Signed,
-    <T as Fixed>::Bits: AsPrimitive<<<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion>
-        + Pow<u32, Output = <T as Fixed>::Bits>
-        + PrimitivePromotionExt
-        + Signed,
-    T: AtanP2Default<Bits = <T as Fixed>::Bits> + Fixed,
-    i8: AsPrimitive<<T as Fixed>::Bits>,
-{
-    let base: <T as Fixed>::Bits = 2.as_();
-    let x_k = base.pow(T::FRAC_NBITS);
-    let k = base.pow(T::INT_NBITS - 2);
-    atan_p2(x.to_bits(), x_k, <T as AtanP2Default>::A, k)
-}
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p2::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
 /// let result = atan2_p2(1000, 1732, K, I17F15::A, K);
 /// assert_abs_diff_eq!(
 ///     PI / 6.0,
