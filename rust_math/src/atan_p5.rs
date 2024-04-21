@@ -32,6 +32,12 @@ pub trait AtanP5Consts<T> {
     }
 }
 
+pub trait AtanP5 {
+    type Output;
+    fn atan_p5(self) -> Self::Output;
+    fn atan2_p5(self, other: Self) -> Self::Output;
+}
+
 pub trait AtanP5Default {
     type Bits;
     const A: Self::Bits;
