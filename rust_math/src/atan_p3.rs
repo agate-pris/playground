@@ -58,6 +58,10 @@ impl AtanP3 for i32 {
         }
     }
     fn atan2_p3(self, other: i32) -> Self::Output {
+        fn div(a: i32, b: i32) -> i32 {
+            (a as i64 * <i32 as AtanP3Consts<i32>>::ONE as i64 / b as i64) as i32
+        }
+
         use Ordering::*;
 
         const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
@@ -68,40 +72,40 @@ impl AtanP3 for i32 {
         match (self.cmp(&Self::ZERO), other.cmp(&Self::ZERO)) {
             (Less, Less) => {
                 if self < other {
-                    let x = other * Self::ONE / self;
+                    let x = div(other, self);
                     NEG_RIGHT - x.atan_p3()
                 } else {
-                    let x = self * Self::ONE / other;
+                    let x = div(self, other);
                     NEG_STRAIGHT + x.atan_p3()
                 }
             }
             (Less, Equal) => NEG_RIGHT,
             (Less, Greater) => {
                 if self < -other {
-                    let x = other * Self::ONE / self;
+                    let x = div(other, self);
                     NEG_RIGHT - x.atan_p3()
                 } else {
-                    let x = self * Self::ONE / other;
+                    let x = div(self, other);
                     x.atan_p3()
                 }
             }
             (Equal, Less) => STRAIGHT,
             (Greater, Less) => {
                 if -self < other {
-                    let x = other * Self::ONE / self;
-                    x.atan_p3()
+                    let x = div(other, self);
+                    RIGHT - x.atan_p3()
                 } else {
-                    let x = self * Self::ONE / other;
+                    let x = div(self, other);
                     STRAIGHT + x.atan_p3()
                 }
             }
             (Greater, Equal) => RIGHT,
             (Greater, Greater) => {
                 if self < other {
-                    let x = self * Self::ONE / other;
+                    let x = div(self, other);
                     x.atan_p3()
                 } else {
-                    let x = other * Self::ONE / self;
+                    let x = div(other, self);
                     RIGHT - x.atan_p3()
                 }
             }
