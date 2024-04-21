@@ -34,6 +34,29 @@ pub trait AtanP2 {
     fn atan_p2(self) -> Self::Output;
 }
 
+impl AtanP2 for i32 {
+    type Output = i32;
+
+    fn atan_p2(self) -> Self::Output {
+        fn inv(x: i32) -> i32 {
+            const K: i32 = 2_i32.pow(i32::BITS - 2);
+            K / x
+        }
+
+        const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
+        const NEG_ONE: i32 = -<i32 as AtanP2Consts<i32>>::ONE;
+
+        if self < NEG_ONE {
+            const NEG_RIGHT: i32 = -RIGHT;
+            NEG_RIGHT - i32::calc(inv(self))
+        } else if self > <i32 as AtanP2Consts<i32>>::ONE {
+            RIGHT - i32::calc(inv(self))
+        } else {
+            i32::calc(self)
+        }
+    }
+}
+
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
     T: Copy + Signed,
