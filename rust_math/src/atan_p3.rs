@@ -19,6 +19,19 @@ where
     x * (frac_k_4 - (x_abs - one) * (a + x_abs * b / one) / one)
 }
 
+pub trait AtanP3Consts<T> {
+    const ONE: T;
+    const FRAC_K_4: T;
+    const A: T;
+    const B: T;
+    fn calc(x: T) -> T
+    where
+        T: Copy + Signed,
+    {
+        atan_p3_impl(x, Self::ONE, Self::FRAC_K_4, Self::A, Self::B)
+    }
+}
+
 pub trait AtanP3Default {
     type Bits;
     const A: Self::Bits;
