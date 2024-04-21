@@ -11,6 +11,13 @@ use primitive_promotion::PrimitivePromotionExt;
 
 use crate::atan::{atan2_impl, atan_impl};
 
+fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
+where
+    T: Copy + Signed,
+{
+    x * (frac_k_4 + a * (one - x.abs()) / one)
+}
+
 pub trait AtanP2Consts<T> {
     const ONE: T;
     const FRAC_K_4: T;
@@ -55,13 +62,6 @@ impl AtanP2 for i32 {
             i32::calc(self)
         }
     }
-}
-
-fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
-where
-    T: Copy + Signed,
-{
-    x * (frac_k_4 + a * (one - x.abs()) / one)
 }
 
 pub trait AtanP2Default {
