@@ -3,16 +3,7 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 
-use fixed::{
-    traits::Fixed,
-    types::{
-        I10F6, I11F5, I12F4, I13F3, I17F15, I18F14, I19F13, I20F12, I21F11, I22F10, I23F9, I9F7,
-    },
-};
-use num_traits::{AsPrimitive, ConstZero, Pow, Signed};
-use primitive_promotion::PrimitivePromotionExt;
-
-use crate::atan::{atan2_impl, atan_impl};
+use num_traits::ConstZero;
 
 fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
@@ -122,39 +113,7 @@ impl AtanP5 for i32 {
     }
 }
 
-pub trait AtanP5Default {
-    type Bits;
-    const A: Self::Bits;
-    const B: Self::Bits;
-    const C: Self::Bits;
-}
-
-macro_rules! impl_atan_p5_default_fixed_i16 {
-    ($($t:ty, $a:expr, $b:expr),*) => {
-        $(
-            impl AtanP5Default for $t {
-                type Bits = <Self as Fixed>::Bits;
-                const A: Self::Bits = $a;
-                const B: Self::Bits = $b;
-                const C: Self::Bits = 2_i16.pow(i16::BITS - 2 - <Self as Fixed>::FRAC_NBITS) / 4 - Self::A + Self::B;
-            }
-        )*
-    };
-}
-
-macro_rules! impl_atan_p5_default_fixed_i32 {
-    ($($t:ty, $a:expr, $b:expr),*) => {
-        $(
-            impl AtanP5Default for $t {
-                type Bits = <Self as Fixed>::Bits;
-                const A: Self::Bits = $a;
-                const B: Self::Bits = $b;
-                const C: Self::Bits = 2_i32.pow(i32::BITS - 2 - <Self as Fixed>::FRAC_NBITS) / 4 - Self::A + Self::B;
-            }
-        )*
-    };
-}
-
+/*
 impl_atan_p5_default_fixed_i16!(
     I13F3, 69, 204, I12F4, 27, 93, I11F5, 13, 46, I10F6, 6, 22, I9F7, 5, 14
 );
@@ -163,125 +122,7 @@ impl_atan_p5_default_fixed_i32!(
     I17F15, 787, 2968, I18F14, 1582, 5947, I19F13, 3169, 11901, I20F12, 6348, 23813, I21F11, 12707,
     47632, I22F10, 25420, 95234, I23F9, 50981, 190506
 );
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p5::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p5(1000 * K / 1732, K, I17F15::A, I17F15::B, I17F15::C);
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.00085,
-/// );
-/// ```
-pub fn atan_p5<T>(x: T, one: T, a: T, b: T, c: T) -> T
-where
-    T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: PartialOrd + AsPrimitive<T::PrimitivePromotion> + PrimitivePromotionExt + Signed,
-    i8: AsPrimitive<T>,
-{
-    atan_impl(x, one, |x| atan_p5_impl(x, one, a, b, c))
-}
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p5::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan_p5_default(I17F15::from_bits(1000 * K / 1732));
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.00085,
-/// );
-/// ```
-pub fn atan_p5_default<T>(x: T) -> <T as Fixed>::Bits
-where
-    <<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion:
-        PartialOrd + AsPrimitive<<T as Fixed>::Bits> + Signed,
-    <T as Fixed>::Bits: AsPrimitive<<<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion>
-        + Pow<u32, Output = <T as Fixed>::Bits>
-        + PrimitivePromotionExt
-        + Signed,
-    T: AtanP5Default<Bits = <T as Fixed>::Bits> + Fixed,
-    i8: AsPrimitive<<T as Fixed>::Bits>,
-{
-    let base: <T as Fixed>::Bits = 2.as_();
-    let k = base.pow(T::FRAC_NBITS);
-    atan_p5(
-        x.to_bits(),
-        k,
-        <T as AtanP5Default>::A,
-        <T as AtanP5Default>::B,
-        <T as AtanP5Default>::C,
-    )
-}
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p5::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// const K: i32 = 2_i32.pow(EXP);
-/// let result = atan2_p5(1000, 1732, K, I17F15::A, I17F15::B, I17F15::C);
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / K.pow(2) as f64,
-///     epsilon = 0.00085,
-/// );
-/// ```
-pub fn atan2_p5<T>(y: T, x: T, one: T, a: T, b: T, c: T) -> T
-where
-    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
-    i8: AsPrimitive<T>,
-{
-    atan2_impl(y, x, one, |x| atan_p5_impl(x, one, a, b, c))
-}
-
-/// ```rust
-/// use std::f64::consts::PI;
-/// use approx::assert_abs_diff_eq;
-/// use fixed::types::I17F15;
-/// use rust_math::atan_p5::*;
-/// const EXP: u32 = i32::BITS / 2 - 1;
-/// let result = atan2_p5_default(I17F15::from_bits(1000), I17F15::from_bits(1732));
-/// assert_abs_diff_eq!(
-///     PI / 6.0,
-///     result as f64 * PI / 2_i32.pow(2 * EXP) as f64,
-///     epsilon = 0.00085,
-/// );
-/// ```
-pub fn atan2_p5_default<T>(y: T, x: T) -> <T as Fixed>::Bits
-where
-    <<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion:
-        PartialOrd + AsPrimitive<<T as Fixed>::Bits> + Signed,
-    <T as Fixed>::Bits: AsPrimitive<<<T as Fixed>::Bits as PrimitivePromotionExt>::PrimitivePromotion>
-        + ConstZero
-        + Pow<u32, Output = <T as Fixed>::Bits>
-        + PrimitivePromotionExt
-        + Signed,
-    T: AtanP5Default<Bits = <T as Fixed>::Bits> + Fixed,
-    i8: AsPrimitive<<T as Fixed>::Bits>,
-{
-    let base: <T as Fixed>::Bits = 2.as_();
-    let k = base.pow(T::FRAC_NBITS);
-    atan2_p5(
-        y.to_bits(),
-        x.to_bits(),
-        k,
-        <T as AtanP5Default>::A,
-        <T as AtanP5Default>::B,
-        <T as AtanP5Default>::C,
-    )
-}
+*/
 
 #[cfg(test)]
 mod tests {
@@ -291,7 +132,8 @@ mod tests {
         ops::RangeInclusive,
     };
 
-    use num_traits::{ConstOne, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, PrimInt, Signed};
+    use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::SliceRandom;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
     use rstest::rstest;
@@ -362,7 +204,7 @@ mod tests {
                         exp,
                         &atan_expected,
                         search_range,
-                        |x, one, k, ab| atan_p5(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1),
+                        |x, one, k, ab| atan_p5_impl(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1),
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
@@ -399,11 +241,11 @@ mod tests {
 
     #[rstest]
     #[case(2, vec![(139, 409), (140, 410)])]
-    #[case(3, vec![(I13F3::A, I13F3::B)])]
-    #[case(4, vec![(I12F4::A, I12F4::B)])]
-    #[case(5, vec![(I11F5::A, I11F5::B)])]
-    #[case(6, vec![(I10F6::A, I10F6::B)])]
-    #[case(7, vec![(I9F7::A, I9F7::B)])]
+    //#[case(3, vec![(I13F3::A, I13F3::B)])]
+    //#[case(4, vec![(I12F4::A, I12F4::B)])]
+    //#[case(5, vec![(I11F5::A, I11F5::B)])]
+    //#[case(6, vec![(I10F6::A, I10F6::B)])]
+    //#[case(7, vec![(I9F7::A, I9F7::B)])]
     fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<(i16, i16)>) {
         test_optimal_constants(exp, expected);
     }
@@ -419,34 +261,12 @@ mod tests {
                 }
             };
         }
-        define_test!(case_01, 15, vec![(I17F15::A, I17F15::B)]);
-        define_test!(case_02, 14, vec![(I18F14::A, I18F14::B)]);
-        define_test!(case_03, 13, vec![(I19F13::A, I19F13::B)]);
-        define_test!(case_04, 12, vec![(I20F12::A, I20F12::B)]);
-        define_test!(case_05, 11, vec![(I21F11::A, I21F11::B)]);
-        define_test!(case_06, 10, vec![(I22F10::A, I22F10::B)]);
-        define_test!(case_07, 9, vec![(I23F9::A, I23F9::B)]);
-    }
-
-    #[test]
-    fn test_atan_p3_default_trait() {
-        assert_eq!(I13F3::A, 69);
-        assert_eq!(I13F3::B, 204);
-        assert_eq!(I13F3::C, 647);
-        assert_eq!(I12F4::A, 27);
-        assert_eq!(I12F4::B, 93);
-        assert_eq!(I12F4::C, 322);
-        assert_eq!(I11F5::A, 13);
-        assert_eq!(I11F5::B, 46);
-        assert_eq!(I11F5::C, 161);
-        assert_eq!(I10F6::A, 6);
-        assert_eq!(I10F6::B, 22);
-        assert_eq!(I10F6::C, 80);
-        assert_eq!(I9F7::A, 5);
-        assert_eq!(I9F7::B, 14);
-        assert_eq!(I9F7::C, 41);
-        assert_eq!(I17F15::A, 787);
-        assert_eq!(I17F15::B, 2968);
-        assert_eq!(I17F15::C, 10373);
+        define_test!(case_01, 15, vec![(i32::A, i32::B)]);
+        //define_test!(case_02, 14, vec![(I18F14::A, I18F14::B)]);
+        //define_test!(case_03, 13, vec![(I19F13::A, I19F13::B)]);
+        //define_test!(case_04, 12, vec![(I20F12::A, I20F12::B)]);
+        //define_test!(case_05, 11, vec![(I21F11::A, I21F11::B)]);
+        //define_test!(case_06, 10, vec![(I22F10::A, I22F10::B)]);
+        //define_test!(case_07, 9, vec![(I23F9::A, I23F9::B)]);
     }
 }

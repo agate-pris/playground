@@ -1,9 +1,8 @@
 use clap::Parser;
-use fixed::types::I17F15;
 use rust_math::{
     atan_p2::AtanP2,
     atan_p3::AtanP3,
-    atan_p5::atan_p5_default,
+    atan_p5::AtanP5,
     sin_cos::{
         cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
         sin_p5o_default,
@@ -39,19 +38,6 @@ fn main() {
         print!("]");
     }
 
-    fn print_fixed<F>(f: F)
-    where
-        F: Fn(I17F15) -> i32,
-    {
-        const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-        println!("[");
-        for x in 0..K {
-            println!("{},", f(I17F15::from_bits(x)));
-        }
-        println!("{}", f(I17F15::from_bits(K)));
-        print!("]");
-    }
-
     if args.cos_p2 {
         print(cos_p2_default);
     }
@@ -77,6 +63,6 @@ fn main() {
         print(AtanP3::atan_p3);
     }
     if args.atan_p5 {
-        print_fixed(atan_p5_default);
+        print(AtanP5::atan_p5);
     }
 }

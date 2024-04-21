@@ -1,64 +1,3 @@
-use num_traits::{AsPrimitive, ConstZero, Signed};
-use primitive_promotion::PrimitivePromotionExt;
-
-pub(crate) fn atan_impl<T, F>(x: T, one: T, f: F) -> T
-where
-    T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-    T: PartialOrd + AsPrimitive<T::PrimitivePromotion> + PrimitivePromotionExt + Signed,
-    F: Fn(T) -> T,
-    i8: AsPrimitive<T>,
-{
-    if x < -one {
-        let k_2 = one * one;
-        let x = k_2 / x;
-        -k_2 / 2.as_() - f(x)
-    } else if x > one {
-        let k_2 = one * one;
-        let x = k_2 / x;
-        k_2 / 2.as_() - f(x)
-    } else {
-        f(x)
-    }
-}
-
-pub(crate) fn atan2_impl<T, F>(y: T, x: T, k: T, f: F) -> T
-where
-    T::PrimitivePromotion: AsPrimitive<T> + PartialOrd + Signed,
-    T: AsPrimitive<T::PrimitivePromotion> + ConstZero + PrimitivePromotionExt + Signed,
-    F: Fn(T) -> T,
-    i8: AsPrimitive<T>,
-{
-    if y.is_zero() && x.is_zero() {
-        return T::ZERO;
-    }
-
-    let x_abs = x.as_().abs();
-    let y_abs = y.as_().abs();
-    let x_is_negative = x.is_negative();
-    let y_is_negative = y.is_negative();
-
-    if x_abs > y_abs {
-        let x = (y_abs * k.as_() / x_abs).as_();
-        let v = f(x);
-        match (x_is_negative, y_is_negative) {
-            (false, false) => v,
-            (true, false) => k * k - v,
-            (false, true) => -v,
-            (true, true) => v - k * k,
-        }
-    } else {
-        let x = (x_abs * k.as_() / y_abs).as_();
-        let v = f(x);
-        let right = k * k / 2.as_();
-        match (x_is_negative, y_is_negative) {
-            (false, false) => right - v,
-            (true, false) => right + v,
-            (false, true) => -right + v,
-            (true, true) => -right - v,
-        }
-    }
-}
-
 #[cfg(test)]
 pub(crate) mod tests {
     use std::{
@@ -73,19 +12,11 @@ pub(crate) mod tests {
     };
 
     use approx::{abs_diff_eq, assert_abs_diff_eq};
-    use fixed::types::I17F15;
-    use num_traits::{ConstOne, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
+    use primitive_promotion::PrimitivePromotionExt;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-    use crate::{
-        atan_p2::AtanP2,
-        atan_p3::AtanP3,
-        atan_p5::{atan2_p5_default, atan_p5_default},
-        bits::Bits,
-        tests::read_data,
-    };
-
-    use super::*;
+    use crate::{atan_p2::AtanP2, atan_p3::AtanP3, atan_p5::AtanP5, bits::Bits, tests::read_data};
 
     fn test_atan<F>(f: F, data_path: &str, acceptable_error: f64)
     where
@@ -150,7 +81,7 @@ pub(crate) mod tests {
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003789); }
     #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(AtanP3::atan_p3, "data/atan_p3_i17f15.json", 0.001601); }
-    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(|a| atan_p5_default(I17F15::from_bits(a)), "data/atan_p5_i17f15.json", 0.000922); }
+    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(AtanP5::atan_p5, "data/atan_p5_i17f15.json", 0.000922); }
 
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
@@ -323,7 +254,7 @@ pub(crate) mod tests {
 
     #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003789); }
     #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001603); }
-    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(|y, x| atan2_p5_default(I17F15::from_bits(y), I17F15::from_bits(x)), "data/atan_p5_i17f15.json", 0.000928); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000928); }
 
     pub fn make_atan_data(exp: u32) -> Vec<f64> {
         let num = num_cpus::get();
