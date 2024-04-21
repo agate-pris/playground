@@ -39,6 +39,12 @@ impl AtanP3Consts<i32> for i32 {
     const B: i32 = 691;
 }
 
+pub trait AtanP3 {
+    type Output;
+    fn atan_p3(self) -> Self::Output;
+    fn atan2_p3(self, other: Self) -> Self::Output;
+}
+
 pub trait AtanP3Default {
     type Bits;
     const A: Self::Bits;
