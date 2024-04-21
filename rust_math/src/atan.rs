@@ -4,7 +4,7 @@ pub(crate) mod tests {
         cmp::Ordering,
         f64::{
             consts::{FRAC_PI_2, PI},
-            INFINITY, NEG_INFINITY,
+            NEG_INFINITY,
         },
         fmt::Debug,
         iter::once,
@@ -20,68 +20,128 @@ pub(crate) mod tests {
 
     fn test_atan<F>(f: F, data_path: &str, acceptable_error: f64)
     where
-        F: Fn(i32) -> i32,
+        F: Sync + Fn(i32) -> i32,
     {
         use std::i32::{MAX, MIN};
 
-        const EXP: u32 = i32::BITS / 2 - 1;
-        const K: i32 = 2_i32.pow(EXP);
-        const K_2: i32 = K.pow(2);
-        const RIGHT: i32 = K_2 / 2;
+        const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+        const POWER_OF_ONE: i32 = ONE.pow(2);
+        const NEG_POWER_OF_ONE: i32 = -POWER_OF_ONE;
+        const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
         const HALF_RIGHT: i32 = RIGHT / 2;
+        const NEG_RIGHT: i32 = -RIGHT;
+        const NEG_HALF_RIGHT: i32 = -HALF_RIGHT;
 
         let expected = read_data::<i32>(data_path).unwrap();
 
-        assert_eq!(expected.len(), (K + 1) as usize);
+        assert_eq!(expected.len(), (ONE + 1) as usize);
         assert_eq!(expected[0], 0);
-        assert_eq!(expected[K as usize], HALF_RIGHT);
+        assert_eq!(expected[ONE as usize], HALF_RIGHT);
 
-        let mut min = INFINITY;
-        let mut max = NEG_INFINITY;
-        let mut sum = 0.0;
-        let mut count = 0_usize;
-
-        let mut verify = |x: i32, expected: i32, neg: bool| {
-            let mut f = |x: i32, expected: i32| {
-                assert_eq!(f(x), expected, "x: {x}");
-                let actual = expected as f64 * PI / K_2 as f64;
-                let expected = (x as f64 / K as f64).atan();
-                assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
-                let diff = actual - expected;
-                sum += diff;
-                count += 1;
-                min = min.min(diff);
-                max = max.max(diff);
+        let f = |x: i32| {
+            let std = (x as f64 / ONE as f64).atan();
+            let fx = f(x);
+            let diff = {
+                let scaled = fx as f64 * PI / POWER_OF_ONE as f64;
+                assert_abs_diff_eq!(std, scaled, epsilon = acceptable_error);
+                scaled - std
             };
-            f(x, expected);
-            if neg {
-                f(-x, -expected);
-            }
+            (fx, diff)
         };
 
-        verify(0, 0, false);
+        let max = NEG_INFINITY
+            .max({
+                let (actual, diff) = f(MIN);
+                assert_eq!(actual, NEG_RIGHT);
+                diff.abs()
+            })
+            .max({
+                let (actual, diff) = f(MAX);
+                assert_eq!(actual, RIGHT);
+                diff.abs()
+            })
+            .max({
+                let (actual, diff) = f(NEG_POWER_OF_ONE - 1);
+                assert_eq!(actual, NEG_RIGHT);
+                diff.abs()
+            })
+            .max({
+                let (actual, diff) = f(POWER_OF_ONE + 1);
+                assert_eq!(actual, RIGHT);
+                diff.abs()
+            });
 
-        for i in 1..K {
-            let expected = expected[i as usize];
-            let inv = RIGHT - expected;
-            verify(i, expected, true);
-            verify(K * K / i, inv, true);
-            verify(K * K / (i + 1) + 1, inv, true);
-        }
+        let (sum, max) = {
+            let (actual, diff) = f(0);
+            assert_eq!(actual, 0);
+            (diff, max.max(diff.abs()))
+        };
+        let max = max.max({
+            const NEG_K: i32 = -ONE;
+            let (actual, diff) = f(NEG_K);
+            assert_eq!(actual, NEG_HALF_RIGHT);
+            diff.abs()
+        });
+        let (sum, max) = {
+            let (actual, diff) = f(ONE);
+            assert_eq!(actual, HALF_RIGHT);
+            (sum + diff, max.max(diff.abs()))
+        };
 
-        verify(MAX, RIGHT, false);
-        verify(MIN, -RIGHT, false);
-        verify(K_2 + 1, RIGHT, true);
-        verify(K, HALF_RIGHT, true);
+        let num = num_cpus::get();
 
-        let avg = sum / count as f64;
+        let (sum, max) = (0..num)
+            .into_par_iter()
+            .fold(
+                || (0.0, NEG_INFINITY),
+                |(sum, max), n| {
+                    let begin = 1 + n as i32 * (ONE - 1) / num as i32;
+                    let end = 1 + (n + 1) as i32 * (ONE - 1) / num as i32;
+                    (begin..end).fold((sum, max), |(sum, max), i| {
+                        let expected = expected[i as usize];
+                        let max = max
+                            .max({
+                                let (actual, diff) = f(NEG_POWER_OF_ONE / (i + 1) - 1);
+                                assert_eq!(actual, NEG_RIGHT + expected);
+                                diff.abs()
+                            })
+                            .max({
+                                let (actual, diff) = f(POWER_OF_ONE / (i + 1) + 1);
+                                assert_eq!(actual, RIGHT - expected);
+                                diff.abs()
+                            })
+                            .max({
+                                let (actual, diff) = f(NEG_POWER_OF_ONE / i);
+                                assert_eq!(actual, NEG_RIGHT + expected);
+                                diff.abs()
+                            })
+                            .max({
+                                let (actual, diff) = f(POWER_OF_ONE / i);
+                                assert_eq!(actual, RIGHT - expected);
+                                diff.abs()
+                            })
+                            .max({
+                                let (actual, diff) = f(-i);
+                                assert_eq!(actual, -expected);
+                                diff.abs()
+                            });
+                        let (actual, diff) = f(i);
+                        assert_eq!(actual, expected);
+                        (sum + diff, max.max(diff.abs()))
+                    })
+                },
+            )
+            .reduce(
+                || (sum, max),
+                |(lsum, lmax), (rsum, rmax)| (lsum + rsum, lmax.max(rmax)),
+            );
 
-        println!("min: {min}, max: {max}, avg: {avg}");
+        println!("max: {max}, avg: {}", sum / (ONE + 1) as f64);
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003789); }
-    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(AtanP3::atan_p3, "data/atan_p3_i17f15.json", 0.001601); }
-    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(AtanP5::atan_p5, "data/atan_p5_i17f15.json", 0.000922); }
+    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(AtanP3::atan_p3, "data/atan_p3_i17f15.json", 0.001544); }
+    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(AtanP5::atan_p5, "data/atan_p5_i17f15.json", 0.000782); }
 
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
