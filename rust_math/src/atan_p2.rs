@@ -26,7 +26,7 @@ pub trait AtanP2Consts<T> {
     where
         T: Copy + Signed,
     {
-        x * (Self::FRAC_K_4 + Self::A * (Self::ONE - x.abs()) / Self::ONE)
+        atan_p2_impl(x, Self::ONE, Self::FRAC_K_4, Self::A)
     }
 }
 
