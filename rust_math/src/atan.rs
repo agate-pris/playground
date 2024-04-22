@@ -4,6 +4,10 @@ const fn inv_i32(x: i32, frac_n_bits: u32) -> i32 {
     ((k + x_as_i64.abs() / 2) / x_as_i64) as i32
 }
 
+pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
+    inv_i32(x, 15)
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use std::{
