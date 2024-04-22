@@ -14,7 +14,7 @@ pub(crate) mod tests {
         cmp::Ordering,
         f64::{
             consts::{FRAC_PI_2, PI},
-            NEG_INFINITY,
+            INFINITY, NEG_INFINITY,
         },
         fmt::Debug,
         iter::once,
@@ -35,118 +35,231 @@ pub(crate) mod tests {
         use std::i32::{MAX, MIN};
 
         const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-        const POWER_OF_ONE: i32 = ONE.pow(2);
-        const NEG_POWER_OF_ONE: i32 = -POWER_OF_ONE;
         const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
-        const HALF_RIGHT: i32 = RIGHT / 2;
         const NEG_RIGHT: i32 = -RIGHT;
-        const NEG_HALF_RIGHT: i32 = -HALF_RIGHT;
+        const K: i64 = 2_i64.pow(i32::BITS - 1);
+        const NEG_K: i64 = -K;
 
         let expected = read_data::<i32>(data_path).unwrap();
 
         assert_eq!(expected.len(), (ONE + 1) as usize);
         assert_eq!(expected[0], 0);
-        assert_eq!(expected[ONE as usize], HALF_RIGHT);
+        assert_eq!(expected[ONE as usize], RIGHT / 2);
 
         let f = |x: i32| {
-            let std = (x as f64 / ONE as f64).atan();
             let fx = f(x);
             let diff = {
-                let scaled = fx as f64 * PI / POWER_OF_ONE as f64;
-                assert_abs_diff_eq!(std, scaled, epsilon = acceptable_error);
-                scaled - std
+                const SCALE: f64 = PI / ONE.pow(2) as f64;
+                let fx = SCALE * fx as f64;
+                let std = (x as f64 / ONE as f64).atan();
+                assert_abs_diff_eq!(fx, std, epsilon = acceptable_error);
+                fx - std
             };
             (fx, diff)
         };
 
-        let max = NEG_INFINITY
-            .max({
-                let (actual, diff) = f(MIN);
-                assert_eq!(actual, NEG_RIGHT);
-                diff.abs()
-            })
-            .max({
-                let (actual, diff) = f(MAX);
-                assert_eq!(actual, RIGHT);
-                diff.abs()
-            })
-            .max({
-                let (actual, diff) = f(NEG_POWER_OF_ONE - 1);
-                assert_eq!(actual, NEG_RIGHT);
-                diff.abs()
-            })
-            .max({
-                let (actual, diff) = f(POWER_OF_ONE + 1);
-                assert_eq!(actual, RIGHT);
-                diff.abs()
-            });
-
-        let (sum, max) = {
-            let (actual, diff) = f(0);
-            assert_eq!(actual, 0);
-            (diff, max.max(diff.abs()))
+        let (neg_inv_error_min, neg_inv_error_max) = {
+            let expected = NEG_RIGHT + expected[1];
+            let (actual, diff_1) = f((NEG_K / 3 - 1) as i32);
+            assert_eq!(actual, expected);
+            let (actual, diff_2) = f(MIN);
+            assert_eq!(actual, expected);
+            (diff_1.min(diff_2), diff_1.max(diff_2))
         };
-        let max = max.max({
-            const NEG_K: i32 = -ONE;
-            let (actual, diff) = f(NEG_K);
-            assert_eq!(actual, NEG_HALF_RIGHT);
-            diff.abs()
-        });
-        let (sum, max) = {
-            let (actual, diff) = f(ONE);
-            assert_eq!(actual, HALF_RIGHT);
-            (sum + diff, max.max(diff.abs()))
+
+        let (inv_error_min, inv_error_max) = {
+            let expected = RIGHT - expected[1];
+            let (actual, diff_1) = f((K / 3 + 1) as i32);
+            assert_eq!(actual, expected);
+            let (actual, diff_2) = f(MAX);
+            assert_eq!(actual, expected);
+            (diff_1.min(diff_2), diff_1.max(diff_2))
+        };
+
+        let (neg_error_min, neg_error_max) = {
+            let (actual, diff) = f(-1);
+            assert_eq!(actual, -expected[1]);
+            (diff, diff)
+        };
+
+        let (diff_sum, error_min, error_max) = {
+            let (actual, diff_1) = f(1);
+            assert_eq!(actual, expected[1]);
+            let (actual, diff_2) = f(0);
+            assert_eq!(actual, expected[0]);
+            (diff_1 + diff_2, diff_1.min(diff_2), diff_1.max(diff_2))
         };
 
         let num = num_cpus::get();
 
-        let (sum, max) = (0..num)
+        let (
+            diff_sum,
+            error_min,
+            error_max,
+            neg_error_min,
+            neg_error_max,
+            inv_error_min,
+            inv_error_max,
+            neg_inv_error_min,
+            neg_inv_error_max,
+        ) = (0..num)
             .into_par_iter()
-            .fold(
-                || (0.0, NEG_INFINITY),
-                |(sum, max), n| {
-                    let begin = 1 + n as i32 * (ONE - 1) / num as i32;
-                    let end = 1 + (n + 1) as i32 * (ONE - 1) / num as i32;
-                    (begin..end).fold((sum, max), |(sum, max), i| {
+            .map(|n| {
+                let begin = 2 + n as i32 * (ONE - 1) / num as i32;
+                let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
+                (begin..end).fold(
+                    (
+                        0.0,
+                        INFINITY,
+                        NEG_INFINITY,
+                        INFINITY,
+                        NEG_INFINITY,
+                        INFINITY,
+                        NEG_INFINITY,
+                        INFINITY,
+                        NEG_INFINITY,
+                    ),
+                    |(
+                        diff_sum,
+                        error_min,
+                        error_max,
+                        neg_error_min,
+                        neg_error_max,
+                        inv_error_min,
+                        inv_error_max,
+                        neg_inv_error_min,
+                        neg_inv_error_max,
+                    ),
+                     i| {
                         let expected = expected[i as usize];
-                        let max = max
-                            .max({
-                                let (actual, diff) = f(NEG_POWER_OF_ONE / (i + 1) - 1);
-                                assert_eq!(actual, NEG_RIGHT + expected);
-                                diff.abs()
-                            })
-                            .max({
-                                let (actual, diff) = f(POWER_OF_ONE / (i + 1) + 1);
-                                assert_eq!(actual, RIGHT - expected);
-                                diff.abs()
-                            })
-                            .max({
-                                let (actual, diff) = f(NEG_POWER_OF_ONE / i);
-                                assert_eq!(actual, NEG_RIGHT + expected);
-                                diff.abs()
-                            })
-                            .max({
-                                let (actual, diff) = f(POWER_OF_ONE / i);
-                                assert_eq!(actual, RIGHT - expected);
-                                diff.abs()
-                            })
-                            .max({
-                                let (actual, diff) = f(-i);
-                                assert_eq!(actual, -expected);
-                                diff.abs()
-                            });
+                        let (neg_inv_error_min, neg_inv_error_max) = {
+                            let expected = NEG_RIGHT + expected;
+
+                            let x = NEG_K / (2 * i as i64 + 1) - 1;
+                            let (actual, diff_1) = f(x as i32);
+                            assert_eq!(actual, expected);
+
+                            let x = NEG_K / (2 * i as i64 - 1);
+                            let (actual, diff_2) = f(x as i32);
+                            assert_eq!(actual, expected);
+
+                            (
+                                neg_inv_error_min.min(diff_1.min(diff_2)),
+                                neg_inv_error_max.max(diff_1.max(diff_2)),
+                            )
+                        };
+                        let (inv_error_min, inv_error_max) = {
+                            let expected = RIGHT - expected;
+
+                            let x = K / (2 * i as i64 + 1) + 1;
+                            let (actual, diff_1) = f(x as i32);
+                            assert_eq!(actual, expected);
+
+                            let x = K / (2 * i as i64 - 1);
+                            let (actual, diff_2) = f(x as i32);
+                            assert_eq!(actual, expected);
+
+                            (
+                                inv_error_min.min(diff_1.min(diff_2)),
+                                inv_error_max.max(diff_1.max(diff_2)),
+                            )
+                        };
+
+                        let (neg_error_min, neg_error_max) = {
+                            let (actual, diff) = f(-i);
+                            assert_eq!(actual, -expected);
+                            (neg_error_min.min(diff), neg_error_max.max(diff))
+                        };
+
                         let (actual, diff) = f(i);
                         assert_eq!(actual, expected);
-                        (sum + diff, max.max(diff.abs()))
-                    })
-                },
-            )
+
+                        (
+                            diff_sum + diff,
+                            error_min.min(diff),
+                            error_max.max(diff),
+                            neg_error_min,
+                            neg_error_max,
+                            inv_error_min,
+                            inv_error_max,
+                            neg_inv_error_min,
+                            neg_inv_error_max,
+                        )
+                    },
+                )
+            })
             .reduce(
-                || (sum, max),
-                |(lsum, lmax), (rsum, rmax)| (lsum + rsum, lmax.max(rmax)),
+                || {
+                    (
+                        diff_sum,
+                        error_min,
+                        error_max,
+                        neg_error_min,
+                        neg_error_max,
+                        inv_error_min,
+                        inv_error_max,
+                        neg_inv_error_min,
+                        neg_inv_error_max,
+                    )
+                },
+                |(
+                    ldiff_sum,
+                    lerror_min,
+                    lerror_max,
+                    lneg_error_min,
+                    lneg_error_max,
+                    linv_error_min,
+                    linv_error_max,
+                    lneg_inv_error_min,
+                    lneg_inv_error_max,
+                ),
+                 (
+                    rdiff_sum,
+                    rerror_min,
+                    rerror_max,
+                    rneg_error_min,
+                    rneg_error_max,
+                    rinv_error_min,
+                    rinv_error_max,
+                    rneg_inv_error_min,
+                    rneg_inv_error_max,
+                )| {
+                    (
+                        ldiff_sum + rdiff_sum,
+                        lerror_min.min(rerror_min),
+                        lerror_max.max(rerror_max),
+                        lneg_error_min.min(rneg_error_min),
+                        lneg_error_max.max(rneg_error_max),
+                        linv_error_min.min(rinv_error_min),
+                        linv_error_max.max(rinv_error_max),
+                        lneg_inv_error_min.min(rneg_inv_error_min),
+                        lneg_inv_error_max.max(rneg_inv_error_max),
+                    )
+                },
             );
 
-        println!("max: {max}, avg: {}", sum / (ONE + 1) as f64);
+        println!(
+            concat!(
+                "error min:         {:12.9}\n",
+                "error max:         {:12.9}\n",
+                "neg error min:     {:12.9}\n",
+                "neg error max:     {:12.9}\n",
+                "inv error min:     {:12.9}\n",
+                "inv error max:     {:12.9}\n",
+                "neg inv error min: {:12.9}\n",
+                "neg inv error max: {:12.9}\n",
+                "error average:     {:12.9}"
+            ),
+            error_min,
+            error_max,
+            neg_error_min,
+            neg_error_max,
+            inv_error_min,
+            inv_error_max,
+            neg_inv_error_min,
+            neg_inv_error_max,
+            diff_sum / (ONE + 1) as f64
+        );
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003789); }
