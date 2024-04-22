@@ -2,6 +2,8 @@ use std::cmp::Ordering;
 
 use num_traits::{ConstZero, Signed};
 
+use crate::atan::inv_i32_f15;
+
 fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
 where
     T: Copy + Signed,
@@ -40,19 +42,14 @@ impl AtanP3 for i32 {
     type Output = i32;
 
     fn atan_p3(self) -> Self::Output {
-        fn inv(x: i32) -> i32 {
-            const K: i32 = 2_i32.pow(i32::BITS - 2);
-            K / x
-        }
-
         const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
         const NEG_ONE: i32 = -<i32 as AtanP3Consts<i32>>::ONE;
 
         if self < NEG_ONE {
             const NEG_RIGHT: i32 = -RIGHT;
-            NEG_RIGHT - i32::calc(inv(self))
+            NEG_RIGHT - i32::calc(inv_i32_f15(self))
         } else if self > <i32 as AtanP3Consts<i32>>::ONE {
-            RIGHT - i32::calc(inv(self))
+            RIGHT - i32::calc(inv_i32_f15(self))
         } else {
             i32::calc(self)
         }
