@@ -76,40 +76,40 @@ impl AtanP5 for i32 {
             (Less, Less) => {
                 if self < other {
                     let x = div(other, self);
-                    NEG_RIGHT - x.atan_p5()
+                    NEG_RIGHT - i32::calc(x)
                 } else {
                     let x = div(self, other);
-                    NEG_STRAIGHT + x.atan_p5()
+                    NEG_STRAIGHT + i32::calc(x)
                 }
             }
             (Less, Equal) => NEG_RIGHT,
             (Less, Greater) => {
                 if self < -other {
                     let x = div(other, self);
-                    NEG_RIGHT - x.atan_p5()
+                    NEG_RIGHT - i32::calc(x)
                 } else {
                     let x = div(self, other);
-                    x.atan_p5()
+                    i32::calc(x)
                 }
             }
             (Equal, Less) => STRAIGHT,
             (Greater, Less) => {
                 if -self < other {
                     let x = div(other, self);
-                    RIGHT - x.atan_p5()
+                    RIGHT - i32::calc(x)
                 } else {
                     let x = div(self, other);
-                    STRAIGHT + x.atan_p5()
+                    STRAIGHT + i32::calc(x)
                 }
             }
             (Greater, Equal) => RIGHT,
             (Greater, Greater) => {
                 if self < other {
                     let x = div(self, other);
-                    x.atan_p5()
+                    i32::calc(x)
                 } else {
                     let x = div(other, self);
-                    RIGHT - x.atan_p5()
+                    RIGHT - i32::calc(x)
                 }
             }
             _ => Self::ZERO,
