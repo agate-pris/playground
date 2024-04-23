@@ -535,8 +535,6 @@ mod tests {
         f_std: impl Fn(f64) -> f64,
         acceptable_error: f64,
     ) {
-        use std::i32::{MAX, MIN};
-
         // 5th mersenne prime
         const STEP: usize = 8191;
 
@@ -547,21 +545,25 @@ mod tests {
 
         assert_eq!(data.len(), right_as_usize + 1);
         assert_eq!(full % right, 0);
-        assert_eq!(MIN % full, 0);
-        assert_eq!(MAX % full, full - 1);
+        assert_eq!(i32::MIN % full, 0);
+        assert_eq!(i32::MAX % full, full - 1);
 
         let data = to_period(&data);
 
         assert_eq!(data.len(), full as usize);
 
         let x = (-full - 1..=full + 1)
-            .chain(MAX - full..=MAX)
-            .chain(MIN..=MIN + full + 1)
-            .chain((MIN..=MAX).step_by(right_as_usize))
-            .chain((MIN..=MAX).skip(1).step_by(right_as_usize))
-            .chain((MIN..=MAX).skip(right_as_usize - 1).step_by(right_as_usize))
-            .chain((MIN..=MAX).step_by(STEP))
-            .chain((MIN..=MAX).rev().step_by(STEP));
+            .chain(i32::MAX - full..=i32::MAX)
+            .chain(i32::MIN..=i32::MIN + full + 1)
+            .chain((i32::MIN..=i32::MAX).step_by(right_as_usize))
+            .chain((i32::MIN..=i32::MAX).skip(1).step_by(right_as_usize))
+            .chain(
+                (i32::MIN..=i32::MAX)
+                    .skip(right_as_usize - 1)
+                    .step_by(right_as_usize),
+            )
+            .chain((i32::MIN..=i32::MAX).step_by(STEP))
+            .chain((i32::MIN..=i32::MAX).rev().step_by(STEP));
 
         let frac_pi_straight = FRAC_PI_2 / right as f64;
         let mut min = f64::INFINITY;

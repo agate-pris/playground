@@ -96,10 +96,7 @@ pub(crate) trait AtanUtil<T> {
 pub(crate) mod tests {
     use std::{
         cmp::Ordering,
-        f64::{
-            consts::{FRAC_PI_2, PI},
-            INFINITY, NEG_INFINITY,
-        },
+        f64::consts::{FRAC_PI_2, PI},
         fmt::Debug,
         iter::once,
         ops::RangeInclusive,
@@ -116,8 +113,6 @@ pub(crate) mod tests {
     where
         F: Sync + Fn(i32) -> i32,
     {
-        use std::i32::{MAX, MIN};
-
         const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
         const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
         const NEG_RIGHT: i32 = -RIGHT;
@@ -146,7 +141,7 @@ pub(crate) mod tests {
             let expected = NEG_RIGHT + expected[1];
             let (actual, diff_1) = f((NEG_K / 3 - 1) as i32);
             assert_eq!(actual, expected);
-            let (actual, diff_2) = f(MIN);
+            let (actual, diff_2) = f(i32::MIN);
             assert_eq!(actual, expected);
             (diff_1.min(diff_2), diff_1.max(diff_2))
         };
@@ -155,7 +150,7 @@ pub(crate) mod tests {
             let expected = RIGHT - expected[1];
             let (actual, diff_1) = f((K / 3 + 1) as i32);
             assert_eq!(actual, expected);
-            let (actual, diff_2) = f(MAX);
+            let (actual, diff_2) = f(i32::MAX);
             assert_eq!(actual, expected);
             (diff_1.min(diff_2), diff_1.max(diff_2))
         };
@@ -194,14 +189,14 @@ pub(crate) mod tests {
                 (begin..end).fold(
                     (
                         0.0,
-                        INFINITY,
-                        NEG_INFINITY,
-                        INFINITY,
-                        NEG_INFINITY,
-                        INFINITY,
-                        NEG_INFINITY,
-                        INFINITY,
-                        NEG_INFINITY,
+                        f64::INFINITY,
+                        f64::NEG_INFINITY,
+                        f64::INFINITY,
+                        f64::NEG_INFINITY,
+                        f64::INFINITY,
+                        f64::NEG_INFINITY,
+                        f64::INFINITY,
+                        f64::NEG_INFINITY,
                     ),
                     |(
                         diff_sum,
@@ -356,8 +351,6 @@ pub(crate) mod tests {
     {
         assert_eq!(f(0, 0), 0);
 
-        use std::i32::{MAX, MIN};
-
         const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
         const STRAIGHT: i32 = K.pow(2);
         const RIGHT: i32 = STRAIGHT / 2;
@@ -371,7 +364,7 @@ pub(crate) mod tests {
         // Find the largest error for each of the eight regions
         // that are divided by the straight lines y = x, y = -x, y = 0, x = 0.
 
-        let mut max_error = NEG_INFINITY;
+        let mut max_error = f64::NEG_INFINITY;
 
         // Calculate the expected and actual value and store value.
         let mut calc = |p: &[i32; 2]| {
@@ -450,7 +443,7 @@ pub(crate) mod tests {
 
         // (MAX, MAX - 1), (MIN, -MAX)
         {
-            let points = to_8_points(MAX, MAX - 1, MIN, -MAX);
+            let points = to_8_points(i32::MAX, i32::MAX - 1, i32::MIN, -i32::MAX);
             let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
 
             #[rustfmt::skip] assert_ne!(angles[0].1,      HALF_RIGHT);
@@ -477,7 +470,7 @@ pub(crate) mod tests {
                 count - copy
             };
 
-            const OFFSET_X: i32 = MAX - K + 1;
+            const OFFSET_X: i32 = i32::MAX - K + 1;
             let offset_y = OFFSET_X / K * count;
 
             let positions = (begin..=n)
@@ -598,7 +591,7 @@ pub(crate) mod tests {
                     }
                 }
 
-                let mut max_error = NEG_INFINITY;
+                let mut max_error = f64::NEG_INFINITY;
                 let mut error_sum = 0.0;
 
                 for x in T::ZERO..=one {
