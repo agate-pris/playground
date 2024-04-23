@@ -7,9 +7,13 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+fixed = { default-features = false, optional = true,  version = "1", features = ["num-traits"] }
 num-traits = "0.2"
 primitive_promotion = "0.1"
 rayon = "1"
+
+[features]
+fixed = ["dep:fixed"]
 
 [dev-dependencies]
 anyhow = "1"
