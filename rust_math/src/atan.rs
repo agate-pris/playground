@@ -4,7 +4,6 @@ use std::{
 };
 
 use num_traits::ConstZero;
-use primitive_promotion::PrimitivePromotionExt;
 
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
     const K: i64 = 2_i64.pow(2 * 15);
@@ -17,10 +16,7 @@ pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
     (a as i64 * K / b as i64) as i32
 }
 
-pub(crate) trait AtanUtil<T>
-where
-    T: PrimitivePromotionExt,
-{
+pub(crate) trait AtanUtil<T> {
     const ONE: T;
     const NEG_ONE: T;
     const RIGHT: T;
