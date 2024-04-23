@@ -19,9 +19,9 @@ where
     const ONE: T;
     const NEG_ONE: T;
     const ONE_PROMOTION: T::PrimitivePromotion;
-    const STRAIGHT: T;
     const RIGHT: T;
     const NEG_RIGHT: T;
+    const STRAIGHT: T;
     const NEG_STRAIGHT: T;
     fn inv(x: T) -> T;
     fn div(a: T, b: T) -> T
