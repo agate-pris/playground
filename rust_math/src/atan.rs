@@ -17,18 +17,20 @@ pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
 }
 
 pub(crate) trait AtanUtil<T> {
+    type Output;
     const ONE: T;
     const NEG_ONE: T;
-    const RIGHT: T;
-    const NEG_RIGHT: T;
-    const STRAIGHT: T;
-    const NEG_STRAIGHT: T;
+    const RIGHT: Self::Output;
+    const NEG_RIGHT: Self::Output;
+    const STRAIGHT: Self::Output;
+    const NEG_STRAIGHT: Self::Output;
     fn inv(x: T) -> T;
     fn div(a: T, b: T) -> T;
-    fn calc(x: T) -> T;
-    fn atan(x: T) -> T
+    fn calc(x: T) -> Self::Output;
+    fn atan(x: T) -> Self::Output
     where
-        T: PartialOrd + Sub<Output = T>,
+        T: PartialOrd,
+        Self::Output: Sub<Output = Self::Output>,
     {
         if x < Self::NEG_ONE {
             Self::NEG_RIGHT - Self::calc(Self::inv(x))
@@ -38,9 +40,10 @@ pub(crate) trait AtanUtil<T> {
             Self::calc(x)
         }
     }
-    fn atan2(y: T, x: T) -> T
+    fn atan2(y: T, x: T) -> Self::Output
     where
-        T: Copy + Ord + Neg<Output = T> + Sub<Output = T> + ConstZero,
+        T: Copy + Ord + Neg<Output = T> + ConstZero,
+        Self::Output: Sub<Output = Self::Output> + ConstZero,
     {
         use Ordering::*;
 
@@ -84,7 +87,7 @@ pub(crate) trait AtanUtil<T> {
                     Self::RIGHT - Self::calc(x)
                 }
             }
-            _ => T::ZERO,
+            _ => Self::Output::ZERO,
         }
     }
 }

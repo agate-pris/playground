@@ -32,6 +32,7 @@ impl AtanP2Consts<i32> for AtanP2ConstsI32 {
 struct AtanP2I32Util();
 
 impl AtanUtil<i32> for AtanP2I32Util {
+    type Output = i32;
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
     const RIGHT: i32 = Self::STRAIGHT / 2;
