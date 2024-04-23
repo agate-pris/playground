@@ -3,7 +3,7 @@ use std::{
     ops::{Neg, Sub},
 };
 
-use num_traits::ConstZero;
+use num_traits::Zero;
 
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
     const K: i64 = 2_i64.pow(2 * 15);
@@ -42,12 +42,12 @@ pub(crate) trait AtanUtil<T> {
     }
     fn atan2(y: T, x: T) -> Self::Output
     where
-        T: Copy + Ord + Neg<Output = T> + ConstZero,
-        Self::Output: Sub<Output = Self::Output> + ConstZero,
+        T: Copy + Ord + Neg<Output = T> + Zero,
+        Self::Output: Sub<Output = Self::Output> + Zero,
     {
         use Ordering::*;
 
-        match (y.cmp(&T::ZERO), x.cmp(&T::ZERO)) {
+        match (y.cmp(&T::zero()), x.cmp(&T::zero())) {
             (Less, Less) => {
                 if y < x {
                     let x = Self::div(x, y);
@@ -87,7 +87,7 @@ pub(crate) trait AtanUtil<T> {
                     Self::RIGHT - Self::calc(x)
                 }
             }
-            _ => Self::Output::ZERO,
+            _ => Self::Output::zero(),
         }
     }
 }
