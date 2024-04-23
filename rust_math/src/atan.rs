@@ -24,7 +24,6 @@ where
     const NEG_RIGHT: T;
     const NEG_STRAIGHT: T;
     fn inv(x: T) -> T;
-    fn calc(x: T) -> T;
     fn div(a: T, b: T) -> T
     where
         T: AsPrimitive<T::PrimitivePromotion>,
@@ -34,6 +33,7 @@ where
     {
         (a.as_() * Self::ONE_PROMOTION / b.as_()).as_()
     }
+    fn calc(x: T) -> T;
     fn atan(x: T) -> T
     where
         T: PartialOrd + Sub<Output = T>,
