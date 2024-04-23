@@ -34,7 +34,6 @@ struct AtanP2I32Util();
 impl AtanUtil<i32> for AtanP2I32Util {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
-    const ONE_PROMOTION: i64 = 2_i64.pow(i32::BITS / 2 - 1);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_RIGHT: i32 = -Self::RIGHT;
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);

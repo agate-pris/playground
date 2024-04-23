@@ -23,7 +23,6 @@ where
 {
     const ONE: T;
     const NEG_ONE: T;
-    const ONE_PROMOTION: T::PrimitivePromotion;
     const RIGHT: T;
     const NEG_RIGHT: T;
     const STRAIGHT: T;
