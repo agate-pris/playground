@@ -1,3 +1,11 @@
+use std::{
+    cmp::Ordering,
+    ops::{Div, Mul, Neg, Sub},
+};
+
+use num_traits::{AsPrimitive, ConstZero};
+use primitive_promotion::PrimitivePromotionExt;
+
 const fn inv_i32(x: i32, frac_n_bits: u32) -> i32 {
     let k = 2_i64.pow(2 * frac_n_bits);
     let x_as_i64 = x as i64;
@@ -6,6 +14,79 @@ const fn inv_i32(x: i32, frac_n_bits: u32) -> i32 {
 
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
     inv_i32(x, 15)
+}
+
+pub(crate) trait Atan2Util<T>
+where
+    T: PrimitivePromotionExt,
+{
+    const ONE: T::PrimitivePromotion;
+    const STRAIGHT: T;
+    const RIGHT: T;
+    const NEG_RIGHT: T;
+    const NEG_STRAIGHT: T;
+    fn calc(x: T) -> T;
+    fn div(a: T, b: T) -> T
+    where
+        T: AsPrimitive<T::PrimitivePromotion>,
+        T::PrimitivePromotion: AsPrimitive<T>
+            + Mul<Output = T::PrimitivePromotion>
+            + Div<Output = T::PrimitivePromotion>,
+    {
+        (a.as_() * Self::ONE / b.as_()).as_()
+    }
+    fn atan2(y: T, x: T) -> T
+    where
+        T: Ord + Neg<Output = T> + Sub<Output = T> + ConstZero + AsPrimitive<T::PrimitivePromotion>,
+        T::PrimitivePromotion: AsPrimitive<T>
+            + Mul<Output = T::PrimitivePromotion>
+            + Div<Output = T::PrimitivePromotion>,
+    {
+        use Ordering::*;
+
+        match (y.cmp(&T::ZERO), x.cmp(&T::ZERO)) {
+            (Less, Less) => {
+                if y < x {
+                    let x = Self::div(x, y);
+                    Self::NEG_RIGHT - Self::calc(x)
+                } else {
+                    let x = Self::div(y, x);
+                    Self::NEG_STRAIGHT + Self::calc(x)
+                }
+            }
+            (Less, Equal) => Self::NEG_RIGHT,
+            (Less, Greater) => {
+                if y < -x {
+                    let x = Self::div(x, y);
+                    Self::NEG_RIGHT - Self::calc(x)
+                } else {
+                    let x = Self::div(y, x);
+                    Self::calc(x)
+                }
+            }
+            (Equal, Less) => Self::STRAIGHT,
+            (Greater, Less) => {
+                if -y < x {
+                    let x = Self::div(x, y);
+                    Self::RIGHT - Self::calc(x)
+                } else {
+                    let x = Self::div(y, x);
+                    Self::STRAIGHT + Self::calc(x)
+                }
+            }
+            (Greater, Equal) => Self::RIGHT,
+            (Greater, Greater) => {
+                if y < x {
+                    let x = Self::div(y, x);
+                    Self::calc(x)
+                } else {
+                    let x = Self::div(x, y);
+                    Self::RIGHT - Self::calc(x)
+                }
+            }
+            _ => T::ZERO,
+        }
+    }
 }
 
 #[cfg(test)]
