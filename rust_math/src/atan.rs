@@ -12,7 +12,7 @@ pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
     ((K + x_as_i64.abs() / 2) / x_as_i64) as i32
 }
 
-pub(crate) trait Atan2Util<T>
+pub(crate) trait AtanUtil<T>
 where
     T: PrimitivePromotionExt,
 {

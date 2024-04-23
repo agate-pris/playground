@@ -1,6 +1,6 @@
 use num_traits::Signed;
 
-use crate::atan::{inv_i32_f15, Atan2Util};
+use crate::atan::{inv_i32_f15, AtanUtil};
 
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
@@ -31,7 +31,7 @@ impl AtanP2Consts<i32> for AtanP2ConstsI32 {
 
 struct AtanP2I32Util();
 
-impl Atan2Util<i32> for AtanP2I32Util {
+impl AtanUtil<i32> for AtanP2I32Util {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
     const ONE_PROMOTION: i64 = 2_i64.pow(i32::BITS / 2 - 1);

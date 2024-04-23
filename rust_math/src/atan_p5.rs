@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::atan::{inv_i32_f15, Atan2Util};
+use crate::atan::{inv_i32_f15, AtanUtil};
 
 fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
@@ -34,7 +34,7 @@ impl AtanP5Consts<i32> for AtanP5ConstsI32 {
 
 struct AtanP5I32Util();
 
-impl Atan2Util<i32> for AtanP5I32Util {
+impl AtanUtil<i32> for AtanP5I32Util {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
     const ONE_PROMOTION: i64 = 2_i64.pow(i32::BITS / 2 - 1);
