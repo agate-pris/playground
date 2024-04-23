@@ -6,14 +6,10 @@ use std::{
 use num_traits::{AsPrimitive, ConstZero};
 use primitive_promotion::PrimitivePromotionExt;
 
-const fn inv_i32(x: i32, frac_n_bits: u32) -> i32 {
-    let k = 2_i64.pow(2 * frac_n_bits);
-    let x_as_i64 = x as i64;
-    ((k + x_as_i64.abs() / 2) / x_as_i64) as i32
-}
-
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
-    inv_i32(x, 15)
+    const K: i64 = 2_i64.pow(2 * 15);
+    let x_as_i64 = x as i64;
+    ((K + x_as_i64.abs() / 2) / x_as_i64) as i32
 }
 
 pub(crate) trait Atan2Util<T>
