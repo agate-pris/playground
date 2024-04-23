@@ -32,11 +32,16 @@ impl AtanP2Consts<i32> for AtanP2ConstsI32 {
 struct AtanP2I32Util();
 
 impl Atan2Util<i32> for AtanP2I32Util {
+    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const NEG_ONE: i32 = -Self::ONE;
     const ONE_PROMOTION: i64 = 2_i64.pow(i32::BITS / 2 - 1);
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_RIGHT: i32 = -Self::RIGHT;
     const NEG_STRAIGHT: i32 = -Self::STRAIGHT;
+    fn inv(x: i32) -> i32 {
+        inv_i32_f15(x)
+    }
     fn calc(x: i32) -> i32 {
         AtanP2ConstsI32::calc(x)
     }
@@ -52,17 +57,7 @@ impl AtanP2 for i32 {
     type Output = i32;
 
     fn atan_p2(self) -> Self::Output {
-        const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
-        const NEG_ONE: i32 = -AtanP2ConstsI32::ONE;
-
-        if self < NEG_ONE {
-            const NEG_RIGHT: i32 = -RIGHT;
-            NEG_RIGHT - AtanP2ConstsI32::calc(inv_i32_f15(self))
-        } else if self > AtanP2ConstsI32::ONE {
-            RIGHT - AtanP2ConstsI32::calc(inv_i32_f15(self))
-        } else {
-            AtanP2ConstsI32::calc(self)
-        }
+        AtanP2I32Util::atan(self)
     }
     fn atan2_p2(self, other: i32) -> Self::Output {
         AtanP2I32Util::atan2(self, other)
