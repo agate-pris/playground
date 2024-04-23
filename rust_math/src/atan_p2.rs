@@ -1,6 +1,6 @@
 use num_traits::Signed;
 
-use crate::atan::{inv_i32_f15, AtanUtil};
+use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
 fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
 where
@@ -41,6 +41,9 @@ impl AtanUtil<i32> for AtanP2I32Util {
     const NEG_STRAIGHT: i32 = -Self::STRAIGHT;
     fn inv(x: i32) -> i32 {
         inv_i32_f15(x)
+    }
+    fn div(x: i32, y: i32) -> i32 {
+        div_i32_f15(x, y)
     }
     fn calc(x: i32) -> i32 {
         AtanP2ConstsI32::calc(x)

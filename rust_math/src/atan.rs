@@ -29,15 +29,7 @@ where
     const STRAIGHT: T;
     const NEG_STRAIGHT: T;
     fn inv(x: T) -> T;
-    fn div(a: T, b: T) -> T
-    where
-        T: AsPrimitive<T::PrimitivePromotion>,
-        T::PrimitivePromotion: AsPrimitive<T>
-            + Mul<Output = T::PrimitivePromotion>
-            + Div<Output = T::PrimitivePromotion>,
-    {
-        (a.as_() * Self::ONE_PROMOTION / b.as_()).as_()
-    }
+    fn div(a: T, b: T) -> T;
     fn calc(x: T) -> T;
     fn atan(x: T) -> T
     where
