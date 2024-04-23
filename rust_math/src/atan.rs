@@ -1,9 +1,9 @@
 use std::{
     cmp::Ordering,
-    ops::{Div, Mul, Neg, Sub},
+    ops::{Neg, Sub},
 };
 
-use num_traits::{AsPrimitive, ConstZero};
+use num_traits::ConstZero;
 use primitive_promotion::PrimitivePromotionExt;
 
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
@@ -44,10 +44,7 @@ where
     }
     fn atan2(y: T, x: T) -> T
     where
-        T: Ord + Neg<Output = T> + Sub<Output = T> + ConstZero + AsPrimitive<T::PrimitivePromotion>,
-        T::PrimitivePromotion: AsPrimitive<T>
-            + Mul<Output = T::PrimitivePromotion>
-            + Div<Output = T::PrimitivePromotion>,
+        T: Copy + Ord + Neg<Output = T> + Sub<Output = T> + ConstZero,
     {
         use Ordering::*;
 
