@@ -1,11 +1,6 @@
-use std::{
-    cmp::Ordering,
-    ops::{Add, Div, Mul, Sub},
-};
+use std::ops::{Add, Div, Mul, Sub};
 
-use num_traits::ConstZero;
-
-use crate::atan::inv_i32_f15;
+use crate::atan::{inv_i32_f15, Atan2Util};
 
 fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
 where
@@ -28,11 +23,26 @@ pub trait AtanP5Consts<T> {
     }
 }
 
-impl AtanP5Consts<i32> for i32 {
+struct AtanP5ConstsI32();
+
+impl AtanP5Consts<i32> for AtanP5ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const A: i32 = 787;
     const B: i32 = 2968;
     const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
+}
+
+struct AtanP5I32Util();
+
+impl Atan2Util<i32> for AtanP5I32Util {
+    const ONE: i64 = 2_i64.pow(i32::BITS / 2 - 1);
+    const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
+    const RIGHT: i32 = Self::STRAIGHT / 2;
+    const NEG_RIGHT: i32 = -Self::RIGHT;
+    const NEG_STRAIGHT: i32 = -Self::STRAIGHT;
+    fn calc(x: i32) -> i32 {
+        AtanP5ConstsI32::calc(x)
+    }
 }
 
 pub trait AtanP5 {
@@ -46,71 +56,19 @@ impl AtanP5 for i32 {
 
     fn atan_p5(self) -> Self::Output {
         const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
-        const NEG_ONE: i32 = -<i32 as AtanP5Consts<i32>>::ONE;
+        const NEG_ONE: i32 = -AtanP5ConstsI32::ONE;
 
         if self < NEG_ONE {
             const NEG_RIGHT: i32 = -RIGHT;
-            NEG_RIGHT - i32::calc(inv_i32_f15(self))
-        } else if self > <i32 as AtanP5Consts<i32>>::ONE {
-            RIGHT - i32::calc(inv_i32_f15(self))
+            NEG_RIGHT - AtanP5ConstsI32::calc(inv_i32_f15(self))
+        } else if self > AtanP5ConstsI32::ONE {
+            RIGHT - AtanP5ConstsI32::calc(inv_i32_f15(self))
         } else {
-            i32::calc(self)
+            AtanP5ConstsI32::calc(self)
         }
     }
     fn atan2_p5(self, other: i32) -> Self::Output {
-        fn div(a: i32, b: i32) -> i32 {
-            (a as i64 * <i32 as AtanP5Consts<i32>>::ONE as i64 / b as i64) as i32
-        }
-
-        use Ordering::*;
-
-        const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
-        const NEG_STRAIGHT: i32 = -STRAIGHT;
-        const RIGHT: i32 = STRAIGHT / 2;
-        const NEG_RIGHT: i32 = -RIGHT;
-
-        match (self.cmp(&Self::ZERO), other.cmp(&Self::ZERO)) {
-            (Less, Less) => {
-                if self < other {
-                    let x = div(other, self);
-                    NEG_RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    NEG_STRAIGHT + i32::calc(x)
-                }
-            }
-            (Less, Equal) => NEG_RIGHT,
-            (Less, Greater) => {
-                if self < -other {
-                    let x = div(other, self);
-                    NEG_RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    i32::calc(x)
-                }
-            }
-            (Equal, Less) => STRAIGHT,
-            (Greater, Less) => {
-                if -self < other {
-                    let x = div(other, self);
-                    RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    STRAIGHT + i32::calc(x)
-                }
-            }
-            (Greater, Equal) => RIGHT,
-            (Greater, Greater) => {
-                if self < other {
-                    let x = div(self, other);
-                    i32::calc(x)
-                } else {
-                    let x = div(other, self);
-                    RIGHT - i32::calc(x)
-                }
-            }
-            _ => Self::ZERO,
-        }
+        AtanP5I32Util::atan2(self, other)
     }
 }
 
@@ -128,12 +86,13 @@ impl_atan_p5_default_fixed_i32!(
 #[cfg(test)]
 mod tests {
     use std::{
+        cmp::Ordering,
         f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
 
-    use num_traits::{AsPrimitive, ConstOne, PrimInt, Signed};
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::SliceRandom;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -262,7 +221,7 @@ mod tests {
                 }
             };
         }
-        define_test!(case_01, 15, vec![(i32::A, i32::B)]);
+        define_test!(case_01, 15, vec![(AtanP5ConstsI32::A, AtanP5ConstsI32::B)]);
         //define_test!(case_02, 14, vec![(I18F14::A, I18F14::B)]);
         //define_test!(case_03, 13, vec![(I19F13::A, I19F13::B)]);
         //define_test!(case_04, 12, vec![(I20F12::A, I20F12::B)]);
