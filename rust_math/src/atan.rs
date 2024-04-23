@@ -20,7 +20,7 @@ pub(crate) trait Atan2Util<T>
 where
     T: PrimitivePromotionExt,
 {
-    const ONE: T::PrimitivePromotion;
+    const ONE_PROMOTION: T::PrimitivePromotion;
     const STRAIGHT: T;
     const RIGHT: T;
     const NEG_RIGHT: T;
@@ -33,7 +33,7 @@ where
             + Mul<Output = T::PrimitivePromotion>
             + Div<Output = T::PrimitivePromotion>,
     {
-        (a.as_() * Self::ONE / b.as_()).as_()
+        (a.as_() * Self::ONE_PROMOTION / b.as_()).as_()
     }
     fn atan2(y: T, x: T) -> T
     where

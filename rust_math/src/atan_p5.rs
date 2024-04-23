@@ -35,7 +35,7 @@ impl AtanP5Consts<i32> for AtanP5ConstsI32 {
 struct AtanP5I32Util();
 
 impl Atan2Util<i32> for AtanP5I32Util {
-    const ONE: i64 = 2_i64.pow(i32::BITS / 2 - 1);
+    const ONE_PROMOTION: i64 = 2_i64.pow(i32::BITS / 2 - 1);
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_RIGHT: i32 = -Self::RIGHT;
