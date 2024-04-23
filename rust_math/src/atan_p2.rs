@@ -67,6 +67,44 @@ impl AtanP2 for i32 {
     }
 }
 
+#[cfg(feature = "fixed")]
+use fixed::types::{I17F15, I2F30};
+
+#[cfg(feature = "fixed")]
+struct AtanP2I17F15Util();
+
+#[cfg(feature = "fixed")]
+impl AtanUtil<I17F15> for AtanP2I17F15Util {
+    type Output = I2F30;
+    const ONE: I17F15 = I17F15::ONE;
+    const NEG_ONE: I17F15 = I17F15::NEG_ONE;
+    const RIGHT: Self::Output = I2F30::from_bits(Self::STRAIGHT.to_bits() / 2);
+    const NEG_RIGHT: Self::Output = I2F30::from_bits(-Self::RIGHT.to_bits());
+    const STRAIGHT: Self::Output = I2F30::from_bits(1 << 30);
+    const NEG_STRAIGHT: Self::Output = I2F30::from_bits(-Self::STRAIGHT.to_bits());
+    fn inv(x: I17F15) -> I17F15 {
+        x.recip()
+    }
+    fn div(a: I17F15, b: I17F15) -> I17F15 {
+        a / b
+    }
+    fn calc(x: I17F15) -> Self::Output {
+        I2F30::from_bits(AtanP2ConstsI32::calc(x.to_bits()))
+    }
+}
+
+#[cfg(feature = "fixed")]
+impl AtanP2 for I17F15 {
+    type Output = I2F30;
+
+    fn atan_p2(self) -> Self::Output {
+        AtanP2I17F15Util::atan(self)
+    }
+    fn atan2_p2(self, other: I17F15) -> Self::Output {
+        AtanP2I17F15Util::atan2(self, other)
+    }
+}
+
 /*
 impl_atan_p2_default_fixed!(
     I3F5, 0, I2F6, 0, I13F3, 179, I12F4, 91, I11F5, 47, I10F6, 24, I9F7, 13, I8F8, 8, I7F9, 5,
