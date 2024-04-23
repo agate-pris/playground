@@ -1,8 +1,6 @@
-use std::cmp::Ordering;
+use num_traits::Signed;
 
-use num_traits::{ConstZero, Signed};
-
-use crate::atan::inv_i32_f15;
+use crate::atan::{inv_i32_f15, Atan2Util};
 
 fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
 where
@@ -25,11 +23,26 @@ pub trait AtanP3Consts<T> {
     }
 }
 
-impl AtanP3Consts<i32> for i32 {
+struct AtanP3ConstsI32();
+
+impl AtanP3Consts<i32> for AtanP3ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
     const A: i32 = 2555;
     const B: i32 = 691;
+}
+
+struct AtanP3I32Util();
+
+impl Atan2Util<i32> for AtanP3I32Util {
+    const ONE: i64 = 2_i64.pow(i32::BITS / 2 - 1);
+    const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
+    const RIGHT: i32 = Self::STRAIGHT / 2;
+    const NEG_RIGHT: i32 = -Self::RIGHT;
+    const NEG_STRAIGHT: i32 = -Self::STRAIGHT;
+    fn calc(x: i32) -> i32 {
+        AtanP3ConstsI32::calc(x)
+    }
 }
 
 pub trait AtanP3 {
@@ -43,71 +56,19 @@ impl AtanP3 for i32 {
 
     fn atan_p3(self) -> Self::Output {
         const RIGHT: i32 = 2_i32.pow(i32::BITS - 3);
-        const NEG_ONE: i32 = -<i32 as AtanP3Consts<i32>>::ONE;
+        const NEG_ONE: i32 = -AtanP3ConstsI32::ONE;
 
         if self < NEG_ONE {
             const NEG_RIGHT: i32 = -RIGHT;
-            NEG_RIGHT - i32::calc(inv_i32_f15(self))
-        } else if self > <i32 as AtanP3Consts<i32>>::ONE {
-            RIGHT - i32::calc(inv_i32_f15(self))
+            NEG_RIGHT - AtanP3ConstsI32::calc(inv_i32_f15(self))
+        } else if self > AtanP3ConstsI32::ONE {
+            RIGHT - AtanP3ConstsI32::calc(inv_i32_f15(self))
         } else {
-            i32::calc(self)
+            AtanP3ConstsI32::calc(self)
         }
     }
     fn atan2_p3(self, other: i32) -> Self::Output {
-        fn div(a: i32, b: i32) -> i32 {
-            (a as i64 * <i32 as AtanP3Consts<i32>>::ONE as i64 / b as i64) as i32
-        }
-
-        use Ordering::*;
-
-        const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
-        const NEG_STRAIGHT: i32 = -STRAIGHT;
-        const RIGHT: i32 = STRAIGHT / 2;
-        const NEG_RIGHT: i32 = -RIGHT;
-
-        match (self.cmp(&Self::ZERO), other.cmp(&Self::ZERO)) {
-            (Less, Less) => {
-                if self < other {
-                    let x = div(other, self);
-                    NEG_RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    NEG_STRAIGHT + i32::calc(x)
-                }
-            }
-            (Less, Equal) => NEG_RIGHT,
-            (Less, Greater) => {
-                if self < -other {
-                    let x = div(other, self);
-                    NEG_RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    i32::calc(x)
-                }
-            }
-            (Equal, Less) => STRAIGHT,
-            (Greater, Less) => {
-                if -self < other {
-                    let x = div(other, self);
-                    RIGHT - i32::calc(x)
-                } else {
-                    let x = div(self, other);
-                    STRAIGHT + i32::calc(x)
-                }
-            }
-            (Greater, Equal) => RIGHT,
-            (Greater, Greater) => {
-                if self < other {
-                    let x = div(self, other);
-                    i32::calc(x)
-                } else {
-                    let x = div(other, self);
-                    RIGHT - i32::calc(x)
-                }
-            }
-            _ => Self::ZERO,
-        }
+        AtanP3I32Util::atan2(self, other)
     }
 }
 
@@ -124,12 +85,13 @@ impl_atan_p3_default_fixed!(
 #[cfg(test)]
 mod tests {
     use std::{
+        cmp::Ordering,
         f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
 
-    use num_traits::{AsPrimitive, ConstOne, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt};
     use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::*;
     use rayon::prelude::*;
@@ -282,7 +244,7 @@ mod tests {
         //define_test!(case_13, 18, vec![(I14F18::A, I14F18::B)]);
         //define_test!(case_14, 17, vec![(I15F17::A, I15F17::B)]);
         //define_test!(case_15, 16, vec![(I16F16::A, I16F16::B)]);
-        define_test!(case_16, 15, vec![(i32::A, i32::B)]);
+        define_test!(case_16, 15, vec![(AtanP3ConstsI32::A, AtanP3ConstsI32::B)]);
         //define_test!(case_17, 14, vec![(I18F14::A, I18F14::B)]);
         //define_test!(case_18, 13, vec![(I19F13::A, I19F13::B)]);
         //define_test!(case_19, 12, vec![(I20F12::A, I20F12::B)]);
