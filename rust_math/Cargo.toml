@@ -15,7 +15,6 @@ rayon = "1"
 [dev-dependencies]
 anyhow = "1"
 approx = "0.5"
-chrono = "0.4"
 itertools = "0.12"
 num_cpus = "1"
 rand = "0.8"
