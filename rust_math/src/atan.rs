@@ -102,7 +102,8 @@ pub(crate) mod tests {
         ops::RangeInclusive,
     };
 
-    use approx::{abs_diff_eq, assert_abs_diff_eq};
+    use anyhow::{Context, Result};
+    use approx::abs_diff_eq;
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -125,46 +126,49 @@ pub(crate) mod tests {
         assert_eq!(expected[0], 0);
         assert_eq!(expected[ONE as usize], RIGHT / 2);
 
-        let f = |x: i32| {
+        let f = |x: i32| -> Result<_> {
             let fx = f(x);
             let diff = {
                 const SCALE: f64 = PI / ONE.pow(2) as f64;
                 let fx = SCALE * fx as f64;
                 let std = (x as f64 / ONE as f64).atan();
-                assert_abs_diff_eq!(fx, std, epsilon = acceptable_error);
+                anyhow::ensure!(
+                    abs_diff_eq!(fx, std, epsilon = acceptable_error),
+                    "x: {x}, fx: {fx}, std: {std}"
+                );
                 fx - std
             };
-            (fx, diff)
+            Ok((fx, diff))
         };
 
         let (neg_inv_error_min, neg_inv_error_max) = {
             let expected = NEG_RIGHT + expected[1];
-            let (actual, diff_1) = f((NEG_K / 3 - 1) as i32);
+            let (actual, diff_1) = f((NEG_K / 3 - 1) as i32).unwrap();
             assert_eq!(actual, expected);
-            let (actual, diff_2) = f(i32::MIN);
+            let (actual, diff_2) = f(i32::MIN).unwrap();
             assert_eq!(actual, expected);
             (diff_1.min(diff_2), diff_1.max(diff_2))
         };
 
         let (inv_error_min, inv_error_max) = {
             let expected = RIGHT - expected[1];
-            let (actual, diff_1) = f((K / 3 + 1) as i32);
+            let (actual, diff_1) = f((K / 3 + 1) as i32).unwrap();
             assert_eq!(actual, expected);
-            let (actual, diff_2) = f(i32::MAX);
+            let (actual, diff_2) = f(i32::MAX).unwrap();
             assert_eq!(actual, expected);
             (diff_1.min(diff_2), diff_1.max(diff_2))
         };
 
         let (neg_error_min, neg_error_max) = {
-            let (actual, diff) = f(-1);
+            let (actual, diff) = f(-1).unwrap();
             assert_eq!(actual, -expected[1]);
             (diff, diff)
         };
 
         let (diff_sum, error_min, error_max) = {
-            let (actual, diff_1) = f(1);
+            let (actual, diff_1) = f(1).unwrap();
             assert_eq!(actual, expected[1]);
-            let (actual, diff_2) = f(0);
+            let (actual, diff_2) = f(0).unwrap();
             assert_eq!(actual, expected[0]);
             (diff_1 + diff_2, diff_1.min(diff_2), diff_1.max(diff_2))
         };
@@ -186,7 +190,7 @@ pub(crate) mod tests {
             .map(|n| {
                 let begin = 2 + n as i32 * (ONE - 1) / num as i32;
                 let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
-                (begin..end).fold(
+                (begin..end).try_fold(
                     (
                         0.0,
                         f64::INFINITY,
@@ -209,17 +213,20 @@ pub(crate) mod tests {
                         neg_inv_error_min,
                         neg_inv_error_max,
                     ),
-                     i| {
+                     i|
+                     -> Result<_> {
                         let expected = expected[i as usize];
                         let (neg_inv_error_min, neg_inv_error_max) = {
                             let expected = NEG_RIGHT + expected;
 
                             let x = NEG_K / (2 * i as i64 + 1) - 1;
-                            let (actual, diff_1) = f(x as i32);
+                            let (actual, diff_1) =
+                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
                             assert_eq!(actual, expected);
 
                             let x = NEG_K / (2 * i as i64 - 1);
-                            let (actual, diff_2) = f(x as i32);
+                            let (actual, diff_2) =
+                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
                             assert_eq!(actual, expected);
 
                             (
@@ -231,11 +238,13 @@ pub(crate) mod tests {
                             let expected = RIGHT - expected;
 
                             let x = K / (2 * i as i64 + 1) + 1;
-                            let (actual, diff_1) = f(x as i32);
+                            let (actual, diff_1) =
+                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
                             assert_eq!(actual, expected);
 
                             let x = K / (2 * i as i64 - 1);
-                            let (actual, diff_2) = f(x as i32);
+                            let (actual, diff_2) =
+                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
                             assert_eq!(actual, expected);
 
                             (
@@ -245,15 +254,17 @@ pub(crate) mod tests {
                         };
 
                         let (neg_error_min, neg_error_max) = {
-                            let (actual, diff) = f(-i);
+                            let (actual, diff) =
+                                f(-i).with_context(|| format!("{}:{}", file!(), line!()))?;
                             assert_eq!(actual, -expected);
                             (neg_error_min.min(diff), neg_error_max.max(diff))
                         };
 
-                        let (actual, diff) = f(i);
+                        let (actual, diff) =
+                            f(i).with_context(|| format!("{}:{}", file!(), line!()))?;
                         assert_eq!(actual, expected);
 
-                        (
+                        Ok((
                             diff_sum + diff,
                             error_min.min(diff),
                             error_max.max(diff),
@@ -263,11 +274,11 @@ pub(crate) mod tests {
                             inv_error_max,
                             neg_inv_error_min,
                             neg_inv_error_max,
-                        )
+                        ))
                     },
                 )
             })
-            .reduce(
+            .try_reduce(
                 || {
                     (
                         diff_sum,
@@ -303,7 +314,7 @@ pub(crate) mod tests {
                     rneg_inv_error_min,
                     rneg_inv_error_max,
                 )| {
-                    (
+                    Ok((
                         ldiff_sum + rdiff_sum,
                         lerror_min.min(rerror_min),
                         lerror_max.max(rerror_max),
@@ -313,9 +324,10 @@ pub(crate) mod tests {
                         linv_error_max.max(rinv_error_max),
                         lneg_inv_error_min.min(rneg_inv_error_min),
                         lneg_inv_error_max.max(rneg_inv_error_max),
-                    )
+                    ))
                 },
-            );
+            )
+            .unwrap();
 
         println!(
             concat!(
