@@ -102,7 +102,7 @@ pub(crate) mod tests {
         ops::RangeInclusive,
     };
 
-    use anyhow::{Context, Result};
+    use anyhow::Result;
     use approx::abs_diff_eq;
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
@@ -119,6 +119,16 @@ pub(crate) mod tests {
         const NEG_RIGHT: i32 = -RIGHT;
         const K: i64 = 2_i64.pow(i32::BITS - 1);
         const NEG_K: i64 = -K;
+        const ERRORS_LEN: usize = 6;
+
+        type Errors = [f64; ERRORS_LEN];
+
+        fn make_min_errors(lhs: Errors, rhs: Errors) -> Errors {
+            std::array::from_fn(|i| lhs[i].min(rhs[i]))
+        }
+        fn make_max_errors(lhs: Errors, rhs: Errors) -> Errors {
+            std::array::from_fn(|i| lhs[i].max(rhs[i]))
+        }
 
         let expected = read_data::<i32>(data_path).unwrap();
 
@@ -126,7 +136,7 @@ pub(crate) mod tests {
         assert_eq!(expected[0], 0);
         assert_eq!(expected[ONE as usize], RIGHT / 2);
 
-        let f = |x: i32, expected: i32| -> Result<_> {
+        let f = |x, expected| -> Result<_> {
             let actual = f(x);
             anyhow::ensure!(
                 actual == expected,
@@ -161,6 +171,46 @@ pub(crate) mod tests {
         let zero_error = f(0, expected[0]).unwrap();
         let diff_sum = error + zero_error;
         let num = num_cpus::get();
+
+        let map_op = |n| {
+            let begin = 2 + n as i32 * (ONE - 1) / num as i32;
+            let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
+            (begin..end).try_fold(
+                (
+                    0.0,
+                    [f64::INFINITY; ERRORS_LEN],
+                    [f64::NEG_INFINITY; ERRORS_LEN],
+                ),
+                |(diff_sum, errors_min, errors_max), i| -> Result<_> {
+                    let expected = expected[i as usize];
+                    let expected = [expected, -expected, RIGHT - expected, NEG_RIGHT + expected];
+                    let errors = [
+                        (expected[0], i),
+                        (expected[1], -i),
+                        (expected[2], (K / (2 * i as i64 + 1)) as i32 + 1),
+                        (expected[2], (K / (2 * i as i64 - 1)) as i32),
+                        (expected[3], (NEG_K / (2 * i as i64 + 1)) as i32 - 1),
+                        (expected[3], (NEG_K / (2 * i as i64 - 1)) as i32),
+                    ]
+                    .try_map(|(expected, x)| f(x, expected))?;
+                    anyhow::ensure!(errors_min.len() == ERRORS_LEN);
+                    anyhow::ensure!(errors_max.len() == ERRORS_LEN);
+                    anyhow::ensure!(errors.len() == ERRORS_LEN);
+                    let errors_min = make_min_errors(errors_min, errors);
+                    let errors_max = make_max_errors(errors_max, errors);
+                    Ok((diff_sum + errors[0], errors_min, errors_max))
+                },
+            )
+        };
+
+        let try_reduce_op = |(ldiff_sum, lerrors_min, lerrors_max): (_, Errors, Errors),
+                             (rdiff_sum, rerrors_min, rerrors_max): (_, Errors, Errors)|
+         -> Result<_> {
+            let errors_min = make_min_errors(lerrors_min, rerrors_min);
+            let errors_max = make_max_errors(lerrors_max, rerrors_max);
+            Ok((ldiff_sum + rdiff_sum, errors_min, errors_max))
+        };
+
         let errors = [
             error,
             neg_error,
@@ -169,64 +219,10 @@ pub(crate) mod tests {
             neg_inv_error_near,
             neg_inv_error_far,
         ];
-
         let (diff_sum, errors_min, errors_max) = (0..num)
             .into_par_iter()
-            .map(|n| {
-                let begin = 2 + n as i32 * (ONE - 1) / num as i32;
-                let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
-                (begin..end).try_fold(
-                    (0.0, [f64::INFINITY; 6], [f64::NEG_INFINITY; 6]),
-                    |(diff_sum, mut errors_min, mut errors_max), i| -> Result<_> {
-                        let expected = expected[i as usize];
-                        let expected =
-                            [expected, -expected, RIGHT - expected, NEG_RIGHT + expected];
-                        let errors = [
-                            (expected[0], i),
-                            (expected[1], -i),
-                            (expected[2], (K / (2 * i as i64 + 1)) as i32 + 1),
-                            (expected[2], (K / (2 * i as i64 - 1)) as i32),
-                            (expected[3], (NEG_K / (2 * i as i64 + 1)) as i32 - 1),
-                            (expected[3], (NEG_K / (2 * i as i64 - 1)) as i32),
-                        ]
-                        .try_map(|(expected, x)| f(x, expected))
-                        .with_context(|| format!("{}:{}", file!(), line!()))?;
-
-                        if errors_min.len() != errors.len() {
-                            anyhow::bail!("{}:{}", file!(), line!());
-                        }
-                        if errors_max.len() != errors.len() {
-                            anyhow::bail!("{}:{}", file!(), line!());
-                        }
-                        for (l, r) in errors_min.iter_mut().zip(errors.iter()) {
-                            *l = l.min(*r);
-                        }
-                        for (l, r) in errors_max.iter_mut().zip(errors.iter()) {
-                            *l = l.max(*r);
-                        }
-                        Ok((diff_sum + errors[0], errors_min, errors_max))
-                    },
-                )
-            })
-            .try_reduce(
-                || (diff_sum, errors.clone(), errors.clone()),
-                |(ldiff_sum, mut lerrors_min, mut lerrors_max),
-                 (rdiff_sum, rerrors_min, rerrors_max)| {
-                    if lerrors_min.len() != rerrors_min.len() {
-                        anyhow::bail!("{}:{}", file!(), line!());
-                    }
-                    if lerrors_max.len() != rerrors_max.len() {
-                        anyhow::bail!("{}:{}", file!(), line!());
-                    }
-                    for (l, r) in lerrors_min.iter_mut().zip(rerrors_min.into_iter()) {
-                        *l = l.min(r);
-                    }
-                    for (l, r) in lerrors_max.iter_mut().zip(rerrors_max.into_iter()) {
-                        *l = l.max(r);
-                    }
-                    Ok((ldiff_sum + rdiff_sum, lerrors_min, lerrors_max))
-                },
-            )
+            .map(map_op)
+            .try_reduce(|| (diff_sum, errors.clone(), errors.clone()), try_reduce_op)
             .unwrap();
 
         println!("error_zero: {:15.9}", zero_error);
