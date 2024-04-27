@@ -492,9 +492,9 @@ pub(crate) mod tests {
         }
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003789); }
-    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001603); }
-    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000928); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003778); }
+    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001543); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000767); }
 
     pub fn make_atan_data(exp: u32) -> Vec<f64> {
         let num = num_cpus::get();
