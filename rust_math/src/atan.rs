@@ -126,231 +126,117 @@ pub(crate) mod tests {
         assert_eq!(expected[0], 0);
         assert_eq!(expected[ONE as usize], RIGHT / 2);
 
-        let f = |x: i32| -> Result<_> {
-            let fx = f(x);
-            let diff = {
-                const SCALE: f64 = PI / ONE.pow(2) as f64;
-                let fx = SCALE * fx as f64;
-                let std = (x as f64 / ONE as f64).atan();
-                anyhow::ensure!(
-                    abs_diff_eq!(fx, std, epsilon = acceptable_error),
-                    "x: {x}, fx: {fx}, std: {std}"
-                );
-                fx - std
-            };
-            Ok((fx, diff))
+        let f = |x: i32, expected: i32| -> Result<_> {
+            let actual = f(x);
+            anyhow::ensure!(
+                actual == expected,
+                "x: {x}, actual: {actual}, expected: {expected}"
+            );
+
+            const SCALE: f64 = PI / ONE.pow(2) as f64;
+            let actual = SCALE * actual as f64;
+            let expected = (x as f64 / ONE as f64).atan();
+            anyhow::ensure!(
+                abs_diff_eq!(actual, expected, epsilon = acceptable_error),
+                "x: {x}, actual: {actual}, expected: {expected}"
+            );
+            Ok(actual - expected)
         };
 
-        let (neg_inv_error_min, neg_inv_error_max) = {
+        let (neg_inv_error_near, neg_inv_error_far) = {
             let expected = NEG_RIGHT + expected[1];
-            let (actual, diff_1) = f((NEG_K / 3 - 1) as i32).unwrap();
-            assert_eq!(actual, expected);
-            let (actual, diff_2) = f(i32::MIN).unwrap();
-            assert_eq!(actual, expected);
-            (diff_1.min(diff_2), diff_1.max(diff_2))
+            let neg_inv_error_near = f((NEG_K / 3 - 1) as i32, expected).unwrap();
+            let neg_inv_error_far = f(i32::MIN, expected).unwrap();
+            (neg_inv_error_near, neg_inv_error_far)
         };
-
-        let (inv_error_min, inv_error_max) = {
+        let (inv_error_near, inv_error_far) = {
             let expected = RIGHT - expected[1];
-            let (actual, diff_1) = f((K / 3 + 1) as i32).unwrap();
-            assert_eq!(actual, expected);
-            let (actual, diff_2) = f(i32::MAX).unwrap();
-            assert_eq!(actual, expected);
-            (diff_1.min(diff_2), diff_1.max(diff_2))
+            let inv_error_near = f((K / 3 + 1) as i32, expected).unwrap();
+            let inv_error_far = f(i32::MAX, expected).unwrap();
+            (inv_error_near, inv_error_far)
         };
 
-        let (neg_error_min, neg_error_max) = {
-            let (actual, diff) = f(-1).unwrap();
-            assert_eq!(actual, -expected[1]);
-            (diff, diff)
-        };
-
-        let (diff_sum, error_min, error_max) = {
-            let (actual, diff_1) = f(1).unwrap();
-            assert_eq!(actual, expected[1]);
-            let (actual, diff_2) = f(0).unwrap();
-            assert_eq!(actual, expected[0]);
-            (diff_1 + diff_2, diff_1.min(diff_2), diff_1.max(diff_2))
-        };
-
+        let neg_error = f(-1, -expected[1]).unwrap();
+        let error = f(1, expected[1]).unwrap();
+        let zero_error = f(0, expected[0]).unwrap();
+        let diff_sum = error + zero_error;
         let num = num_cpus::get();
+        let errors = vec![
+            error,
+            neg_error,
+            inv_error_near,
+            inv_error_far,
+            neg_inv_error_near,
+            neg_inv_error_far,
+        ];
 
-        let (
-            diff_sum,
-            error_min,
-            error_max,
-            neg_error_min,
-            neg_error_max,
-            inv_error_min,
-            inv_error_max,
-            neg_inv_error_min,
-            neg_inv_error_max,
-        ) = (0..num)
+        let (diff_sum, errors_min, errors_max) = (0..num)
             .into_par_iter()
             .map(|n| {
                 let begin = 2 + n as i32 * (ONE - 1) / num as i32;
                 let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
                 (begin..end).try_fold(
-                    (
-                        0.0,
-                        f64::INFINITY,
-                        f64::NEG_INFINITY,
-                        f64::INFINITY,
-                        f64::NEG_INFINITY,
-                        f64::INFINITY,
-                        f64::NEG_INFINITY,
-                        f64::INFINITY,
-                        f64::NEG_INFINITY,
-                    ),
-                    |(
-                        diff_sum,
-                        error_min,
-                        error_max,
-                        neg_error_min,
-                        neg_error_max,
-                        inv_error_min,
-                        inv_error_max,
-                        neg_inv_error_min,
-                        neg_inv_error_max,
-                    ),
-                     i|
-                     -> Result<_> {
+                    (0.0, vec![f64::INFINITY; 6], vec![f64::NEG_INFINITY; 6]),
+                    |(diff_sum, mut errors_min, mut errors_max), i| -> Result<_> {
                         let expected = expected[i as usize];
-                        let (neg_inv_error_min, neg_inv_error_max) = {
-                            let expected = NEG_RIGHT + expected;
+                        let expected =
+                            [expected, -expected, RIGHT - expected, NEG_RIGHT + expected];
+                        let errors = [
+                            (expected[0], i),
+                            (expected[1], -i),
+                            (expected[2], (K / (2 * i as i64 + 1)) as i32 + 1),
+                            (expected[2], (K / (2 * i as i64 - 1)) as i32),
+                            (expected[3], (NEG_K / (2 * i as i64 + 1)) as i32 - 1),
+                            (expected[3], (NEG_K / (2 * i as i64 - 1)) as i32),
+                        ]
+                        .map(|(expected, x)| f(x, expected))
+                        .into_iter()
+                        .collect::<Result<Vec<_>>>()
+                        .with_context(|| format!("{}:{}", file!(), line!()))?;
 
-                            let x = NEG_K / (2 * i as i64 + 1) - 1;
-                            let (actual, diff_1) =
-                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
-                            assert_eq!(actual, expected);
-
-                            let x = NEG_K / (2 * i as i64 - 1);
-                            let (actual, diff_2) =
-                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
-                            assert_eq!(actual, expected);
-
-                            (
-                                neg_inv_error_min.min(diff_1.min(diff_2)),
-                                neg_inv_error_max.max(diff_1.max(diff_2)),
-                            )
-                        };
-                        let (inv_error_min, inv_error_max) = {
-                            let expected = RIGHT - expected;
-
-                            let x = K / (2 * i as i64 + 1) + 1;
-                            let (actual, diff_1) =
-                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
-                            assert_eq!(actual, expected);
-
-                            let x = K / (2 * i as i64 - 1);
-                            let (actual, diff_2) =
-                                f(x as i32).with_context(|| format!("{}:{}", file!(), line!()))?;
-                            assert_eq!(actual, expected);
-
-                            (
-                                inv_error_min.min(diff_1.min(diff_2)),
-                                inv_error_max.max(diff_1.max(diff_2)),
-                            )
-                        };
-
-                        let (neg_error_min, neg_error_max) = {
-                            let (actual, diff) =
-                                f(-i).with_context(|| format!("{}:{}", file!(), line!()))?;
-                            assert_eq!(actual, -expected);
-                            (neg_error_min.min(diff), neg_error_max.max(diff))
-                        };
-
-                        let (actual, diff) =
-                            f(i).with_context(|| format!("{}:{}", file!(), line!()))?;
-                        assert_eq!(actual, expected);
-
-                        Ok((
-                            diff_sum + diff,
-                            error_min.min(diff),
-                            error_max.max(diff),
-                            neg_error_min,
-                            neg_error_max,
-                            inv_error_min,
-                            inv_error_max,
-                            neg_inv_error_min,
-                            neg_inv_error_max,
-                        ))
+                        if errors_min.len() != errors.len() {
+                            anyhow::bail!("{}:{}", file!(), line!());
+                        }
+                        if errors_max.len() != errors.len() {
+                            anyhow::bail!("{}:{}", file!(), line!());
+                        }
+                        for (i, &e) in errors.iter().enumerate() {
+                            errors_min[i] = errors_min[i].min(e);
+                            errors_max[i] = errors_max[i].max(e);
+                        }
+                        Ok((diff_sum + errors[0], errors_min, errors_max))
                     },
                 )
             })
             .try_reduce(
-                || {
-                    (
-                        diff_sum,
-                        error_min,
-                        error_max,
-                        neg_error_min,
-                        neg_error_max,
-                        inv_error_min,
-                        inv_error_max,
-                        neg_inv_error_min,
-                        neg_inv_error_max,
-                    )
-                },
-                |(
-                    ldiff_sum,
-                    lerror_min,
-                    lerror_max,
-                    lneg_error_min,
-                    lneg_error_max,
-                    linv_error_min,
-                    linv_error_max,
-                    lneg_inv_error_min,
-                    lneg_inv_error_max,
-                ),
-                 (
-                    rdiff_sum,
-                    rerror_min,
-                    rerror_max,
-                    rneg_error_min,
-                    rneg_error_max,
-                    rinv_error_min,
-                    rinv_error_max,
-                    rneg_inv_error_min,
-                    rneg_inv_error_max,
-                )| {
-                    Ok((
-                        ldiff_sum + rdiff_sum,
-                        lerror_min.min(rerror_min),
-                        lerror_max.max(rerror_max),
-                        lneg_error_min.min(rneg_error_min),
-                        lneg_error_max.max(rneg_error_max),
-                        linv_error_min.min(rinv_error_min),
-                        linv_error_max.max(rinv_error_max),
-                        lneg_inv_error_min.min(rneg_inv_error_min),
-                        lneg_inv_error_max.max(rneg_inv_error_max),
-                    ))
+                || (diff_sum, errors.clone(), errors.clone()),
+                |(ldiff_sum, mut lerrors_min, mut lerrors_max),
+                 (rdiff_sum, rerrors_min, rerrors_max)| {
+                    if lerrors_min.len() != rerrors_min.len() {
+                        anyhow::bail!("{}:{}", file!(), line!());
+                    }
+                    if lerrors_max.len() != rerrors_max.len() {
+                        anyhow::bail!("{}:{}", file!(), line!());
+                    }
+                    for (l, r) in lerrors_min.iter_mut().zip(rerrors_min.into_iter()) {
+                        *l = l.min(r);
+                    }
+                    for (l, r) in lerrors_max.iter_mut().zip(rerrors_max.into_iter()) {
+                        *l = l.max(r);
+                    }
+                    Ok((ldiff_sum + rdiff_sum, lerrors_min, lerrors_max))
                 },
             )
             .unwrap();
 
-        println!(
-            concat!(
-                "error min:         {:12.9}\n",
-                "error max:         {:12.9}\n",
-                "neg error min:     {:12.9}\n",
-                "neg error max:     {:12.9}\n",
-                "inv error min:     {:12.9}\n",
-                "inv error max:     {:12.9}\n",
-                "neg inv error min: {:12.9}\n",
-                "neg inv error max: {:12.9}\n",
-                "error average:     {:12.9}"
-            ),
-            error_min,
-            error_max,
-            neg_error_min,
-            neg_error_max,
-            inv_error_min,
-            inv_error_max,
-            neg_inv_error_min,
-            neg_inv_error_max,
-            diff_sum / (ONE + 1) as f64
-        );
+        println!("error_zero: {:15.9}", zero_error);
+        for (i, e) in errors_min.iter().enumerate() {
+            println!("errors_min[{}]: {:12.9}", i, e);
+        }
+        for (i, e) in errors_max.iter().enumerate() {
+            println!("errors_max[{}]: {:12.9}", i, e);
+        }
+        println!("average: {:18.9}", diff_sum / (ONE + 1) as f64);
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003778); }
