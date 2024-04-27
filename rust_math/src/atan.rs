@@ -161,7 +161,7 @@ pub(crate) mod tests {
         let zero_error = f(0, expected[0]).unwrap();
         let diff_sum = error + zero_error;
         let num = num_cpus::get();
-        let errors = vec![
+        let errors = [
             error,
             neg_error,
             inv_error_near,
@@ -176,7 +176,7 @@ pub(crate) mod tests {
                 let begin = 2 + n as i32 * (ONE - 1) / num as i32;
                 let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
                 (begin..end).try_fold(
-                    (0.0, vec![f64::INFINITY; 6], vec![f64::NEG_INFINITY; 6]),
+                    (0.0, [f64::INFINITY; 6], [f64::NEG_INFINITY; 6]),
                     |(diff_sum, mut errors_min, mut errors_max), i| -> Result<_> {
                         let expected = expected[i as usize];
                         let expected =
@@ -189,9 +189,7 @@ pub(crate) mod tests {
                             (expected[3], (NEG_K / (2 * i as i64 + 1)) as i32 - 1),
                             (expected[3], (NEG_K / (2 * i as i64 - 1)) as i32),
                         ]
-                        .map(|(expected, x)| f(x, expected))
-                        .into_iter()
-                        .collect::<Result<Vec<_>>>()
+                        .try_map(|(expected, x)| f(x, expected))
                         .with_context(|| format!("{}:{}", file!(), line!()))?;
 
                         if errors_min.len() != errors.len() {
