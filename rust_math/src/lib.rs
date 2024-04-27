@@ -1,3 +1,5 @@
+#![feature(array_try_map)]
+
 #[cfg(test)]
 extern crate num_cpus;
 
