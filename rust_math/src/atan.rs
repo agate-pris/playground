@@ -12,8 +12,10 @@ pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
 }
 
 pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
-    const K: i64 = 1 << 15;
-    (a as i64 * K / b as i64) as i32
+    const K: i64 = 1 << (15 + 1);
+    let a = a as i64 * K;
+    let b = b as i64;
+    ((a + a.signum() * b.abs()) / (2 * b)) as i32
 }
 
 pub(crate) trait AtanUtil<T> {
@@ -94,16 +96,11 @@ pub(crate) trait AtanUtil<T> {
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use std::{
-        cmp::Ordering,
-        f64::consts::{FRAC_PI_2, PI},
-        fmt::Debug,
-        iter::once,
-        ops::RangeInclusive,
-    };
+    use std::{cmp::Ordering, f64::consts::PI, fmt::Debug, iter::once, ops::RangeInclusive};
 
     use anyhow::Result;
     use approx::abs_diff_eq;
+    use itertools::Itertools;
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -241,10 +238,8 @@ pub(crate) mod tests {
 
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
-        F: Fn(i32, i32) -> i32,
+        F: Fn(i32, i32) -> i32 + Sync,
     {
-        assert_eq!(f(0, 0), 0);
-
         const K: i32 = 2_i32.pow(i32::BITS / 2 - 1);
         const STRAIGHT: i32 = K.pow(2);
         const RIGHT: i32 = STRAIGHT / 2;
@@ -254,60 +249,104 @@ pub(crate) mod tests {
         const NEG_HALF_RIGHT: i32 = -HALF_RIGHT;
         const OPPOSITE_HALF_RIGHT: i32 = NEG_STRAIGHT + HALF_RIGHT;
         const OPPOSITE_NEG_HALF_RIGHT: i32 = STRAIGHT + NEG_HALF_RIGHT;
-
-        // Find the largest error for each of the eight regions
-        // that are divided by the straight lines y = x, y = -x, y = 0, x = 0.
-
-        let mut max_error = f64::NEG_INFINITY;
-
-        // Calculate the expected and actual value and store value.
-        let mut calc = |p: &[i32; 2]| {
-            let expected = (p[1] as f64).atan2(p[0] as f64);
-            let actual = f(p[1], p[0]);
-            {
-                const SCALE: f64 = FRAC_PI_2 / RIGHT as f64;
-                let actual = actual as f64 * SCALE;
-                let cond = abs_diff_eq!(expected, actual, epsilon = acceptable_error);
-                assert!(cond, "p: {p:?}, expected: {expected}, actual: {actual}");
-                max_error = max_error.max((actual - expected).abs());
-            }
-            (expected, actual)
-        };
-
-        // On the straight lintes y = 0, x = 0.
-        {
-            let points = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-            let e = [0, RIGHT, STRAIGHT, NEG_RIGHT];
-            angles.iter().zip(e).for_each(|(a, e)| assert_eq!(a.1, e));
-        }
-
-        // On the straight lines y = x, y = -x.
-        {
-            let points = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
-            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-            let e = [
-                HALF_RIGHT,
-                OPPOSITE_NEG_HALF_RIGHT,
-                OPPOSITE_HALF_RIGHT,
-                NEG_HALF_RIGHT,
-            ];
-            angles.iter().zip(e).for_each(|(a, e)| assert_eq!(a.1, e));
-        }
+        const ERRORS_LEN: usize = 8;
 
         fn to_4_points(x: i32, y: i32) -> [[i32; 2]; 4] {
             [[x, y], [y, x], [-y, x], [x, -y]]
         }
 
-        fn to_8_points(x: i32, y: i32, z: i32, w: i32) -> [[i32; 2]; 8] {
+        fn to_8_points(x: i32, y: i32, z: i32, w: i32) -> [[i32; 2]; ERRORS_LEN] {
             let p = to_4_points(x, y);
             let n = to_4_points(z, w);
             [p[0], p[1], p[2], n[3], n[0], n[1], n[2], p[3]]
         }
 
-        fn to_8_points_default(x: i32, y: i32) -> [[i32; 2]; 8] {
+        fn to_8_points_default(x: i32, y: i32) -> [[i32; 2]; ERRORS_LEN] {
             to_8_points(x, y, -x, -y)
         }
+
+        fn compare_steep(a: &[i32; 2], b: &[i32; 2]) -> Ordering {
+            let aybx = a[1] as i64 * b[0] as i64;
+            let byax = b[1] as i64 * a[0] as i64;
+            aybx.cmp(&byax)
+        }
+
+        fn collect_most_steep_points(n: i32) -> Vec<[i32; 2]> {
+            const WIDTH: i32 = 2_i32.pow(16);
+            const X: i32 = i32::MAX - (WIDTH - 1);
+            const X_BEGIN: i32 = X + 1;
+
+            let points = (X_BEGIN..=i32::MAX)
+                .map(|x| {
+                    let y = {
+                        const WIDTH_AS_I64: i64 = WIDTH as i64;
+                        let mul = x as i64 * (2 * n + 1) as i64;
+                        let rem = mul % WIDTH_AS_I64;
+                        mul / WIDTH_AS_I64 - if rem == 0 { 1 } else { 0 }
+                    } as i32;
+                    [x, y]
+                })
+                .collect::<Vec<_>>();
+
+            points.into_iter().max_set_by(compare_steep)
+        }
+
+        for (y, x, expected) in [
+            (0, 0, 0),
+            (0, 1, 0),
+            (1, 1, HALF_RIGHT),
+            (1, 0, RIGHT),
+            (1, -1, OPPOSITE_NEG_HALF_RIGHT),
+            (0, -1, STRAIGHT),
+            (-1, 1, NEG_HALF_RIGHT),
+            (-1, 0, NEG_RIGHT),
+            (-1, -1, OPPOSITE_HALF_RIGHT),
+            (0, i32::MAX, 0),
+            (0, i32::MIN, STRAIGHT),
+            (i32::MAX, 0, RIGHT),
+            (i32::MIN, 0, NEG_RIGHT),
+            (i32::MAX, i32::MAX, HALF_RIGHT),
+            (i32::MIN, i32::MIN, OPPOSITE_HALF_RIGHT),
+            (i32::MIN, i32::MAX, NEG_HALF_RIGHT),
+            (i32::MAX, i32::MIN, OPPOSITE_NEG_HALF_RIGHT),
+            (0, -i32::MAX, STRAIGHT),
+            (i32::MIN, -i32::MAX, OPPOSITE_HALF_RIGHT),
+            (i32::MAX, -i32::MAX, OPPOSITE_NEG_HALF_RIGHT),
+            (-i32::MAX, 0, NEG_RIGHT),
+            (-i32::MAX, i32::MIN, OPPOSITE_HALF_RIGHT),
+            (-i32::MAX, i32::MAX, NEG_HALF_RIGHT),
+            (-i32::MAX, -i32::MAX, OPPOSITE_HALF_RIGHT),
+            (1, i32::MAX, 0),
+            (1, i32::MIN, STRAIGHT),
+            (1, -i32::MAX, STRAIGHT),
+            (-1, i32::MAX, 0),
+            (-1, i32::MIN, NEG_STRAIGHT),
+            (-1, -i32::MAX, NEG_STRAIGHT),
+            (i32::MIN, 1, NEG_RIGHT),
+            (i32::MAX, 1, RIGHT),
+            (i32::MIN, -1, NEG_RIGHT),
+            (i32::MAX, -1, RIGHT),
+            (-i32::MAX, 1, NEG_RIGHT),
+            (-i32::MAX, -1, NEG_RIGHT),
+        ] {
+            assert_eq!(f(y, x), expected, "p: [{x}, {y}]");
+        }
+
+        let f = |p: &[i32; 2]| -> Result<_> {
+            let actual = f(p[1], p[0]);
+            let error = {
+                const SCALE: f64 = PI / STRAIGHT as f64;
+                let actual = SCALE * actual as f64;
+                let expected = (p[1] as f64).atan2(p[0] as f64);
+                anyhow::ensure!(
+                    abs_diff_eq!(expected, actual, epsilon = acceptable_error),
+                    "p: {:?}, expected: {expected}, actual: {actual}",
+                    p
+                );
+                actual - expected
+            };
+            Ok((actual, error))
+        };
 
         let data = read_data::<i32>(data_path).unwrap();
 
@@ -315,100 +354,147 @@ pub(crate) mod tests {
         assert_eq!(data[0], 0);
         assert_eq!(data[K as usize], HALF_RIGHT);
 
-        let assert_equality = |angles: &[(f64, i32)], i: usize| {
-            assert_eq!(angles.len(), 8);
-
-            #[rustfmt::skip] assert_eq!(angles[0].1,              data[i]);
-            #[rustfmt::skip] assert_eq!(angles[1].1,      RIGHT - data[i]);
-            #[rustfmt::skip] assert_eq!(angles[2].1,      RIGHT + data[i]);
-            #[rustfmt::skip] assert_eq!(angles[3].1,  2 * RIGHT - data[i]);
-            #[rustfmt::skip] assert_eq!(angles[4].1, -2 * RIGHT + data[i]);
-            #[rustfmt::skip] assert_eq!(angles[5].1,     -RIGHT - data[i]);
-            #[rustfmt::skip] assert_eq!(angles[6].1,     -RIGHT + data[i]);
-            #[rustfmt::skip] assert_eq!(angles[7].1,             -data[i]);
+        // 0
+        let far = {
+            const EXPECTED: [i32; ERRORS_LEN] = [
+                0,
+                RIGHT,
+                RIGHT,
+                STRAIGHT,
+                NEG_STRAIGHT,
+                NEG_RIGHT,
+                NEG_RIGHT,
+                0,
+            ];
+            collect_most_steep_points(0)
+                .into_iter()
+                .try_fold(
+                    [(f64::INFINITY, f64::NEG_INFINITY); ERRORS_LEN],
+                    |error, p| -> Result<_> {
+                        let points = to_8_points_default(p[0], p[1]);
+                        anyhow::ensure!(EXPECTED.len() == points.len());
+                        std::array::try_from_fn(|i| {
+                            let (min, max) = error[i];
+                            let expected = EXPECTED[i];
+                            let (actual, error) = f(&points[i])?;
+                            anyhow::ensure!(expected == actual);
+                            Ok((min.min(error), max.max(error)))
+                        })
+                    },
+                )
+                .unwrap()
         };
 
-        // (K, K - 1)
-        {
-            let points = to_8_points_default(K, K - 1);
-            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-            assert_equality(&angles, K as usize - 1);
-        }
+        // 32768
+        let near = {
+            const EXPECTED: [i32; ERRORS_LEN] = [
+                HALF_RIGHT,
+                HALF_RIGHT,
+                OPPOSITE_NEG_HALF_RIGHT,
+                OPPOSITE_NEG_HALF_RIGHT,
+                OPPOSITE_HALF_RIGHT,
+                OPPOSITE_HALF_RIGHT,
+                NEG_HALF_RIGHT,
+                NEG_HALF_RIGHT,
+            ];
+            let points = to_8_points_default(2_i32.pow(16), 2_i32.pow(16) - 1);
+            assert_eq!(EXPECTED.len(), points.len());
+            std::array::try_from_fn(|i| {
+                let expected = EXPECTED[i];
+                let (actual, error) = f(&points[i])?;
+                anyhow::ensure!(expected == actual);
+                Ok(error)
+            })
+            .unwrap()
+        };
 
-        // (MAX, MAX - 1), (MIN, -MAX)
-        {
-            let points = to_8_points(i32::MAX, i32::MAX - 1, i32::MIN, -i32::MAX);
-            let angles = points.iter().map(&mut calc).collect::<Vec<_>>();
-
-            #[rustfmt::skip] assert_ne!(angles[0].1,      HALF_RIGHT);
-            #[rustfmt::skip] assert_ne!(angles[1].1,  3 * HALF_RIGHT);
-            #[rustfmt::skip] assert_ne!(angles[2].1, -3 * HALF_RIGHT);
-            #[rustfmt::skip] assert_ne!(angles[3].1,     -HALF_RIGHT);
-
-            assert_equality(&angles, K as usize - 1);
-        }
-
-        fn collect_most_steep_points(n: i32) -> Vec<[i32; 2]> {
-            fn compare_steep(a: &[i32; 2], b: &[i32; 2]) -> Ordering {
-                let aybx = a[1] as i64 * b[0] as i64;
-                let byax = b[1] as i64 * a[0] as i64;
-                aybx.cmp(&byax)
+        let f = |p: &[i32; 2], i: usize| -> Result<_> {
+            let expected = data[i];
+            let expected = [
+                expected,
+                RIGHT - expected,
+                RIGHT + expected,
+                STRAIGHT - expected,
+                NEG_STRAIGHT + expected,
+                NEG_RIGHT - expected,
+                NEG_RIGHT + expected,
+                -expected,
+            ];
+            let points = to_8_points_default(p[0], p[1]);
+            anyhow::ensure!(expected.len() == points.len());
+            let result = points.try_map(|p| f(&p))?;
+            for (&expected, &actual) in expected.iter().zip(result.iter().map(|(r, _)| r)) {
+                anyhow::ensure!(expected == actual);
             }
+            Ok(result.map(|(_, diff)| diff))
+        };
 
-            let count = n + 1;
-            let begin = {
-                let mut copy = count;
-                while copy % 2 == 0 && copy > 1 {
-                    copy /= 2;
-                }
-                count - copy
-            };
+        let num = num_cpus::get();
 
-            const OFFSET_X: i32 = i32::MAX - K + 1;
-            let offset_y = OFFSET_X / K * count;
+        let map_op = |n| {
+            let begin = 1 + (K - 1) * n as i32 / num as i32;
+            let end = 1 + (K - 1) * (n + 1) as i32 / num as i32;
+            (begin..end).try_fold(
+                [[(f64::INFINITY, f64::NEG_INFINITY); ERRORS_LEN]; 2],
+                |errors, i| -> Result<_> {
+                    let near = {
+                        let errors = errors[0];
+                        let point = [2 * K, 1 + 2 * (i - 1)];
+                        let e = f(&point, i as usize)?;
+                        std::array::from_fn(|i| (errors[i].0.min(e[i]), errors[i].1.max(e[i])))
+                    };
+                    let far = collect_most_steep_points(i).into_iter().try_fold(
+                        errors[1],
+                        |errors, p| -> Result<_> {
+                            let e = f(&p, i as usize)?;
+                            Ok(std::array::from_fn(|i| {
+                                (errors[i].0.min(e[i]), errors[i].1.max(e[i]))
+                            }))
+                        },
+                    )?;
+                    Ok([near, far])
+                },
+            )
+        };
 
-            let positions = (begin..=n)
-                .map(|m| [OFFSET_X + K * m / count + 1, offset_y + m])
-                .collect::<Vec<_>>();
+        let errors = (0..num)
+            .into_par_iter()
+            .map(map_op)
+            .try_reduce(
+                || [near.map(|a| (a, a)), far],
+                |l, r| {
+                    let near = {
+                        std::array::from_fn(|i| {
+                            let (lnear, rnear) = (l[0][i], r[0][i]);
+                            let min = lnear.0.min(rnear.0);
+                            let max = lnear.1.max(rnear.1);
+                            (min, max)
+                        })
+                    };
+                    let far = {
+                        std::array::from_fn(|i| {
+                            let (lfar, rfar) = (l[1][i], r[1][i]);
+                            let min = lfar.0.min(rfar.0);
+                            let max = lfar.1.max(rfar.1);
+                            (min, max)
+                        })
+                    };
+                    Ok([near, far])
+                },
+            )
+            .unwrap();
 
-            let max = positions.iter().cloned().max_by(compare_steep).unwrap();
-
-            positions
-                .into_iter()
-                .filter(|a| compare_steep(a, &max).is_eq())
-                .collect()
+        for (i, e) in errors[0].iter().enumerate() {
+            println!("near_errors[{i}]: ({:12.9}, {:12.9})", e.0, e.1);
         }
-
-        for n in 1..K - 1 {
-            // (K, n)
-            {
-                let angles = to_8_points_default(K, n)
-                    .iter()
-                    .map(&mut calc)
-                    .collect::<Vec<_>>();
-
-                assert_equality(&angles, n as usize);
-            }
-
-            // most steep points
-            {
-                let positions = collect_most_steep_points(n);
-
-                for position in positions.into_iter() {
-                    let positions = to_8_points_default(position[0], position[1]);
-                    let angles = positions.iter().map(&mut calc).collect::<Vec<_>>();
-
-                    assert_equality(&angles, n as usize);
-                }
-            }
+        for (i, e) in errors[1].iter().enumerate() {
+            println!("far_errors[{i}]:  ({:12.9}, {:12.9})", e.0, e.1);
         }
-
-        println!("max error: {max_error}");
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003789); }
-    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001603); }
-    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000928); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003778); }
+    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001543); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000767); }
 
     pub fn make_atan_data(exp: u32) -> Vec<f64> {
         let num = num_cpus::get();

@@ -1,3 +1,4 @@
+#![feature(array_try_from_fn)]
 #![feature(array_try_map)]
 
 #[cfg(test)]
