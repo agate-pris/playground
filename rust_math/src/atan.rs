@@ -200,9 +200,11 @@ pub(crate) mod tests {
                         if errors_max.len() != errors.len() {
                             anyhow::bail!("{}:{}", file!(), line!());
                         }
-                        for (i, &e) in errors.iter().enumerate() {
-                            errors_min[i] = errors_min[i].min(e);
-                            errors_max[i] = errors_max[i].max(e);
+                        for (l, r) in errors_min.iter_mut().zip(errors.iter()) {
+                            *l = l.min(*r);
+                        }
+                        for (l, r) in errors_max.iter_mut().zip(errors.iter()) {
+                            *l = l.max(*r);
                         }
                         Ok((diff_sum + errors[0], errors_min, errors_max))
                     },
