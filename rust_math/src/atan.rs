@@ -222,7 +222,7 @@ pub(crate) mod tests {
         let (diff_sum, errors_min, errors_max) = (0..num)
             .into_par_iter()
             .map(map_op)
-            .try_reduce(|| (diff_sum, errors.clone(), errors.clone()), try_reduce_op)
+            .try_reduce(|| (diff_sum, errors, errors), try_reduce_op)
             .unwrap();
 
         println!("error_zero: {:15.9}", zero_error);
