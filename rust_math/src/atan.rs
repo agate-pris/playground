@@ -282,6 +282,19 @@ pub(crate) mod tests {
             points.into_iter().max_set_by(compare_steep)
         }
 
+        fn fold_errors(
+            init: [(f64, f64); ERRORS_LEN],
+            errors: [f64; ERRORS_LEN],
+        ) -> [(f64, f64); ERRORS_LEN] {
+            std::array::from_fn(|i| (init[i].0.min(errors[i]), init[i].1.max(errors[i])))
+        }
+        fn reduce_errors(
+            lhs: [(f64, f64); ERRORS_LEN],
+            rhs: [(f64, f64); ERRORS_LEN],
+        ) -> [(f64, f64); ERRORS_LEN] {
+            std::array::from_fn(|i| (lhs[i].0.min(rhs[i].0), lhs[i].1.max(rhs[i].1)))
+        }
+
         for (y, x, expected) in [
             (0, 0, 0),
             (0, 1, 0),
@@ -361,16 +374,16 @@ pub(crate) mod tests {
                 .into_iter()
                 .try_fold(
                     [(f64::INFINITY, f64::NEG_INFINITY); ERRORS_LEN],
-                    |error, p| -> Result<_> {
+                    |errors, p| -> Result<_> {
                         let points = to_8_points_default(p[0], p[1]);
                         anyhow::ensure!(EXPECTED.len() == points.len());
-                        std::array::try_from_fn(|i| {
-                            let (min, max) = error[i];
+                        let e = std::array::try_from_fn(|i| {
                             let expected = EXPECTED[i];
                             let (actual, error) = f(&points[i])?;
                             anyhow::ensure!(expected == actual);
-                            Ok((min.min(error), max.max(error)))
-                        })
+                            Ok(error)
+                        })?;
+                        Ok(fold_errors(errors, e))
                     },
                 )
                 .unwrap()
@@ -432,17 +445,13 @@ pub(crate) mod tests {
                         let errors = errors[0];
                         let point = [2 * K, 1 + 2 * (i - 1)];
                         let e = f(&point, i as usize)?;
-                        std::array::from_fn(|i| (errors[i].0.min(e[i]), errors[i].1.max(e[i])))
+                        fold_errors(errors, e)
                     };
-                    let far = collect_most_steep_points(i).into_iter().try_fold(
-                        errors[1],
-                        |errors, p| -> Result<_> {
-                            let e = f(&p, i as usize)?;
-                            Ok(std::array::from_fn(|i| {
-                                (errors[i].0.min(e[i]), errors[i].1.max(e[i]))
-                            }))
-                        },
-                    )?;
+                    let far = collect_most_steep_points(i)
+                        .into_iter()
+                        .try_fold(errors[1], |errors, p| -> Result<_> {
+                            Ok(fold_errors(errors, f(&p, i as usize)?))
+                        })?;
                     Ok([near, far])
                 },
             )
@@ -453,25 +462,7 @@ pub(crate) mod tests {
             .map(map_op)
             .try_reduce(
                 || [near.map(|a| (a, a)), far],
-                |l, r| {
-                    let near = {
-                        std::array::from_fn(|i| {
-                            let (lnear, rnear) = (l[0][i], r[0][i]);
-                            let min = lnear.0.min(rnear.0);
-                            let max = lnear.1.max(rnear.1);
-                            (min, max)
-                        })
-                    };
-                    let far = {
-                        std::array::from_fn(|i| {
-                            let (lfar, rfar) = (l[1][i], r[1][i]);
-                            let min = lfar.0.min(rfar.0);
-                            let max = lfar.1.max(rfar.1);
-                            (min, max)
-                        })
-                    };
-                    Ok([near, far])
-                },
+                |l, r| Ok(std::array::from_fn(|i| reduce_errors(l[i], r[i]))),
             )
             .unwrap();
 
