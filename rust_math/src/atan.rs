@@ -118,13 +118,17 @@ pub(crate) mod tests {
         const NEG_K: i64 = -K;
         const ERRORS_LEN: usize = 6;
 
-        type Errors = [f64; ERRORS_LEN];
-
-        fn make_min_errors(lhs: Errors, rhs: Errors) -> Errors {
-            std::array::from_fn(|i| lhs[i].min(rhs[i]))
+        fn fold_errors(
+            init: [(f64, f64); ERRORS_LEN],
+            errors: [f64; ERRORS_LEN],
+        ) -> [(f64, f64); ERRORS_LEN] {
+            std::array::from_fn(|i| (init[i].0.min(errors[i]), init[i].1.max(errors[i])))
         }
-        fn make_max_errors(lhs: Errors, rhs: Errors) -> Errors {
-            std::array::from_fn(|i| lhs[i].max(rhs[i]))
+        fn reduce_errors(
+            lhs: [(f64, f64); ERRORS_LEN],
+            rhs: [(f64, f64); ERRORS_LEN],
+        ) -> [(f64, f64); ERRORS_LEN] {
+            std::array::from_fn(|i| (lhs[i].0.min(rhs[i].0), lhs[i].1.max(rhs[i].1)))
         }
 
         let expected = read_data::<i32>(data_path).unwrap();
@@ -173,15 +177,11 @@ pub(crate) mod tests {
             let begin = 2 + n as i32 * (ONE - 1) / num as i32;
             let end = 2 + (n + 1) as i32 * (ONE - 1) / num as i32;
             (begin..end).try_fold(
-                (
-                    0.0,
-                    [f64::INFINITY; ERRORS_LEN],
-                    [f64::NEG_INFINITY; ERRORS_LEN],
-                ),
-                |(diff_sum, errors_min, errors_max), i| -> Result<_> {
+                (0.0, [(f64::INFINITY, f64::NEG_INFINITY); ERRORS_LEN]),
+                |(error_sum, errors), i| -> Result<_> {
                     let expected = expected[i as usize];
                     let expected = [expected, -expected, RIGHT - expected, NEG_RIGHT + expected];
-                    let errors = [
+                    let e = [
                         (expected[0], i),
                         (expected[1], -i),
                         (expected[2], (K / (2 * i as i64 + 1)) as i32 + 1),
@@ -190,22 +190,11 @@ pub(crate) mod tests {
                         (expected[3], (NEG_K / (2 * i as i64 - 1)) as i32),
                     ]
                     .try_map(|(expected, x)| f(x, expected))?;
-                    anyhow::ensure!(errors_min.len() == ERRORS_LEN);
-                    anyhow::ensure!(errors_max.len() == ERRORS_LEN);
-                    anyhow::ensure!(errors.len() == ERRORS_LEN);
-                    let errors_min = make_min_errors(errors_min, errors);
-                    let errors_max = make_max_errors(errors_max, errors);
-                    Ok((diff_sum + errors[0], errors_min, errors_max))
+                    let error_sum = error_sum + e[0];
+                    let errors = fold_errors(errors, e);
+                    Ok((error_sum, errors))
                 },
             )
-        };
-
-        let try_reduce_op = |(ldiff_sum, lerrors_min, lerrors_max): (_, Errors, Errors),
-                             (rdiff_sum, rerrors_min, rerrors_max): (_, Errors, Errors)|
-         -> Result<_> {
-            let errors_min = make_min_errors(lerrors_min, rerrors_min);
-            let errors_max = make_max_errors(lerrors_max, rerrors_max);
-            Ok((ldiff_sum + rdiff_sum, errors_min, errors_max))
         };
 
         let errors = [
@@ -216,20 +205,22 @@ pub(crate) mod tests {
             neg_inv_error_near,
             neg_inv_error_far,
         ];
-        let (diff_sum, errors_min, errors_max) = (0..num)
+        let (diff_sum, errors) = (0..num)
             .into_par_iter()
             .map(map_op)
-            .try_reduce(|| (diff_sum, errors, errors), try_reduce_op)
+            .try_reduce(
+                || (diff_sum, errors.map(|e| (e, e))),
+                |(ldiff_sum, lerrors), (rdiff_sum, rerrors)| -> Result<_> {
+                    Ok((ldiff_sum + rdiff_sum, reduce_errors(lerrors, rerrors)))
+                },
+            )
             .unwrap();
 
-        println!("error_zero: {:15.9}", zero_error);
-        for (i, e) in errors_min.iter().enumerate() {
-            println!("errors_min[{}]: {:12.9}", i, e);
+        println!("error_zero: {:12.9}", zero_error);
+        for (i, e) in errors.iter().enumerate() {
+            println!("errors[{}]: ({:12.9}, {:12.9})", i, e.0, e.1);
         }
-        for (i, e) in errors_max.iter().enumerate() {
-            println!("errors_max[{}]: {:12.9}", i, e);
-        }
-        println!("average: {:18.9}", diff_sum / (ONE + 1) as f64);
+        println!("average: {:15.9}", diff_sum / (ONE + 1) as f64);
     }
 
     #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003778); }
