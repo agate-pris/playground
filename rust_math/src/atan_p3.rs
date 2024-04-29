@@ -2,12 +2,11 @@ use num_traits::Signed;
 
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
-fn atan_p3_impl<T>(x: T, one: T, frac_k_4: T, a: T, b: T) -> T
-where
-    T: Copy + Signed,
-{
-    let x_abs = x.abs();
-    x * (frac_k_4 - (x_abs - one) * (a + x_abs * b / one) / one)
+macro_rules! atan_p3_impl {
+    ($x:ident,$one:expr,$frac_k_4:expr,$a:expr,$b:expr) => {{
+        let x_abs = $x.abs();
+        $x * (($frac_k_4) - (x_abs - ($one)) * (($a) + x_abs * ($b) / ($one)) / ($one))
+    }};
 }
 
 pub trait AtanP3Consts<T> {
@@ -19,7 +18,7 @@ pub trait AtanP3Consts<T> {
     where
         T: Copy + Signed,
     {
-        atan_p3_impl(x, Self::ONE, Self::FRAC_K_4, Self::A, Self::B)
+        atan_p3_impl!(x, Self::ONE, Self::FRAC_K_4, Self::A, Self::B)
     }
 }
 
@@ -161,7 +160,7 @@ mod tests {
                         exp,
                         &atan_expected,
                         search_range,
-                        |x, one, k, ab| atan_p3_impl(x, one, k / 4.as_(), ab.0, ab.1),
+                        |x, one, k, ab| atan_p3_impl!(x, one, k / 4.as_(), ab.0, ab.1),
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
