@@ -114,8 +114,9 @@ pub(crate) mod tests {
         rerror_sum: f64,
     ) -> Ordering {
         lerror_max
-            .total_cmp(&rerror_max)
-            .then_with(|| lerror_sum.total_cmp(&rerror_sum))
+            .abs()
+            .total_cmp(&rerror_max.abs())
+            .then_with(|| lerror_sum.abs().total_cmp(&rerror_sum.abs()))
     }
 
     fn test_atan<F>(f: F, data_path: &str, acceptable_error: f64)
