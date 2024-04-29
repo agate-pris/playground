@@ -2,11 +2,10 @@ use num_traits::Signed;
 
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
-fn atan_p2_impl<T>(x: T, one: T, frac_k_4: T, a: T) -> T
-where
-    T: Copy + Signed,
-{
-    x * (frac_k_4 + a * (one - x.abs()) / one)
+macro_rules! atan_p2_impl {
+    ($x:ident,$one:expr,$frac_k_4:expr,$a:expr) => {
+        $x * (($frac_k_4) + ($a) * (($one) - $x.abs()) / ($one))
+    };
 }
 
 pub trait AtanP2Consts<T> {
@@ -17,7 +16,7 @@ pub trait AtanP2Consts<T> {
     where
         T: Copy + Signed,
     {
-        atan_p2_impl(x, Self::ONE, Self::FRAC_K_4, Self::A)
+        atan_p2_impl!(x, Self::ONE, Self::FRAC_K_4, Self::A)
     }
 }
 
@@ -158,7 +157,7 @@ mod tests {
                         exp,
                         &atan_expected,
                         search_range,
-                        |x, one, k, a| atan_p2_impl(x, one, k / 4.as_(), a),
+                        |x, one, k, a| atan_p2_impl!(x, one, k / 4.as_(), a),
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
