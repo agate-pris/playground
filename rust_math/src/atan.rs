@@ -107,6 +107,17 @@ pub(crate) mod tests {
 
     use crate::{atan_p2::AtanP2, atan_p3::AtanP3, atan_p5::AtanP5, bits::Bits, tests::read_data};
 
+    pub(crate) fn compare_error(
+        lerror_max: f64,
+        lerror_sum: f64,
+        rerror_max: f64,
+        rerror_sum: f64,
+    ) -> Ordering {
+        lerror_max
+            .total_cmp(&rerror_max)
+            .then_with(|| lerror_sum.total_cmp(&rerror_sum))
+    }
+
     fn test_atan<F>(f: F, data_path: &str, acceptable_error: f64)
     where
         F: Sync + Fn(i32) -> i32,

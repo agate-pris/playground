@@ -95,7 +95,7 @@ mod tests {
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
     use rstest::rstest;
 
-    use crate::bits::Bits;
+    use crate::{atan::tests::compare_error, bits::Bits};
 
     use super::*;
 
@@ -142,8 +142,6 @@ mod tests {
             (calc(0.0776509570923569 / PI), calc(0.287434475393028 / PI))
         };
 
-        let cmp = |(a, b): (f64, f64), (c, d)| a.total_cmp(&c).then_with(|| b.total_cmp(&d));
-
         let atan_expected = crate::atan::tests::make_atan_data(exp);
 
         let (mut k, max_error, error_sum) = (0..num)
@@ -166,7 +164,7 @@ mod tests {
                         },
                     );
 
-                    match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
+                    match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
                         Equal => (acc.into_iter().chain(k).collect(), max_error, error_sum),
                         Less => (k, max_error, error_sum),
                         Greater => (acc, min_max_error, min_error_sum),
@@ -175,7 +173,7 @@ mod tests {
             )
             .reduce(
                 || (vec![], f64::INFINITY, f64::INFINITY),
-                |(lhs, lmax, lsum), (rhs, rmax, rsum)| match cmp((lmax, lsum), (rmax, rsum)) {
+                |(lhs, lmax, lsum), (rhs, rmax, rsum)| match compare_error(lmax, lsum, rmax, rsum) {
                     Equal => (lhs.into_iter().chain(rhs).collect(), lmax, lsum),
                     Less => (lhs, lmax, lsum),
                     Greater => (rhs, rmax, rsum),
