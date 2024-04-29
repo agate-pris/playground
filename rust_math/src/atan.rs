@@ -546,10 +546,6 @@ pub(crate) mod tests {
             (base.pow(exp), base.pow(T::BITS - 2 - exp), to_rad)
         };
 
-        let cmp = |(lmax, lsum): (f64, f64), (rmax, rsum): (f64, f64)| {
-            lmax.total_cmp(&rmax).then_with(|| lsum.total_cmp(&rsum))
-        };
-
         let time = std::time::Instant::now();
         let mut elapsed = 0;
 
@@ -583,7 +579,7 @@ pub(crate) mod tests {
 
                 let error_sum = error_sum.abs();
 
-                match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
+                match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
                     Equal => (
                         acc.into_iter().chain(once(item.clone())).collect(),
                         max_error,
