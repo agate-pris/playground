@@ -2,12 +2,11 @@ use std::ops::{Add, Div, Mul, Sub};
 
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
-fn atan_p5_impl<T>(x: T, one: T, a: T, b: T, c: T) -> T
-where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
-{
-    let x_2 = x * x / one;
-    ((a * x_2 / one - b) * x_2 / one + c) * x
+macro_rules! atan_p5_impl {
+    ($x:ident,$one:expr,$a:expr,$b:expr,$c:expr) => {{
+        let x_2 = $x * $x / ($one);
+        ((($a) * x_2 / ($one) - ($b)) * x_2 / ($one) + ($c)) * $x
+    }};
 }
 
 pub trait AtanP5Consts<T> {
@@ -19,7 +18,7 @@ pub trait AtanP5Consts<T> {
     where
         T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
     {
-        atan_p5_impl(x, Self::ONE, Self::A, Self::B, Self::C)
+        atan_p5_impl!(x, Self::ONE, Self::A, Self::B, Self::C)
     }
 }
 
@@ -162,7 +161,9 @@ mod tests {
                         exp,
                         &atan_expected,
                         search_range,
-                        |x, one, k, ab| atan_p5_impl(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1),
+                        |x, one, k, ab| {
+                            atan_p5_impl!(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1)
+                        },
                     );
 
                     match cmp((max_error, error_sum), (min_max_error, min_error_sum)) {
