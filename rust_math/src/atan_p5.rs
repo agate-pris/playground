@@ -180,11 +180,8 @@ mod tests {
                 },
             );
 
+        println!("exp: {exp}, max_error: {max_error}, error_sum: {error_sum}",);
         k.sort_unstable_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)));
-        println!(
-            "exp: {exp}, k: {:?}, max_error: {max_error}, error_sum: {error_sum}",
-            k
-        );
         assert_eq!(expected, k);
     }
 
