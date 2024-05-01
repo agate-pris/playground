@@ -107,6 +107,10 @@ pub(crate) mod tests {
 
     use crate::{atan_p2::AtanP2, atan_p3::AtanP3, atan_p5::AtanP5, bits::Bits, tests::read_data};
 
+    pub(crate) fn compare_max_error(lhs: f64, rhs: f64) -> Ordering {
+        lhs.abs().total_cmp(&rhs.abs())
+    }
+
     pub(crate) fn compare_error(
         lerror_max: f64,
         lerror_sum: f64,
