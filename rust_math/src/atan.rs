@@ -586,8 +586,8 @@ pub(crate) mod tests {
                         min_max_error,
                         min_error_sum,
                     ),
-                    Less => (vec![item], max_error, error_sum),
                     Greater => (acc, min_max_error, min_error_sum),
+                    Less => (vec![item], max_error, error_sum),
                 }
             },
         )
