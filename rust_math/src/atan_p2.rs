@@ -116,7 +116,7 @@ mod tests {
         let num = num_cpus::get();
         let a = {
             let base: T = 2.as_();
-            let quarter: T = base.pow(T::BITS - 2 - exp - 2);
+            let quarter: T = base.pow(T::BITS - 2 - exp) / 4.as_();
             let mut v = (0.as_()..=quarter).collect::<Vec<_>>();
             v.shuffle(&mut rand::thread_rng());
             v
