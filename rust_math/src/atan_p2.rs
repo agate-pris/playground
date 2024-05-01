@@ -190,80 +190,52 @@ mod tests {
 
     #[rstest]
     #[case(1, vec![2, 3])]
-    #[case(2, vec![3])]
+    #[case(2, vec![A_I6F2])]
     #[case(3, vec![0, 1])]
-    #[case(4, vec![0, 1])]
-    //#[case(5, vec![I3F5::A])]
-    //#[case(6, vec![I2F6::A])]
     fn test_optimal_constants_i8(#[case] exp: u32, #[case] expected: Vec<i8>) {
         test_optimal_constants(exp, expected);
     }
 
     #[rstest]
-    #[case(1, vec![740, 741])]
     #[case(2, vec![360, 361])]
-    //#[case(3, vec![I13F3::A])]
-    //#[case(4, vec![I12F4::A])]
-    //#[case(5, vec![I11F5::A])]
-    //#[case(6, vec![I10F6::A])]
-    //#[case(7, vec![I9F7::A])]
-    //#[case(8, vec![I8F8::A])]
-    //#[case(9, vec![I7F9::A])]
-    //#[case(10, vec![I6F10::A])]
-    #[case(11, vec![0, 1] )]
-    #[case(12, vec![0, 1] )]
-    #[case(13, vec![0])]
-    #[case(14, vec![0])]
+    #[case(3, vec![A_I13F3])]
+    #[case(4, vec![A_I12F4])]
+    #[case(5, vec![A_I11F5])]
+    #[case(6, vec![A_I10F6])]
+    #[case(7, vec![A_I9F7])]
+    #[case(8, vec![A_I8F8])]
+    #[case(9, vec![A_I7F9])]
+    #[case(10, vec![A_I6F10])]
+    #[case(11, vec![0, 1])]
     fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<i16>) {
         test_optimal_constants(exp, expected);
     }
 
     #[rstest]
-    //#[case(6, vec![I26F6::A])]
-    //#[case(7, vec![I25F7::A])]
-    //#[case(8, vec![I24F8::A])]
-    //#[case(9, vec![I23F9::A])]
-    //#[case(10, vec![I22F10::A])]
-    //#[case(11, vec![I21F11::A])]
-    //#[case(12, vec![I20F12::A])]
-    //#[case(13, vec![I19F13::A])]
-    //#[case(14, vec![I18F14::A])]
-    #[case(15, vec![AtanP2ConstsI32::A])]
-    //#[case(16, vec![I16F16::A])]
-    //#[case(17, vec![I15F17::A])]
-    //#[case(18, vec![I14F18::A])]
-    //#[case(19, vec![I13F19::A])]
-    //#[case(20, vec![I12F20::A])]
-    //#[case(21, vec![I11F21::A])]
-    //#[case(22, vec![I10F22::A])]
+    #[case(5, vec![2917056, 2917057])]
+    #[case(6, vec![A_I26F6])]
+    #[case(7, vec![A_I25F7])]
+    #[case(8, vec![A_I24F8])]
+    #[case(9, vec![A_I23F9])]
+    #[case(10, vec![A_I22F10])]
+    #[case(11, vec![A_I21F11])]
+    #[case(12, vec![A_I20F12])]
+    #[case(13, vec![A_I19F13])]
+    #[case(14, vec![A_I18F14])]
+    #[case(15, vec![A_I17F15])]
+    #[case(16, vec![A_I16F16])]
+    #[case(17, vec![A_I15F17])]
+    #[case(18, vec![A_I14F18])]
+    #[case(19, vec![A_I13F19])]
+    #[case(20, vec![A_I12F20])]
+    #[case(21, vec![A_I11F21])]
+    #[case(22, vec![A_I10F22])]
+    #[case(23, vec![A_I9F23])]
+    #[case(24, vec![A_I8F24])]
+    #[case(25, vec![A_I7F25])]
+    #[case(26, vec![A_I6F26])]
+    #[case(27, vec![0, 1])]
     fn test_optimal_constants_i32(#[case] exp: u32, #[case] expected: Vec<i32>) {
         test_optimal_constants(exp, expected);
-    }
-
-    // Test as `cargo test -- atan_p2::tests::test_optimal_constants --ignored --nocapture --test-threads=1`
-    mod test_optimal_constants {
-        use super::*;
-        macro_rules! define_test {
-            ($name:tt, $exp:expr, $expected:expr) => {
-                #[test]
-                #[ignore]
-                fn $name() {
-                    test_optimal_constants_i32($exp, $expected);
-                }
-            };
-        }
-        define_test!(case_01, 30, vec![0]);
-        define_test!(case_02, 29, vec![0]);
-        define_test!(case_03, 28, vec![0, 1]);
-        define_test!(case_04, 27, vec![0, 1]);
-        //define_test!(case_05, 26, vec![I6F26::A]);
-        //define_test!(case_06, 25, vec![I7F25::A]);
-        //define_test!(case_07, 24, vec![I8F24::A]);
-        //define_test!(case_08, 23, vec![I9F23::A]);
-        define_test!(case_09, 5, vec![2917056, 2917057]);
-        define_test!(case_10, 4, vec![5835516]);
-        define_test!(case_11, 3, vec![11671032, 11671033]);
-        define_test!(case_12, 2, vec![23487671]);
-        define_test!(case_13, 1, vec![48497950, 48497951]);
     }
 }
