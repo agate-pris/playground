@@ -107,7 +107,6 @@ impl AtanP3 for i32 {
 mod tests {
     use std::{
         cmp::Ordering,
-        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
