@@ -145,29 +145,20 @@ mod tests {
 
         let (mut k, max_error, error_sum) = (0..num)
             .into_par_iter()
-            .fold(
-                || (vec![], f64::INFINITY, f64::INFINITY),
-                |(acc, min_max_error, min_error_sum), n| {
-                    let search_range = a
-                        .iter()
-                        .skip(a.len() * n / num)
-                        .take(a.len() * (n + 1) / num - a.len() * n / num)
-                        .flat_map(|&a| b.iter().map(move |&b| (a, b)));
+            .map(|n| {
+                let search_range = a
+                    .iter()
+                    .skip(a.len() * n / num)
+                    .take(a.len() * (n + 1) / num - a.len() * n / num)
+                    .flat_map(|&a| b.iter().map(move |&b| (a, b)));
 
-                    let (k, max_error, error_sum) = crate::atan::tests::find_optimal_constants(
-                        exp,
-                        &atan_expected,
-                        search_range,
-                        |x, one, k, ab| atan_p3_impl!(x, one, k / 4.as_(), ab.0, ab.1),
-                    );
-
-                    match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
-                        Equal => (acc.into_iter().chain(k).collect(), max_error, error_sum),
-                        Less => (k, max_error, error_sum),
-                        Greater => (acc, min_max_error, min_error_sum),
-                    }
-                },
-            )
+                crate::atan::tests::find_optimal_constants(
+                    exp,
+                    &atan_expected,
+                    search_range,
+                    |x, one, k, ab| atan_p3_impl!(x, one, k / 4.as_(), ab.0, ab.1),
+                )
+            })
             .reduce(
                 || (vec![], f64::INFINITY, f64::INFINITY),
                 |(lhs, lmax, lsum), (rhs, rmax, rsum)| match compare_error(lmax, lsum, rmax, rsum) {
