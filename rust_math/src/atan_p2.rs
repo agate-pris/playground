@@ -56,7 +56,7 @@ struct AtanP2ConstsI32();
 impl AtanP2Consts<i32> for AtanP2ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
-    const A: i32 = 2850;
+    const A: i32 = A_I17F15;
 }
 
 struct AtanP2I32Util();
