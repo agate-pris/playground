@@ -8,6 +8,37 @@ macro_rules! atan_p2_impl {
     };
 }
 
+pub const A_I6F2: i8 = 3;
+pub const A_I13F3: i16 = 179;
+pub const A_I12F4: i16 = 91;
+pub const A_I11F5: i16 = 47;
+pub const A_I10F6: i16 = 24;
+pub const A_I9F7: i16 = 13;
+pub const A_I8F8: i16 = 8;
+pub const A_I7F9: i16 = 5;
+pub const A_I6F10: i16 = 3;
+pub const A_I26F6: i32 = 1458371;
+pub const A_I25F7: i32 = 729188;
+pub const A_I24F8: i32 = 364590;
+pub const A_I23F9: i32 = 182295;
+pub const A_I22F10: i32 = 91148;
+pub const A_I21F11: i32 = 45575;
+pub const A_I20F12: i32 = 22789;
+pub const A_I19F13: i32 = 11395;
+pub const A_I18F14: i32 = 5699;
+pub const A_I17F15: i32 = 2850;
+pub const A_I16F16: i32 = 1426;
+pub const A_I15F17: i32 = 714;
+pub const A_I14F18: i32 = 358;
+pub const A_I13F19: i32 = 180;
+pub const A_I12F20: i32 = 91;
+pub const A_I11F21: i32 = 47;
+pub const A_I10F22: i32 = 25;
+pub const A_I9F23: i32 = 14;
+pub const A_I8F24: i32 = 8;
+pub const A_I7F25: i32 = 5;
+pub const A_I6F26: i32 = 3;
+
 pub trait AtanP2Consts<T> {
     const ONE: T;
     const FRAC_K_4: T;
