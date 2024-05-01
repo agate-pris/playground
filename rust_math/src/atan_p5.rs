@@ -9,6 +9,18 @@ macro_rules! atan_p5_impl {
     }};
 }
 
+pub const A_B_I16: [(i16, i16); 5] = [(5, 14), (6, 22), (13, 46), (27, 93), (69, 204)];
+
+pub const A_B_I32: [(i32, i32); 7] = [
+    (787, 2968),
+    (1582, 5947),
+    (3169, 11901),
+    (6348, 23813),
+    (12707, 47632),
+    (25420, 95234),
+    (50981, 190506),
+];
+
 pub trait AtanP5Consts<T> {
     const ONE: T;
     const A: T;
@@ -26,8 +38,8 @@ struct AtanP5ConstsI32();
 
 impl AtanP5Consts<i32> for AtanP5ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-    const A: i32 = 787;
-    const B: i32 = 2968;
+    const A: i32 = A_B_I32[0].0;
+    const B: i32 = A_B_I32[0].1;
     const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
 }
 
@@ -68,17 +80,6 @@ impl AtanP5 for i32 {
         AtanP5I32Util::atan2(self, other)
     }
 }
-
-/*
-impl_atan_p5_default_fixed_i16!(
-    I13F3, 69, 204, I12F4, 27, 93, I11F5, 13, 46, I10F6, 6, 22, I9F7, 5, 14
-);
-
-impl_atan_p5_default_fixed_i32!(
-    I17F15, 787, 2968, I18F14, 1582, 5947, I19F13, 3169, 11901, I20F12, 6348, 23813, I21F11, 12707,
-    47632, I22F10, 25420, 95234, I23F9, 50981, 190506
-);
-*/
 
 #[cfg(test)]
 mod tests {
@@ -182,15 +183,13 @@ mod tests {
         test_optimal_constants(exp, expected);
     }
 
-    #[rstest]
-    #[case(2, vec![(139, 409), (140, 410)])]
-    //#[case(3, vec![(I13F3::A, I13F3::B)])]
-    //#[case(4, vec![(I12F4::A, I12F4::B)])]
-    //#[case(5, vec![(I11F5::A, I11F5::B)])]
-    //#[case(6, vec![(I10F6::A, I10F6::B)])]
-    //#[case(7, vec![(I9F7::A, I9F7::B)])]
-    fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<(i16, i16)>) {
-        test_optimal_constants(exp, expected);
+    #[test]
+    fn test_optimal_constants_i16() {
+        for (i, &(a, b)) in A_B_I16.iter().enumerate() {
+            test_optimal_constants(7 - i as u32, vec![(a, b)]);
+        }
+        let expected: Vec<(i16, i16)> = vec![(139, 409), (140, 410)];
+        test_optimal_constants(2, expected);
     }
 
     mod test_optimal_constants_i32 {
@@ -204,12 +203,12 @@ mod tests {
                 }
             };
         }
-        define_test!(case_01, 15, vec![(AtanP5ConstsI32::A, AtanP5ConstsI32::B)]);
-        //define_test!(case_02, 14, vec![(I18F14::A, I18F14::B)]);
-        //define_test!(case_03, 13, vec![(I19F13::A, I19F13::B)]);
-        //define_test!(case_04, 12, vec![(I20F12::A, I20F12::B)]);
-        //define_test!(case_05, 11, vec![(I21F11::A, I21F11::B)]);
-        //define_test!(case_06, 10, vec![(I22F10::A, I22F10::B)]);
-        //define_test!(case_07, 9, vec![(I23F9::A, I23F9::B)]);
+        define_test!(case_15, 15, vec![(A_B_I32[0])]);
+        define_test!(case_14, 14, vec![(A_B_I32[1])]);
+        define_test!(case_13, 13, vec![(A_B_I32[2])]);
+        define_test!(case_12, 12, vec![(A_B_I32[3])]);
+        define_test!(case_11, 11, vec![(A_B_I32[4])]);
+        define_test!(case_10, 10, vec![(A_B_I32[5])]);
+        define_test!(case_09, 9, vec![(A_B_I32[6])]);
     }
 }
