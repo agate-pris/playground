@@ -111,7 +111,6 @@ impl_atan_p2_default_fixed!(
 mod tests {
     use std::{
         cmp::Ordering,
-        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
@@ -150,23 +149,11 @@ mod tests {
 
         let num = num_cpus::get();
         let a = {
-            let mut rng = rand::thread_rng();
             let base: T = 2.as_();
-            let k = base.pow(T::BITS - 2 - exp);
-            let mut calc = |scale: f64| -> Vec<T> {
-                let k_as_f64: f64 = k.as_();
-                let v = scale * k_as_f64;
-                let first: T = ((scale - 0.05) * k_as_f64).min(v - 1000.0).max(0.0).as_();
-                let last: T = ((scale + 0.05) * k_as_f64)
-                    .max(v + 1000.0)
-                    .min(k_as_f64 / 4.0)
-                    .as_();
-                println!("first: {}, last: {}", first, last);
-                let mut vec = (first..=last).collect::<Vec<_>>();
-                vec.shuffle(&mut rng);
-                vec
-            };
-            calc(0.273 / PI)
+            let quarter: T = base.pow(T::BITS - 2 - exp - 2);
+            let mut v = (0.as_()..=quarter).collect::<Vec<_>>();
+            v.shuffle(&mut rand::thread_rng());
+            v
         };
 
         let atan_expected = crate::atan::tests::make_atan_data(exp);
