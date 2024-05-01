@@ -582,11 +582,11 @@ pub(crate) mod tests {
 
                 match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
                     Equal => (
-                        acc.into_iter().chain(once(item.clone())).collect(),
+                        acc.into_iter().chain(once(item)).collect(),
                         max_error,
                         error_sum,
                     ),
-                    Less => (vec![item.clone()], max_error, error_sum),
+                    Less => (vec![item], max_error, error_sum),
                     Greater => (acc, min_max_error, min_error_sum),
                 }
             },
