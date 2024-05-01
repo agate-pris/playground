@@ -176,7 +176,7 @@ mod tests {
 
         println!("exp: {exp}, max_error: {max_error}, error_sum: {error_sum}");
         k.sort_unstable();
-        assert_eq!(expected, k,);
+        assert_eq!(expected, k);
     }
 
     #[rstest]
