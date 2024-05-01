@@ -117,9 +117,7 @@ pub(crate) mod tests {
         rerror_max: f64,
         rerror_sum: f64,
     ) -> Ordering {
-        lerror_max
-            .abs()
-            .total_cmp(&rerror_max.abs())
+        compare_max_error(lerror_max, rerror_max)
             .then_with(|| lerror_sum.abs().total_cmp(&rerror_sum.abs()))
     }
 
