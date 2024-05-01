@@ -85,7 +85,6 @@ impl AtanP5 for i32 {
 mod tests {
     use std::{
         cmp::Ordering,
-        f64::consts::PI,
         fmt::{Debug, Display},
         ops::RangeInclusive,
     };
@@ -126,21 +125,12 @@ mod tests {
         let (a, b) = {
             let mut rng = rand::thread_rng();
             let base: T = 2.as_();
-            let k = base.pow(T::BITS - 2 - exp);
-            let mut calc = |scale: f64| -> Vec<T> {
-                let k_as_f64: f64 = k.as_();
-                let v = scale * k_as_f64;
-                let first: T = ((scale - 0.05) * k_as_f64).min(v - 1000.0).max(0.0).as_();
-                let last: T = ((scale + 0.05) * k_as_f64)
-                    .max(v + 1000.0)
-                    .min(k_as_f64 / 4.0)
-                    .as_();
-                println!("first: {}, last: {}", first, last);
-                let mut vec = (first..=last).collect::<Vec<_>>();
-                vec.shuffle(&mut rng);
-                vec
-            };
-            (calc(0.0776509570923569 / PI), calc(0.287434475393028 / PI))
+            let quarter = base.pow(T::BITS - 2 - exp) / 4.as_();
+            let mut a = (0.as_()..=quarter).collect::<Vec<_>>();
+            let mut b = a.clone();
+            a.shuffle(&mut rng);
+            b.shuffle(&mut rng);
+            (a, b)
         };
 
         let atan_expected = crate::atan::tests::make_atan_data(exp);
