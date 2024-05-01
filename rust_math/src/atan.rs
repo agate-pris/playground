@@ -563,33 +563,32 @@ pub(crate) mod tests {
                     }
                 }
 
-                let mut max_error = f64::NEG_INFINITY;
-                let mut error_sum = 0.0;
-
-                for x in T::ZERO..=one {
+                match (T::ZERO..=one).try_fold((0.0, 0.0), |(max_error, error_sum), x| {
                     let i: usize = x.as_();
                     let expected = expected[i];
                     let actual: f64 = f(x, one, k, item.clone()).as_();
                     let error = to_rad * actual - expected;
 
-                    error_sum += error;
-                    max_error = max_error.max(error.abs());
+                    let error_sum = error_sum + error;
+                    let max_error = std::cmp::max_by(max_error, error, compare_max_error);
 
-                    if max_error > min_max_error {
-                        break;
+                    match compare_max_error(&max_error, &min_max_error) {
+                        Greater => None,
+                        _ => Some((max_error, error_sum)),
                     }
-                }
-
-                let error_sum = error_sum.abs();
-
-                match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
-                    Equal => (
-                        acc.into_iter().chain(once(item)).collect(),
-                        min_max_error,
-                        min_error_sum,
-                    ),
-                    Greater => (acc, min_max_error, min_error_sum),
-                    Less => (vec![item], max_error, error_sum),
+                }) {
+                    None => (acc, min_max_error, min_error_sum),
+                    Some((max_error, error_sum)) => {
+                        match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
+                            Equal => (
+                                acc.into_iter().chain(once(item)).collect(),
+                                min_max_error,
+                                min_error_sum,
+                            ),
+                            Greater => (acc, min_max_error, min_error_sum),
+                            Less => (vec![item], max_error, error_sum),
+                        }
+                    }
                 }
             },
         )
