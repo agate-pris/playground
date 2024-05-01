@@ -9,35 +9,11 @@ macro_rules! atan_p2_impl {
 }
 
 pub const A_I6F2: i8 = 3;
-pub const A_I13F3: i16 = 179;
-pub const A_I12F4: i16 = 91;
-pub const A_I11F5: i16 = 47;
-pub const A_I10F6: i16 = 24;
-pub const A_I9F7: i16 = 13;
-pub const A_I8F8: i16 = 8;
-pub const A_I7F9: i16 = 5;
-pub const A_I6F10: i16 = 3;
-pub const A_I26F6: i32 = 1458371;
-pub const A_I25F7: i32 = 729188;
-pub const A_I24F8: i32 = 364590;
-pub const A_I23F9: i32 = 182295;
-pub const A_I22F10: i32 = 91148;
-pub const A_I21F11: i32 = 45575;
-pub const A_I20F12: i32 = 22789;
-pub const A_I19F13: i32 = 11395;
-pub const A_I18F14: i32 = 5699;
-pub const A_I17F15: i32 = 2850;
-pub const A_I16F16: i32 = 1426;
-pub const A_I15F17: i32 = 714;
-pub const A_I14F18: i32 = 358;
-pub const A_I13F19: i32 = 180;
-pub const A_I12F20: i32 = 91;
-pub const A_I11F21: i32 = 47;
-pub const A_I10F22: i32 = 25;
-pub const A_I9F23: i32 = 14;
-pub const A_I8F24: i32 = 8;
-pub const A_I7F25: i32 = 5;
-pub const A_I6F26: i32 = 3;
+pub const A_I16: [i16; 8] = [3, 5, 8, 13, 24, 47, 91, 179];
+pub const A_I32: [i32; 21] = [
+    3, 5, 8, 14, 25, 47, 91, 180, 358, 714, 1426, 2850, 5699, 11395, 22789, 45575, 91148, 182295,
+    364590, 729188, 1458371,
+];
 
 pub trait AtanP2Consts<T> {
     const ONE: T;
@@ -56,7 +32,7 @@ struct AtanP2ConstsI32();
 impl AtanP2Consts<i32> for AtanP2ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
-    const A: i32 = A_I17F15;
+    const A: i32 = A_I32[11];
 }
 
 struct AtanP2I32Util();
@@ -178,53 +154,46 @@ mod tests {
         assert_eq!(expected, k);
     }
 
-    #[rstest]
-    #[case(1, vec![2, 3])]
-    #[case(2, vec![A_I6F2])]
-    #[case(3, vec![0, 1])]
-    fn test_optimal_constants_i8(#[case] exp: u32, #[case] expected: Vec<i8>) {
-        test_optimal_constants(exp, expected);
+    #[test]
+    fn test_optimal_constants_i8() {
+        test_optimal_constants(3, Vec::<i8>::from([0, 1]));
+        test_optimal_constants(2, vec![A_I6F2]);
+        test_optimal_constants(1, Vec::<i8>::from([2, 3]));
+    }
+
+    #[test]
+    fn test_optimal_constants_i16() {
+        test_optimal_constants(11, Vec::<i16>::from([0, 1]));
+        for (i, &a) in A_I16.iter().enumerate() {
+            test_optimal_constants(10 - i as u32, vec![a]);
+        }
+        test_optimal_constants(2, Vec::<i16>::from([360, 361]));
     }
 
     #[rstest]
-    #[case(2, vec![360, 361])]
-    #[case(3, vec![A_I13F3])]
-    #[case(4, vec![A_I12F4])]
-    #[case(5, vec![A_I11F5])]
-    #[case(6, vec![A_I10F6])]
-    #[case(7, vec![A_I9F7])]
-    #[case(8, vec![A_I8F8])]
-    #[case(9, vec![A_I7F9])]
-    #[case(10, vec![A_I6F10])]
-    #[case(11, vec![0, 1])]
-    fn test_optimal_constants_i16(#[case] exp: u32, #[case] expected: Vec<i16>) {
-        test_optimal_constants(exp, expected);
-    }
-
-    #[rstest]
-    #[case(5, vec![2917056, 2917057])]
-    #[case(6, vec![A_I26F6])]
-    #[case(7, vec![A_I25F7])]
-    #[case(8, vec![A_I24F8])]
-    #[case(9, vec![A_I23F9])]
-    #[case(10, vec![A_I22F10])]
-    #[case(11, vec![A_I21F11])]
-    #[case(12, vec![A_I20F12])]
-    #[case(13, vec![A_I19F13])]
-    #[case(14, vec![A_I18F14])]
-    #[case(15, vec![A_I17F15])]
-    #[case(16, vec![A_I16F16])]
-    #[case(17, vec![A_I15F17])]
-    #[case(18, vec![A_I14F18])]
-    #[case(19, vec![A_I13F19])]
-    #[case(20, vec![A_I12F20])]
-    #[case(21, vec![A_I11F21])]
-    #[case(22, vec![A_I10F22])]
-    #[case(23, vec![A_I9F23])]
-    #[case(24, vec![A_I8F24])]
-    #[case(25, vec![A_I7F25])]
-    #[case(26, vec![A_I6F26])]
     #[case(27, vec![0, 1])]
+    #[case(26, vec![A_I32[0]])]
+    #[case(25, vec![A_I32[1]])]
+    #[case(24, vec![A_I32[2]])]
+    #[case(23, vec![A_I32[3]])]
+    #[case(22, vec![A_I32[4]])]
+    #[case(21, vec![A_I32[5]])]
+    #[case(20, vec![A_I32[6]])]
+    #[case(19, vec![A_I32[7]])]
+    #[case(18, vec![A_I32[8]])]
+    #[case(17, vec![A_I32[9]])]
+    #[case(16, vec![A_I32[10]])]
+    #[case(15, vec![A_I32[11]])]
+    #[case(14, vec![A_I32[12]])]
+    #[case(13, vec![A_I32[13]])]
+    #[case(12, vec![A_I32[14]])]
+    #[case(11, vec![A_I32[15]])]
+    #[case(10, vec![A_I32[16]])]
+    #[case(9, vec![A_I32[17]])]
+    #[case(8, vec![A_I32[18]])]
+    #[case(7, vec![A_I32[19]])]
+    #[case(6, vec![A_I32[20]])]
+    #[case(5, vec![2917056, 2917057])]
     fn test_optimal_constants_i32(#[case] exp: u32, #[case] expected: Vec<i32>) {
         test_optimal_constants(exp, expected);
     }
