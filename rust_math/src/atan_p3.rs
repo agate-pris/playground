@@ -206,8 +206,8 @@ mod tests {
         test_optimal_constants(2, expected);
     }
 
-    // Test as `cargo test -- atan_p3::tests::test_optimal_constants --ignored --nocapture --test-threads=1`
-    mod test_optimal_constants {
+    // Test as `cargo test -- atan_p3::tests::test_optimal_constants_i32 --ignored --nocapture --test-threads=1`
+    mod test_optimal_constants_i32 {
         use super::*;
         macro_rules! define_test {
             ($name:tt, $exp:expr, $expected:expr) => {
