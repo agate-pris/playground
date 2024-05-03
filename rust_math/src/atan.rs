@@ -532,9 +532,9 @@ pub(crate) mod tests {
             + PrimitivePromotionExt
             + Signed,
         R: Iterator,
-        F: Fn(T, T, T, <R as Iterator>::Item) -> T,
+        F: Fn(T, T, T, R::Item) -> T,
         T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
-        <R as Iterator>::Item: Clone,
+        R::Item: Clone,
         RangeInclusive<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,
     {
