@@ -96,7 +96,7 @@ pub(crate) trait AtanUtil<T> {
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use std::{cmp::Ordering, f64::consts::PI, fmt::Debug, iter::once, ops::RangeInclusive};
+    use std::{cmp::Ordering, f64::consts::PI, fmt::Debug, ops::RangeInclusive};
 
     use anyhow::Result;
     use approx::abs_diff_eq;
@@ -554,7 +554,7 @@ pub(crate) mod tests {
 
         search_range.enumerate().fold(
             (vec![], f64::INFINITY, f64::INFINITY),
-            |(acc, min_max_error, min_error_sum), (i, item)| {
+            |(mut acc, min_max_error, min_error_sum), (i, item)| {
                 if i % 10000 == 0 {
                     let e = time.elapsed().as_secs();
                     if e / 30 != elapsed / 30 {
@@ -580,11 +580,10 @@ pub(crate) mod tests {
                     None => (acc, min_max_error, min_error_sum),
                     Some((max_error, error_sum)) => {
                         match compare_error(max_error, error_sum, min_max_error, min_error_sum) {
-                            Equal => (
-                                acc.into_iter().chain(once(item)).collect(),
-                                min_max_error,
-                                min_error_sum,
-                            ),
+                            Equal => {
+                                acc.push(item);
+                                (acc, min_max_error, min_error_sum)
+                            }
                             Greater => (acc, min_max_error, min_error_sum),
                             Less => (vec![item], max_error, error_sum),
                         }
