@@ -113,7 +113,6 @@ mod tests {
     {
         use Ordering::*;
 
-        let num = num_cpus::get();
         let a = {
             let base: T = 2.as_();
             let quarter: T = base.pow(T::BITS - 2 - exp) / 4.as_();
@@ -122,6 +121,7 @@ mod tests {
             v
         };
 
+        let num = num_cpus::get();
         let atan_expected = crate::atan::tests::make_atan_data(exp);
 
         let (mut k, max_error, error_sum) = (0..num)

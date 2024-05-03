@@ -142,7 +142,6 @@ mod tests {
     {
         use Ordering::*;
 
-        let num = num_cpus::get();
         let (a, b) = {
             let mut rng = rand::thread_rng();
             let base: T = 2.as_();
@@ -154,6 +153,7 @@ mod tests {
             (a, b)
         };
 
+        let num = num_cpus::get();
         let atan_expected = crate::atan::tests::make_atan_data(exp);
 
         let (mut k, max_error, error_sum) = (0..num)
