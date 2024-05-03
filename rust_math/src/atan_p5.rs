@@ -95,7 +95,10 @@ mod tests {
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
     use rstest::rstest;
 
-    use crate::{atan::tests::compare_error, bits::Bits};
+    use crate::{
+        atan::tests::{compare_error, find_optimal_constants},
+        bits::Bits,
+    };
 
     use super::*;
 
@@ -144,12 +147,9 @@ mod tests {
                     .take(a.len() * (n + 1) / num - a.len() * n / num)
                     .flat_map(|&a| b.iter().map(move |&b| (a, b)));
 
-                crate::atan::tests::find_optimal_constants(
-                    exp,
-                    &atan_expected,
-                    search_range,
-                    |x, one, k, ab| atan_p5_impl!(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1),
-                )
+                find_optimal_constants(exp, &atan_expected, search_range, |x, one, k, ab| {
+                    atan_p5_impl!(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1)
+                })
             })
             .reduce(
                 || (vec![], f64::INFINITY, f64::INFINITY),

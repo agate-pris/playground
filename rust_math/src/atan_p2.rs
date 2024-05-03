@@ -87,7 +87,10 @@ mod tests {
     use rayon::prelude::*;
     use rstest::rstest;
 
-    use crate::{atan::tests::compare_error, bits::Bits};
+    use crate::{
+        atan::tests::{compare_error, find_optimal_constants},
+        bits::Bits,
+    };
 
     use super::*;
 
@@ -133,12 +136,9 @@ mod tests {
                     .skip(a.len() * n / num)
                     .take(a.len() * (n + 1) / num - a.len() * n / num);
 
-                crate::atan::tests::find_optimal_constants(
-                    exp,
-                    &atan_expected,
-                    search_range,
-                    |x, one, k, a| atan_p2_impl!(x, one, k / 4.as_(), a),
-                )
+                find_optimal_constants(exp, &atan_expected, search_range, |x, one, k, a| {
+                    atan_p2_impl!(x, one, k / 4.as_(), a)
+                })
             })
             .reduce(
                 || (vec![], f64::INFINITY, f64::INFINITY),
