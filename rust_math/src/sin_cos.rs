@@ -1,14 +1,17 @@
 use std::{
     f64::consts::{FRAC_2_PI, FRAC_PI_2, FRAC_PI_4},
-    ops::Mul,
+    ops::{Div, Mul},
 };
 
 use num_traits::{AsPrimitive, PrimInt, Signed};
 
 use crate::bits::Bits;
 
-fn square<T: PrimInt>(b: T, denom: T) -> T {
-    b.pow(2) / denom
+fn square<T>(b: T, denom: T) -> T
+where
+    T: Copy + Mul<Output = T> + Div<Output = T>,
+{
+    b * b / denom
 }
 
 fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
