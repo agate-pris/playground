@@ -14,7 +14,10 @@ where
     b * b / denom
 }
 
-fn repeat<T: PrimInt + Signed>(t: T, length: T) -> T {
+fn repeat<T>(t: T, length: T) -> T
+where
+    T: Copy + Signed,
+{
     let rem = t % length;
     if rem.is_negative() {
         rem + length
