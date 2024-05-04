@@ -4,7 +4,7 @@ use rust_math::{
     atan_p3::AtanP3,
     atan_p5::AtanP5,
     sin_cos::{
-        cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_default, sin_p5_default,
+        cos_p2_default, cos_p4_default, cos_p4o_default, sin_p3_16384, sin_p5_default,
         sin_p5o_default,
     },
 };
@@ -42,7 +42,7 @@ fn main() {
         print(cos_p2_default);
     }
     if args.sin_p3 {
-        print(sin_p3_default);
+        print(sin_p3_16384);
     }
     if args.cos_p4 {
         print(cos_p4_default);
