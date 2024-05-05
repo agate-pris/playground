@@ -43,7 +43,7 @@ impl AtanP5Consts<i32> for AtanP5ConstsI32 {
     const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
 }
 
-struct AtanP5I32Util();
+pub(crate) struct AtanP5I32Util();
 
 impl AtanUtil<i32> for AtanP5I32Util {
     type Output = i32;
