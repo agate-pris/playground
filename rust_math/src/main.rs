@@ -1,7 +1,7 @@
 use clap::Parser;
 use rust_math::{
-    atan_p2_2850, atan_p3_2555_691, atan_p5_787_2968, cos_p2_i32,
-    sin_cos::{cos_p4_7032, cos_p4_7384, sin_p5_51437, sin_p5_51472},
+    atan_p2_2850, atan_p3_2555_691, atan_p5_787_2968, cos_p2_i32, cos_p4_7032,
+    sin_cos::{cos_p4_7384, sin_p5_51437, sin_p5_51472},
     sin_p3_16384,
 };
 
