@@ -190,6 +190,30 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
+pub(crate) trait Sin<T> {
+    const RIGHT: T;
+    fn sin(x: T) -> T;
+    fn cos(x: T) -> T
+    where
+        T: 'static + PrimInt,
+        i8: AsPrimitive<T>,
+    {
+        Self::sin(odd_cos_impl(x, Self::RIGHT))
+    }
+}
+
+pub(crate) trait Cos<T> {
+    const RIGHT: T;
+    fn cos(x: T) -> T;
+    fn sin(x: T) -> T
+    where
+        T: 'static + PrimInt,
+        i8: AsPrimitive<T>,
+    {
+        Self::cos(even_sin_impl(x, Self::RIGHT))
+    }
+}
+
 /// 1 - x ^ 2
 pub fn cos_p2<T>(x: T, right: T) -> T
 where
