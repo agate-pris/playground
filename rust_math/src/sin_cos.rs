@@ -278,19 +278,13 @@ impl Sin<i32> for SinP5_51472 {
     }
 }
 
-/// Approximate the sine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = 4 * (3 / pi - 9 / 16)
-pub fn sin_p5_51437(x: i32) -> i32 {
-    sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
-}
+pub(crate) struct SinP5_51437();
 
-/// Approximate the cosine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn cos_p5_51437(x: i32) -> i32 {
-    sin_p5_51437(odd_cos_impl(x, RIGHT_I32_DEFAULT))
+impl Sin<i32> for SinP5_51437 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn sin(x: i32) -> i32 {
+        sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+    }
 }
 
 #[cfg(test)]
@@ -298,8 +292,8 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51472, sin_p2_i32, sin_p3_16384,
-        sin_p4_7032, sin_p4_7384, sin_p5_51472, tests::read_data,
+        cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51437, cos_p5_51472, sin_p2_i32,
+        sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472, tests::read_data,
     };
 
     use super::*;
