@@ -215,28 +215,18 @@ where
     sin_p2(x, calc_default_right::<T>())
 }
 
-/// (1.5 - 0.5 * x ^ 2) * x
-pub fn sin_p3_16384(x: i32) -> i32 {
-    const K: i32 = RIGHT_I32_DEFAULT / 2;
-    sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
-}
-
-pub fn sin_p4_7032(x: i32) -> i32 {
-    cos_p4_7032(even_sin_impl(x, RIGHT_I32_DEFAULT))
-}
-
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = pi / 2
-pub fn sin_p5_51472(x: i32) -> i32 {
-    sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
-}
-
 pub fn cos_p2_default<T>(x: T) -> T
 where
     T: AsPrimitive<i8> + Bits + PrimInt + Signed,
     i8: AsPrimitive<T>,
 {
     cos_p2(x, calc_default_right::<T>())
+}
+
+/// (1.5 - 0.5 * x ^ 2) * x
+pub fn sin_p3_16384(x: i32) -> i32 {
+    const K: i32 = RIGHT_I32_DEFAULT / 2;
+    sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
 }
 
 pub fn cos_p3_16384(x: i32) -> i32 {
@@ -251,18 +241,8 @@ pub fn cos_p4_7032(x: i32) -> i32 {
     })
 }
 
-pub fn cos_p5_51472(x: i32) -> i32 {
-    sin_p5_51472(odd_cos_impl(x, RIGHT_I32_DEFAULT))
-}
-
-pub fn sin_p4_7384(x: i32) -> i32 {
-    cos_p4_7384(even_sin_impl(x, RIGHT_I32_DEFAULT))
-}
-
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = 4 * (3 / pi - 9 / 16)
-pub fn sin_p5_51437(x: i32) -> i32 {
-    sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+pub fn sin_p4_7032(x: i32) -> i32 {
+    cos_p4_7032(even_sin_impl(x, RIGHT_I32_DEFAULT))
 }
 
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
@@ -271,6 +251,26 @@ pub fn cos_p4_7384(x: i32) -> i32 {
     even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
         cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
     })
+}
+
+pub fn sin_p4_7384(x: i32) -> i32 {
+    cos_p4_7384(even_sin_impl(x, RIGHT_I32_DEFAULT))
+}
+
+/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
+/// a = pi / 2
+pub fn sin_p5_51472(x: i32) -> i32 {
+    sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+}
+
+pub fn cos_p5_51472(x: i32) -> i32 {
+    sin_p5_51472(odd_cos_impl(x, RIGHT_I32_DEFAULT))
+}
+
+/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
+/// a = 4 * (3 / pi - 9 / 16)
+pub fn sin_p5_51437(x: i32) -> i32 {
+    sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
 }
 
 pub fn cos_p5_51437(x: i32) -> i32 {
