@@ -215,7 +215,7 @@ pub(crate) trait Cos<T> {
 }
 
 /// 1 - x ^ 2
-pub fn cos_p2<T>(x: T, right: T) -> T
+fn cos_p2<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
@@ -223,28 +223,13 @@ where
     even_cos_impl(x, right, |z, _| z.pow(2))
 }
 
-pub fn sin_p2<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p2(even_sin_impl(x, right), right)
-}
+pub(crate) struct CosP2I32();
 
-pub fn sin_p2_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p2(x, calc_default_right::<T>())
-}
-
-pub fn cos_p2_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p2(x, calc_default_right::<T>())
+impl Cos<i32> for CosP2I32 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn cos(x: i32) -> i32 {
+        cos_p2(x, RIGHT_I32_DEFAULT)
+    }
 }
 
 /// (1.5 - 0.5 * x ^ 2) * x
@@ -321,7 +306,7 @@ pub fn cos_p5_51437(x: i32) -> i32 {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::tests::read_data;
+    use crate::{cos_p2_i32, sin_p2_i32, tests::read_data};
 
     use super::*;
 
@@ -390,7 +375,7 @@ mod tests {
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
 
-        #[rustfmt::skip] test(sin_p2_default,  right, one);
+        test(sin_p2_i32, right, one);
         test(sin_p3_16384, right, one);
         test(sin_p4_7032, right, one);
         test(sin_p5_51472, right, one);
@@ -411,7 +396,7 @@ mod tests {
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
 
-        #[rustfmt::skip] test(cos_p2_default,  right, one);
+        test(cos_p2_i32, right, one);
         test(cos_p3_16384, right, one);
         test(cos_p4_7032, right, one);
         test(cos_p5_51472, right, one);
@@ -538,16 +523,16 @@ mod tests {
         iter.clone().chain(iter.map(f)).collect()
     }
 
-    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_default,  calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384,    calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,     calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472,    calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,     calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437,    calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
-    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_default,  calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384,    calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,     calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472,    calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,     calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437,    calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
 }

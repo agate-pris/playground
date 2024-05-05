@@ -17,6 +17,7 @@ use atan::AtanUtil;
 use atan_p2::AtanP2I32Util;
 use atan_p3::AtanP3I32Util;
 use atan_p5::AtanP5I32Util;
+use sin_cos::{Cos, CosP2I32};
 
 pub fn atan_p2_2850(x: i32) -> i32 {
     AtanP2I32Util::atan(x)
@@ -40,6 +41,14 @@ pub fn atan_p5_787_2968(x: i32) -> i32 {
 
 pub fn atan2_p5_787_2968(y: i32, x: i32) -> i32 {
     AtanP5I32Util::atan2(y, x)
+}
+
+pub fn sin_p2_i32(x: i32) -> i32 {
+    CosP2I32::sin(x)
+}
+
+pub fn cos_p2_i32(x: i32) -> i32 {
+    CosP2I32::cos(x)
 }
 
 #[cfg(test)]
