@@ -17,7 +17,7 @@ use atan::AtanUtil;
 use atan_p2::AtanP2I32Util;
 use atan_p3::AtanP3I32Util;
 use atan_p5::AtanP5I32Util;
-use sin_cos::{Cos, CosP2I32, CosP4_7032, Sin, SinP3_16384};
+use sin_cos::{Cos, CosP2I32, CosP4_7032, CosP4_7384, Sin, SinP3_16384};
 
 pub fn atan_p2_2850(x: i32) -> i32 {
     AtanP2I32Util::atan(x)
@@ -70,6 +70,21 @@ pub fn sin_p4_7032(x: i32) -> i32 {
 /// a = 1 - pi / 4
 pub fn cos_p4_7032(x: i32) -> i32 {
     CosP4_7032::cos(x)
+}
+
+/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion  with
+/// coefficients which is adjusted so that the average of the errors is 0.
+pub fn sin_p4_7384(x: i32) -> i32 {
+    CosP4_7384::sin(x)
+}
+
+/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion  with
+/// coefficients which is adjusted so that the average of the errors is 0.
+///
+/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
+/// a = 5 * (1 - 3 / pi)
+pub fn cos_p4_7384(x: i32) -> i32 {
+    CosP4_7384::cos(x)
 }
 
 #[cfg(test)]

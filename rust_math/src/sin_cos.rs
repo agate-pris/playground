@@ -258,21 +258,15 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
-/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-/// a = 5 * (1 - 3 / pi)
-pub fn cos_p4_7384(x: i32) -> i32 {
-    even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
-        cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
-    })
-}
+pub(crate) struct CosP4_7384();
 
-/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn sin_p4_7384(x: i32) -> i32 {
-    cos_p4_7384(even_sin_impl(x, RIGHT_I32_DEFAULT))
+impl Cos<i32> for CosP4_7384 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn cos(x: i32) -> i32 {
+        even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
+            cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
+        })
+    }
 }
 
 /// Approximate the sine function by the 5th order polynomial derived by Taylor expansion.
@@ -308,8 +302,8 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        cos_p2_i32, cos_p3_16384, cos_p4_7032, sin_p2_i32, sin_p3_16384, sin_p4_7032,
-        tests::read_data,
+        cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, sin_p2_i32, sin_p3_16384, sin_p4_7032,
+        sin_p4_7384, tests::read_data,
     };
 
     use super::*;
