@@ -233,13 +233,14 @@ impl Cos<i32> for CosP2I32 {
 }
 
 /// (1.5 - 0.5 * x ^ 2) * x
-pub fn sin_p3_16384(x: i32) -> i32 {
-    const K: i32 = RIGHT_I32_DEFAULT / 2;
-    sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
-}
+pub(crate) struct SinP3_16384();
 
-pub fn cos_p3_16384(x: i32) -> i32 {
-    sin_p3_16384(odd_cos_impl(x, RIGHT_I32_DEFAULT))
+impl Sin<i32> for SinP3_16384 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn sin(x: i32) -> i32 {
+        const K: i32 = RIGHT_I32_DEFAULT / 2;
+        sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
+    }
 }
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
@@ -306,7 +307,7 @@ pub fn cos_p5_51437(x: i32) -> i32 {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::{cos_p2_i32, sin_p2_i32, tests::read_data};
+    use crate::{cos_p2_i32, cos_p3_16384, sin_p2_i32, sin_p3_16384, tests::read_data};
 
     use super::*;
 
