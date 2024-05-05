@@ -65,7 +65,7 @@ impl AtanP3Consts<i32> for AtanP3ConstsI32 {
     const B: i32 = A_B_I32[11].1;
 }
 
-struct AtanP3I32Util();
+pub(crate) struct AtanP3I32Util();
 
 impl AtanUtil<i32> for AtanP3I32Util {
     type Output = i32;
