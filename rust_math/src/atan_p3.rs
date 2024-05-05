@@ -86,23 +86,6 @@ impl AtanUtil<i32> for AtanP3I32Util {
     }
 }
 
-pub trait AtanP3 {
-    type Output;
-    fn atan_p3(self) -> Self::Output;
-    fn atan2_p3(self, other: Self) -> Self::Output;
-}
-
-impl AtanP3 for i32 {
-    type Output = i32;
-
-    fn atan_p3(self) -> Self::Output {
-        AtanP3I32Util::atan(self)
-    }
-    fn atan2_p3(self, other: i32) -> Self::Output {
-        AtanP3I32Util::atan2(self, other)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::{

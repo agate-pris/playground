@@ -1,8 +1,6 @@
 use clap::Parser;
 use rust_math::{
-    atan_p2::AtanP2,
-    atan_p3::AtanP3,
-    atan_p5::AtanP5,
+    atan_p2_2850, atan_p3_2555_691, atan_p5_787_2968,
     sin_cos::{cos_p2_default, cos_p4_7032, cos_p4_7384, sin_p3_16384, sin_p5_51437, sin_p5_51472},
 };
 
@@ -54,12 +52,12 @@ fn main() {
         print(sin_p5_51437);
     }
     if args.atan_p2 {
-        print(AtanP2::atan_p2);
+        print(atan_p2_2850);
     }
     if args.atan_p3 {
-        print(AtanP3::atan_p3);
+        print(atan_p3_2555_691);
     }
     if args.atan_p5 {
-        print(AtanP5::atan_p5);
+        print(atan_p5_787_2968);
     }
 }

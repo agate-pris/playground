@@ -105,7 +105,10 @@ pub(crate) mod tests {
     use primitive_promotion::PrimitivePromotionExt;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-    use crate::{atan_p2::AtanP2, atan_p3::AtanP3, atan_p5::AtanP5, bits::Bits, tests::read_data};
+    use crate::{
+        atan2_p2_2850, atan2_p3_2555_691, atan2_p5_787_2968, atan_p2_2850, atan_p3_2555_691,
+        atan_p5_787_2968, bits::Bits, tests::read_data,
+    };
 
     pub(crate) fn compare_max_error(lhs: &f64, rhs: &f64) -> Ordering {
         lhs.abs().total_cmp(&rhs.abs())
@@ -237,9 +240,9 @@ pub(crate) mod tests {
         println!("average: {:15.9}", diff_sum / (ONE + 1) as f64);
     }
 
-    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(AtanP2::atan_p2, "data/atan_p2_i17f15.json", 0.003778); }
-    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(AtanP3::atan_p3, "data/atan_p3_i17f15.json", 0.001543); }
-    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(AtanP5::atan_p5, "data/atan_p5_i17f15.json", 0.000767); }
+    #[rustfmt::skip] #[test] fn test_atan_p2() { test_atan(atan_p2_2850,     "data/atan_p2_i17f15.json", 0.003778); }
+    #[rustfmt::skip] #[test] fn test_atan_p3() { test_atan(atan_p3_2555_691, "data/atan_p3_i17f15.json", 0.001543); }
+    #[rustfmt::skip] #[test] fn test_atan_p5() { test_atan(atan_p5_787_2968, "data/atan_p5_i17f15.json", 0.000767); }
 
     fn test_atan2<F>(f: F, data_path: &str, acceptable_error: f64)
     where
@@ -488,9 +491,9 @@ pub(crate) mod tests {
         }
     }
 
-    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(AtanP2::atan2_p2, "data/atan_p2_i17f15.json", 0.003778); }
-    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(AtanP3::atan2_p3, "data/atan_p3_i17f15.json", 0.001543); }
-    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(AtanP5::atan2_p5, "data/atan_p5_i17f15.json", 0.000767); }
+    #[rustfmt::skip] #[test] fn test_atan2_p2() { test_atan2(atan2_p2_2850,     "data/atan_p2_i17f15.json", 0.003778); }
+    #[rustfmt::skip] #[test] fn test_atan2_p3() { test_atan2(atan2_p3_2555_691, "data/atan_p3_i17f15.json", 0.001543); }
+    #[rustfmt::skip] #[test] fn test_atan2_p5() { test_atan2(atan2_p5_787_2968, "data/atan_p5_i17f15.json", 0.000767); }
 
     pub fn make_atan_data(exp: u32) -> Vec<f64> {
         let num = num_cpus::get();
