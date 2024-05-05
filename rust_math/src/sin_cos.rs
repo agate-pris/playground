@@ -190,8 +190,32 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
+pub(crate) trait Sin<T> {
+    const RIGHT: T;
+    fn sin(x: T) -> T;
+    fn cos(x: T) -> T
+    where
+        T: 'static + PrimInt,
+        i8: AsPrimitive<T>,
+    {
+        Self::sin(odd_cos_impl(x, Self::RIGHT))
+    }
+}
+
+pub(crate) trait Cos<T> {
+    const RIGHT: T;
+    fn cos(x: T) -> T;
+    fn sin(x: T) -> T
+    where
+        T: 'static + PrimInt,
+        i8: AsPrimitive<T>,
+    {
+        Self::cos(even_sin_impl(x, Self::RIGHT))
+    }
+}
+
 /// 1 - x ^ 2
-pub fn cos_p2<T>(x: T, right: T) -> T
+fn cos_p2<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
     i8: AsPrimitive<T>,
@@ -199,105 +223,78 @@ where
     even_cos_impl(x, right, |z, _| z.pow(2))
 }
 
-pub fn sin_p2<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p2(even_sin_impl(x, right), right)
-}
+pub(crate) struct CosP2I32();
 
-pub fn sin_p2_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    sin_p2(x, calc_default_right::<T>())
-}
-
-pub fn cos_p2_default<T>(x: T) -> T
-where
-    T: AsPrimitive<i8> + Bits + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    cos_p2(x, calc_default_right::<T>())
+impl Cos<i32> for CosP2I32 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn cos(x: i32) -> i32 {
+        cos_p2(x, RIGHT_I32_DEFAULT)
+    }
 }
 
 /// (1.5 - 0.5 * x ^ 2) * x
-pub fn sin_p3_16384(x: i32) -> i32 {
-    const K: i32 = RIGHT_I32_DEFAULT / 2;
-    sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
-}
+pub(crate) struct SinP3_16384();
 
-pub fn cos_p3_16384(x: i32) -> i32 {
-    sin_p3_16384(odd_cos_impl(x, RIGHT_I32_DEFAULT))
+impl Sin<i32> for SinP3_16384 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn sin(x: i32) -> i32 {
+        const K: i32 = RIGHT_I32_DEFAULT / 2;
+        sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
+    }
 }
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
 /// a = 1 - pi / 4
-pub fn cos_p4_7032(x: i32) -> i32 {
-    even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
-        cos_p4_impl(cos_p4_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
-    })
+pub(crate) struct CosP4_7032();
+
+impl Cos<i32> for CosP4_7032 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn cos(x: i32) -> i32 {
+        even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
+            cos_p4_impl(cos_p4_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
+        })
+    }
 }
 
-/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion.
-pub fn sin_p4_7032(x: i32) -> i32 {
-    cos_p4_7032(even_sin_impl(x, RIGHT_I32_DEFAULT))
+pub(crate) struct CosP4_7384();
+
+impl Cos<i32> for CosP4_7384 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn cos(x: i32) -> i32 {
+        even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
+            cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
+        })
+    }
 }
 
-/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-/// a = 5 * (1 - 3 / pi)
-pub fn cos_p4_7384(x: i32) -> i32 {
-    even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
-        cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
-    })
+pub(crate) struct SinP5_51472();
+
+impl Sin<i32> for SinP5_51472 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn sin(x: i32) -> i32 {
+        sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+    }
 }
 
-/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn sin_p4_7384(x: i32) -> i32 {
-    cos_p4_7384(even_sin_impl(x, RIGHT_I32_DEFAULT))
-}
+pub(crate) struct SinP5_51437();
 
-/// Approximate the sine function by the 5th order polynomial derived by Taylor expansion.
-///
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = pi / 2
-pub fn sin_p5_51472(x: i32) -> i32 {
-    sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
-}
-
-/// Approximate the cosine function by the 5th order polynomial derived by Taylor expansion.
-pub fn cos_p5_51472(x: i32) -> i32 {
-    sin_p5_51472(odd_cos_impl(x, RIGHT_I32_DEFAULT))
-}
-
-/// Approximate the sine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = 4 * (3 / pi - 9 / 16)
-pub fn sin_p5_51437(x: i32) -> i32 {
-    sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
-}
-
-/// Approximate the cosine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn cos_p5_51437(x: i32) -> i32 {
-    sin_p5_51437(odd_cos_impl(x, RIGHT_I32_DEFAULT))
+impl Sin<i32> for SinP5_51437 {
+    const RIGHT: i32 = RIGHT_I32_DEFAULT;
+    fn sin(x: i32) -> i32 {
+        sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::tests::read_data;
+    use crate::{
+        cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51437, cos_p5_51472, sin_p2_i32,
+        sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472, tests::read_data,
+    };
 
     use super::*;
 
@@ -366,7 +363,7 @@ mod tests {
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
 
-        #[rustfmt::skip] test(sin_p2_default,  right, one);
+        test(sin_p2_i32, right, one);
         test(sin_p3_16384, right, one);
         test(sin_p4_7032, right, one);
         test(sin_p5_51472, right, one);
@@ -387,7 +384,7 @@ mod tests {
         let right = calc_default_right::<i32>();
         let one = right.pow(2);
 
-        #[rustfmt::skip] test(cos_p2_default,  right, one);
+        test(cos_p2_i32, right, one);
         test(cos_p3_16384, right, one);
         test(cos_p4_7032, right, one);
         test(cos_p5_51472, right, one);
@@ -514,16 +511,16 @@ mod tests {
         iter.clone().chain(iter.map(f)).collect()
     }
 
-    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_default,  calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384,    calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,     calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472,    calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,     calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437,    calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
-    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_default,  calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384,    calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,     calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472,    calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,     calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437,    calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
 }
