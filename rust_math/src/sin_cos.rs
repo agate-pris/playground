@@ -10,7 +10,7 @@ use crate::bits::Bits;
 const RIGHT_I32_DEFAULT: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 macro_rules! sin_impl_default {
-    ($u:ty, $t:ty, $right:expr) => {
+    ($u:ty, $t:ty, $right:ident) => {
         impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
                 Self::cos(x.wrapping_sub($right))
@@ -20,7 +20,7 @@ macro_rules! sin_impl_default {
 }
 
 macro_rules! cos_impl_default {
-    ($u:ty, $t:ty, $right:expr) => {
+    ($u:ty, $t:ty, $right:ident) => {
         impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
                 Self::sin(x.wrapping_add($right))
