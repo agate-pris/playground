@@ -79,14 +79,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-fn even_sin_impl<T>(x: T, right: T) -> T
-where
-    T: 'static + PrimInt,
-    i8: AsPrimitive<T>,
-{
-    (x % calc_full(right)) - right
-}
-
 fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
