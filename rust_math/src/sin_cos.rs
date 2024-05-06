@@ -10,10 +10,11 @@ use crate::bits::Bits;
 const RIGHT_I32_DEFAULT: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 macro_rules! sin_impl_default {
-    ($u:ty, $t:ty, $right:ident) => {
+    ($u:ty, $t:ty) => {
         impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
-                Self::cos(x.wrapping_sub($right))
+                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
+                Self::cos(x.wrapping_sub(RIGHT))
             }
         }
     };
@@ -219,7 +220,7 @@ impl Cos<i32> for CosP2I32 {
     }
 }
 
-sin_impl_default!(CosP2I32, i32, RIGHT_I32_DEFAULT);
+sin_impl_default!(CosP2I32, i32);
 
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
@@ -247,7 +248,7 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
-sin_impl_default!(CosP4_7032, i32, RIGHT_I32_DEFAULT);
+sin_impl_default!(CosP4_7032, i32);
 
 pub(crate) struct CosP4_7384();
 
@@ -259,7 +260,7 @@ impl Cos<i32> for CosP4_7384 {
     }
 }
 
-sin_impl_default!(CosP4_7384, i32, RIGHT_I32_DEFAULT);
+sin_impl_default!(CosP4_7384, i32);
 
 pub(crate) struct SinP5_51472();
 
