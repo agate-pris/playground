@@ -235,6 +235,8 @@ impl Cos<i32> for CosP2I32 {
     }
 }
 
+sin_impl_default!(CosP2I32, i32, RIGHT_I32_DEFAULT);
+
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
 
