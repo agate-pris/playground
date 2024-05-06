@@ -9,6 +9,26 @@ use crate::bits::Bits;
 
 const RIGHT_I32_DEFAULT: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
+macro_rules! sin_impl_default {
+    ($u:ty, $t:ty, $right:expr) => {
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                Self::cos(x.wrapping_sub($right))
+            }
+        }
+    };
+}
+
+macro_rules! cos_impl_default {
+    ($u:ty, $t:ty, $right:expr) => {
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                Self::sin(x.wrapping_add($right))
+            }
+        }
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -57,22 +77,6 @@ where
     i8: AsPrimitive<T>,
 {
     (repeat(x, calc_full(right)) / right).as_()
-}
-
-fn odd_cos_impl<T>(x: T, right: T) -> T
-where
-    T: 'static + PrimInt,
-    i8: AsPrimitive<T>,
-{
-    (x % calc_full(right)) + right
-}
-
-fn even_sin_impl<T>(x: T, right: T) -> T
-where
-    T: 'static + PrimInt,
-    i8: AsPrimitive<T>,
-{
-    (x % calc_full(right)) - right
 }
 
 fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
@@ -191,27 +195,11 @@ where
 }
 
 pub(crate) trait Sin<T> {
-    const RIGHT: T;
     fn sin(x: T) -> T;
-    fn cos(x: T) -> T
-    where
-        T: 'static + PrimInt,
-        i8: AsPrimitive<T>,
-    {
-        Self::sin(odd_cos_impl(x, Self::RIGHT))
-    }
 }
 
 pub(crate) trait Cos<T> {
-    const RIGHT: T;
     fn cos(x: T) -> T;
-    fn sin(x: T) -> T
-    where
-        T: 'static + PrimInt,
-        i8: AsPrimitive<T>,
-    {
-        Self::cos(even_sin_impl(x, Self::RIGHT))
-    }
 }
 
 /// 1 - x ^ 2
@@ -226,22 +214,24 @@ where
 pub(crate) struct CosP2I32();
 
 impl Cos<i32> for CosP2I32 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         cos_p2(x, RIGHT_I32_DEFAULT)
     }
 }
 
+sin_impl_default!(CosP2I32, i32, RIGHT_I32_DEFAULT);
+
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
 
 impl Sin<i32> for SinP3_16384 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         const K: i32 = RIGHT_I32_DEFAULT / 2;
         sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
     }
 }
+
+cos_impl_default!(SinP3_16384, i32, RIGHT_I32_DEFAULT);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
@@ -250,7 +240,6 @@ impl Sin<i32> for SinP3_16384 {
 pub(crate) struct CosP4_7032();
 
 impl Cos<i32> for CosP4_7032 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
             cos_p4_impl(cos_p4_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
@@ -258,10 +247,11 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
+sin_impl_default!(CosP4_7032, i32, RIGHT_I32_DEFAULT);
+
 pub(crate) struct CosP4_7384();
 
 impl Cos<i32> for CosP4_7384 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
             cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
@@ -269,23 +259,27 @@ impl Cos<i32> for CosP4_7384 {
     }
 }
 
+sin_impl_default!(CosP4_7384, i32, RIGHT_I32_DEFAULT);
+
 pub(crate) struct SinP5_51472();
 
 impl Sin<i32> for SinP5_51472 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
     }
 }
 
+cos_impl_default!(SinP5_51472, i32, RIGHT_I32_DEFAULT);
+
 pub(crate) struct SinP5_51437();
 
 impl Sin<i32> for SinP5_51437 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
     }
 }
+
+cos_impl_default!(SinP5_51437, i32, RIGHT_I32_DEFAULT);
 
 #[cfg(test)]
 mod tests {
