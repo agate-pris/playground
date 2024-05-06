@@ -211,7 +211,6 @@ where
 }
 
 pub(crate) trait Sin<T> {
-    const RIGHT: T;
     fn sin(x: T) -> T;
 }
 
@@ -249,7 +248,6 @@ impl Cos<i32> for CosP2I32 {
 pub(crate) struct SinP3_16384();
 
 impl Sin<i32> for SinP3_16384 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         const K: i32 = RIGHT_I32_DEFAULT / 2;
         sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
@@ -285,7 +283,6 @@ impl Cos<i32> for CosP4_7384 {
 pub(crate) struct SinP5_51472();
 
 impl Sin<i32> for SinP5_51472 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
     }
@@ -294,7 +291,6 @@ impl Sin<i32> for SinP5_51472 {
 pub(crate) struct SinP5_51437();
 
 impl Sin<i32> for SinP5_51437 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn sin(x: i32) -> i32 {
         sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
     }
