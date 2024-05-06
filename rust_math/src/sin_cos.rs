@@ -247,6 +247,8 @@ impl Sin<i32> for SinP3_16384 {
     }
 }
 
+cos_impl_default!(SinP3_16384, i32, RIGHT_I32_DEFAULT);
+
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
