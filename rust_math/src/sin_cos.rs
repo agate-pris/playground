@@ -213,13 +213,6 @@ where
 pub(crate) trait Sin<T> {
     const RIGHT: T;
     fn sin(x: T) -> T;
-    fn cos(x: T) -> T
-    where
-        T: 'static + PrimInt,
-        i8: AsPrimitive<T>,
-    {
-        Self::sin(odd_cos_impl(x, Self::RIGHT))
-    }
 }
 
 pub(crate) trait Cos<T> {
