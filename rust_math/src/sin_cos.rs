@@ -215,7 +215,6 @@ pub(crate) trait Sin<T> {
 }
 
 pub(crate) trait Cos<T> {
-    const RIGHT: T;
     fn cos(x: T) -> T;
 }
 
@@ -231,7 +230,6 @@ where
 pub(crate) struct CosP2I32();
 
 impl Cos<i32> for CosP2I32 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         cos_p2(x, RIGHT_I32_DEFAULT)
     }
@@ -254,7 +252,6 @@ impl Sin<i32> for SinP3_16384 {
 pub(crate) struct CosP4_7032();
 
 impl Cos<i32> for CosP4_7032 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
             cos_p4_impl(cos_p4_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
@@ -265,7 +262,6 @@ impl Cos<i32> for CosP4_7032 {
 pub(crate) struct CosP4_7384();
 
 impl Cos<i32> for CosP4_7384 {
-    const RIGHT: i32 = RIGHT_I32_DEFAULT;
     fn cos(x: i32) -> i32 {
         even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
             cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
