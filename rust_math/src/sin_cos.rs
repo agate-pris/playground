@@ -263,6 +263,8 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
+sin_impl_default!(CosP4_7032, i32, RIGHT_I32_DEFAULT);
+
 pub(crate) struct CosP4_7384();
 
 impl Cos<i32> for CosP4_7384 {
