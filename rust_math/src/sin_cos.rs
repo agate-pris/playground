@@ -19,6 +19,16 @@ macro_rules! sin_impl_default {
     };
 }
 
+macro_rules! cos_impl_default {
+    ($u:ty, $t:ty, $right:expr) => {
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                Self::sin(x.wrapping_add($right))
+            }
+        }
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
