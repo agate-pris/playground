@@ -217,13 +217,6 @@ pub(crate) trait Sin<T> {
 pub(crate) trait Cos<T> {
     const RIGHT: T;
     fn cos(x: T) -> T;
-    fn sin(x: T) -> T
-    where
-        T: 'static + PrimInt,
-        i8: AsPrimitive<T>,
-    {
-        Self::cos(even_sin_impl(x, Self::RIGHT))
-    }
 }
 
 /// 1 - x ^ 2
