@@ -295,6 +295,8 @@ impl Sin<i32> for SinP5_51437 {
     }
 }
 
+cos_impl_default!(SinP5_51437, i32, RIGHT_I32_DEFAULT);
+
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
