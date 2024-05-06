@@ -9,6 +9,16 @@ use crate::bits::Bits;
 
 const RIGHT_I32_DEFAULT: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
+macro_rules! sin_impl_default {
+    ($u:ty, $t:ty, $right:expr) => {
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                Self::cos(x.wrapping_sub($right))
+            }
+        }
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
