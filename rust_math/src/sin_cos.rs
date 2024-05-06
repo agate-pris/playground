@@ -21,10 +21,11 @@ macro_rules! sin_impl_default {
 }
 
 macro_rules! cos_impl_default {
-    ($u:ty, $t:ty, $right:ident) => {
+    ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
-                Self::sin(x.wrapping_add($right))
+                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
+                Self::sin(x.wrapping_add(RIGHT))
             }
         }
     };
@@ -232,7 +233,7 @@ impl Sin<i32> for SinP3_16384 {
     }
 }
 
-cos_impl_default!(SinP3_16384, i32, RIGHT_I32_DEFAULT);
+cos_impl_default!(SinP3_16384, i32);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
@@ -270,7 +271,7 @@ impl Sin<i32> for SinP5_51472 {
     }
 }
 
-cos_impl_default!(SinP5_51472, i32, RIGHT_I32_DEFAULT);
+cos_impl_default!(SinP5_51472, i32);
 
 pub(crate) struct SinP5_51437();
 
@@ -280,7 +281,7 @@ impl Sin<i32> for SinP5_51437 {
     }
 }
 
-cos_impl_default!(SinP5_51437, i32, RIGHT_I32_DEFAULT);
+cos_impl_default!(SinP5_51437, i32);
 
 #[cfg(test)]
 mod tests {
