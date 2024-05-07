@@ -190,6 +190,14 @@ trait Right<T> {
     const RIGHT: T;
 }
 
+macro_rules! right_impl {
+    ($u:ty, $t:ty) => {
+        impl Right<$t> for $u {
+            const RIGHT: $t = 1 << Self::RIGHT_EXP;
+        }
+    };
+}
+
 pub(crate) trait Sin<T> {
     fn sin(x: T) -> T;
 }
