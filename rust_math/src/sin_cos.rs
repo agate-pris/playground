@@ -139,12 +139,12 @@ impl CosP2I32 {
 
 even_sin_cos_impl!(CosP2I32, i32);
 
-/// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
 
 consts_impl!(SinP3_16384, i32);
 
 impl SinP3_16384 {
+    /// (1.5 - 0.5 * x ^ 2) * x
     pub fn sin_detail(z: i32) -> i32 {
         const B: i32 = SinP3_16384::RIGHT / 2;
         const A: i32 = SinP3_16384::RIGHT + B;
