@@ -186,6 +186,10 @@ macro_rules! right_exp_impl {
     };
 }
 
+trait Right<T> {
+    const RIGHT: T;
+}
+
 pub(crate) trait Sin<T> {
     fn sin(x: T) -> T;
 }
