@@ -305,13 +305,16 @@ pub(crate) struct SinP5_51472();
 
 consts_impl!(SinP5_51472, i32);
 
-impl Sin<i32> for SinP5_51472 {
-    fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5_k(Self::RIGHT), x, Self::RIGHT)
+impl SinP5_51472 {
+    const K: i32 = sin_p5_k!(Self::RIGHT) as i32;
+    fn sin_detail(z: i32) -> i32 {
+        const A: i32 = SinP5_51472::K * 2 - SinP5_51472::RIGHT * 5 / 2;
+        const B: i32 = SinP5_51472::K - SinP5_51472::RIGHT * 3 / 2;
+        (Self::K - (cos_p4_sin_p5_impl!(A, B, z) >> Self::RIGHT_EXP)) * z
     }
 }
 
-cos_impl_default!(SinP5_51472, i32);
+odd_sin_cos_impl!(SinP5_51472, i32);
 
 pub(crate) struct SinP5_51437();
 
