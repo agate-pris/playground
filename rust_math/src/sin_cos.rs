@@ -257,18 +257,20 @@ where
 
 pub(crate) struct CosP2I32();
 
+consts_impl!(CosP2I32, i32);
+
 impl Cos<i32> for CosP2I32 {
     fn cos(x: i32) -> i32 {
         cos_p2(x, RIGHT_I32)
     }
 }
 
-right_exp_impl!(CosP2I32, i32);
-right_impl!(CosP2I32, i32);
 sin_impl_default!(CosP2I32, i32);
 
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
+
+consts_impl!(SinP3_16384, i32);
 
 impl Sin<i32> for SinP3_16384 {
     fn sin(x: i32) -> i32 {
@@ -277,8 +279,6 @@ impl Sin<i32> for SinP3_16384 {
     }
 }
 
-right_exp_impl!(SinP3_16384, i32);
-right_impl!(SinP3_16384, i32);
 cos_impl_default!(SinP3_16384, i32);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
@@ -286,6 +286,8 @@ cos_impl_default!(SinP3_16384, i32);
 /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
 /// a = 1 - pi / 4
 pub(crate) struct CosP4_7032();
+
+consts_impl!(CosP4_7032, i32);
 
 impl Cos<i32> for CosP4_7032 {
     fn cos(x: i32) -> i32 {
@@ -295,11 +297,11 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
-right_exp_impl!(CosP4_7032, i32);
-right_impl!(CosP4_7032, i32);
 sin_impl_default!(CosP4_7032, i32);
 
 pub(crate) struct CosP4_7384();
+
+consts_impl!(CosP4_7384, i32);
 
 impl Cos<i32> for CosP4_7384 {
     fn cos(x: i32) -> i32 {
@@ -309,11 +311,11 @@ impl Cos<i32> for CosP4_7384 {
     }
 }
 
-right_exp_impl!(CosP4_7384, i32);
-right_impl!(CosP4_7384, i32);
 sin_impl_default!(CosP4_7384, i32);
 
 pub(crate) struct SinP5_51472();
+
+consts_impl!(SinP5_51472, i32);
 
 impl Sin<i32> for SinP5_51472 {
     fn sin(x: i32) -> i32 {
@@ -321,11 +323,11 @@ impl Sin<i32> for SinP5_51472 {
     }
 }
 
-right_exp_impl!(SinP5_51472, i32);
-right_impl!(SinP5_51472, i32);
 cos_impl_default!(SinP5_51472, i32);
 
 pub(crate) struct SinP5_51437();
+
+consts_impl!(SinP5_51437, i32);
 
 impl Sin<i32> for SinP5_51437 {
     fn sin(x: i32) -> i32 {
@@ -333,8 +335,6 @@ impl Sin<i32> for SinP5_51437 {
     }
 }
 
-right_exp_impl!(SinP5_51437, i32);
-right_impl!(SinP5_51437, i32);
 cos_impl_default!(SinP5_51437, i32);
 
 #[cfg(test)]
