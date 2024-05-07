@@ -7,6 +7,14 @@ use num_traits::{AsPrimitive, PrimInt, Signed};
 
 use crate::bits::Bits;
 
+trait Consts<T> {
+    const RIGHT_EXP: u32;
+    const RIGHT: T;
+    const RIGHT_MASK: T;
+    const ONE: T;
+    const NEG_ONE: T;
+}
+
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 fn square<T>(b: T, denom: T) -> T
