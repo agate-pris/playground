@@ -188,18 +188,6 @@ where
     (FRAC_PI_2 * right).round_ties_even().as_()
 }
 
-/// 5 * (1 - 3 / pi)
-fn cos_p4o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right)
-        .round_ties_even()
-        .as_()
-}
-
 /// 4 * (3 / pi - 9 / 16)
 fn sin_p5o_k<T>(right: T) -> T
 where
