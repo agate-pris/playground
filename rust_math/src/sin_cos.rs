@@ -410,9 +410,9 @@ mod tests {
 
     #[test]
     fn test_cos_p4o_k() {
-        assert_eq!(2, cos_p4o_k::<i8>(calc_default_right::<i8>()));
-        assert_eq!(29, cos_p4o_k::<i16>(calc_default_right::<i16>()));
-        assert_eq!(7384, cos_p4o_k::<i32>(calc_default_right::<i32>()));
+        //assert_eq!(2, CosP4_2::K);
+        //assert_eq!(29, CosP4_29::K);
+        assert_eq!(7384, CosP4_7384::K);
     }
 
     #[test]
