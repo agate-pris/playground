@@ -118,6 +118,13 @@ macro_rules! sin_p5_k {
     };
 }
 
+/// 4 * (3 / pi - 9 / 16)
+macro_rules! sin_p5o_k {
+    ($right:expr) => {
+        (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * $right as f64)
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -166,18 +173,6 @@ where
     i8: AsPrimitive<T>,
 {
     (repeat(x, calc_full(right)) / right).as_()
-}
-
-/// 4 * (3 / pi - 9 / 16)
-fn sin_p5o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right)
-        .round_ties_even()
-        .as_()
 }
 
 /// a - b * z ^ 2
@@ -310,13 +305,16 @@ pub(crate) struct SinP5_51437();
 
 consts_impl!(SinP5_51437, i32);
 
-impl Sin<i32> for SinP5_51437 {
-    fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5o_k(Self::RIGHT), x, Self::RIGHT)
+impl SinP5_51437 {
+    const K: i32 = sin_p5o_k!(Self::RIGHT) as i32;
+    fn sin_detail(z: i32) -> i32 {
+        const A: i32 = SinP5_51437::K * 2 - SinP5_51437::RIGHT * 5 / 2;
+        const B: i32 = SinP5_51437::K - SinP5_51437::RIGHT * 3 / 2;
+        (Self::K - (cos_p4_sin_p5_impl!(A, B, z) >> Self::RIGHT_EXP)) * z
     }
 }
 
-cos_impl_default!(SinP5_51437, i32);
+odd_sin_cos_impl!(SinP5_51437, i32);
 
 #[cfg(test)]
 mod tests {
@@ -376,9 +374,9 @@ mod tests {
 
     #[test]
     fn test_sin_p5o_k() {
-        assert_eq!(13, sin_p5o_k::<i8>(calc_default_right::<i8>()));
-        assert_eq!(201, sin_p5o_k::<i16>(calc_default_right::<i16>()));
-        assert_eq!(51437, sin_p5o_k::<i32>(calc_default_right::<i32>()));
+        //assert_eq!(13, SinP5_13::K);
+        //assert_eq!(201, SinP5_201::K);
+        assert_eq!(51437, SinP5_51437::K);
     }
 
     #[test]
