@@ -104,6 +104,13 @@ macro_rules! cos_p4_k {
     };
 }
 
+/// 5 * (1 - 3 / pi)
+macro_rules! cos_p4o_k {
+    ($t:ty) => {
+        (5.0 * (1.0 - 1.5 * FRAC_2_PI) * <$t>::RIGHT as f64 + 0.5)
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
