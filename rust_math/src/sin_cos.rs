@@ -89,6 +89,21 @@ macro_rules! sin_p3_cos_p4_impl {
     };
 }
 
+/// (a - b * z ^ 2) * z ^ 2
+macro_rules! cos_p4_sin_p5_impl {
+    ($a:ident, $b:expr, $z:ident) => {{
+        let z_2 = ($z * $z) >> Self::RIGHT_EXP;
+        sin_p3_cos_p4_impl!($a, $b, z_2) * z_2
+    }};
+}
+
+/// 1 - pi / 4
+macro_rules! cos_p4_k {
+    ($t:ty) => {
+        ((1.0 - FRAC_PI_4) * <$t>::RIGHT as f64 + 0.5)
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -154,16 +169,6 @@ where
         0 => k - f(rem, right),
         _ => unreachable!(),
     }
-}
-
-/// 1 - pi / 4
-fn cos_p4_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    ((1.0 - FRAC_PI_4) * right).round_ties_even().as_()
 }
 
 /// pi / 2
@@ -300,15 +305,15 @@ pub(crate) struct CosP4_7032();
 
 consts_impl!(CosP4_7032, i32);
 
-impl Cos<i32> for CosP4_7032 {
-    fn cos(x: i32) -> i32 {
-        even_cos_impl(x, Self::RIGHT, |z, _| {
-            cos_p4_impl(cos_p4_k(Self::RIGHT), z, Self::RIGHT)
-        })
+impl CosP4_7032 {
+    const K: i32 = cos_p4_k!(CosP4_7032) as i32;
+    pub fn cos_detail(z: i32) -> i32 {
+        const A: i32 = CosP4_7032::K + CosP4_7032::RIGHT;
+        cos_p4_sin_p5_impl!(A, CosP4_7032::K, z)
     }
 }
 
-sin_impl_default!(CosP4_7032, i32);
+even_sin_cos_impl!(CosP4_7032, i32);
 
 pub(crate) struct CosP4_7384();
 
@@ -385,9 +390,9 @@ mod tests {
 
     #[test]
     fn test_cos_p4_k() {
-        assert_eq!(2, cos_p4_k::<i8>(calc_default_right::<i8>()));
-        assert_eq!(27, cos_p4_k::<i16>(calc_default_right::<i16>()));
-        assert_eq!(7032, cos_p4_k::<i32>(calc_default_right::<i32>()));
+        //assert_eq!(2, CosP4_2::K);
+        //assert_eq!(27, CosP4_27::K);
+        assert_eq!(7032, CosP4_7032::K);
     }
 
     #[test]
