@@ -171,16 +171,6 @@ where
     }
 }
 
-/// 1 - pi / 4
-fn cos_p4_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    ((1.0 - FRAC_PI_4) * right).round_ties_even().as_()
-}
-
 /// pi / 2
 fn sin_p5_k<T>(right: T) -> T
 where
