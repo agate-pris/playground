@@ -194,11 +194,6 @@ fn cos_p4_sin_p5_impl<T: PrimInt>(a: T, b: T, z: T, right: T) -> T {
     sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
 }
 
-/// (k + 1 - k * z ^ 2) * z ^ 2
-fn cos_p4_impl<T: PrimInt>(k: T, z: T, right: T) -> T {
-    cos_p4_sin_p5_impl(k + right, k, z, right)
-}
-
 /// x
 fn sin_p1<T>(x: T, right: T) -> T
 where
