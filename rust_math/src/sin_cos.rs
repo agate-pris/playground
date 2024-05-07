@@ -35,6 +35,29 @@ pub(crate) trait Cos<T> {
     fn cos(x: T) -> T;
 }
 
+macro_rules! even_sin_cos_impl {
+    ($u:ty, $t:ty) => {
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                let masked = x & Self::RIGHT_MASK;
+                let quadrant = (x >> Self::RIGHT_EXP) & 3;
+                match quadrant {
+                    1 => Self::cos_detail(Self::RIGHT - masked) - Self::ONE,
+                    3 => Self::ONE - Self::cos_detail(Self::RIGHT - masked),
+                    2 => Self::cos_detail(masked) - Self::ONE,
+                    0 => Self::ONE - Self::cos_detail(masked),
+                    _ => unreachable!(),
+                }
+            }
+        }
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                Self::cos(x.wrapping_sub(Self::RIGHT))
+            }
+        }
+    };
+}
+
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 fn square<T>(b: T, denom: T) -> T
