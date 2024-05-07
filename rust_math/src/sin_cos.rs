@@ -232,16 +232,6 @@ where
     }
 }
 
-/// (1 + k - k * x ^ 2) * x
-fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
-}
-
 /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
 fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
 where
