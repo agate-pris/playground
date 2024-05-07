@@ -194,30 +194,6 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
-trait RightExp {
-    const RIGHT_EXP: u32;
-}
-
-macro_rules! right_exp_impl {
-    ($u:ty, $t:ty) => {
-        impl RightExp for $u {
-            const RIGHT_EXP: u32 = <$t>::BITS / 2 - 1;
-        }
-    };
-}
-
-trait Right<T> {
-    const RIGHT: T;
-}
-
-macro_rules! right_impl {
-    ($u:ty, $t:ty) => {
-        impl Right<$t> for $u {
-            const RIGHT: $t = 1 << Self::RIGHT_EXP;
-        }
-    };
-}
-
 pub(crate) trait Sin<T> {
     fn sin(x: T) -> T;
 }
