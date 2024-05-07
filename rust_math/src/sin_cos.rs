@@ -227,16 +227,6 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
-macro_rules! sin_impl_default {
-    ($u:ty, $t:ty) => {
-        impl Sin<$t> for $u {
-            fn sin(x: $t) -> $t {
-                Self::cos(x.wrapping_sub(Self::RIGHT))
-            }
-        }
-    };
-}
-
 macro_rules! cos_impl_default {
     ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
