@@ -58,6 +58,37 @@ macro_rules! even_sin_cos_impl {
     };
 }
 
+macro_rules! odd_sin_cos_impl {
+    ($u:ty, $t:ty) => {
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                let masked = x & Self::RIGHT_MASK;
+                let quadrant = (x >> Self::RIGHT_EXP) & 3;
+                let z = match quadrant {
+                    1 => Self::RIGHT - masked,
+                    3 => masked - Self::RIGHT,
+                    2 => -masked,
+                    0 => masked,
+                    _ => unreachable!(),
+                };
+                Self::sin_detail(z)
+            }
+        }
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                Self::sin(x.wrapping_add(Self::RIGHT))
+            }
+        }
+    };
+}
+
+/// a - b * z ^ 2
+macro_rules! sin_p3_cos_p4_impl {
+    ($a:ident, $b:ident, $z_2:ident) => {
+        ($a - (($z_2 * $b) >> Self::RIGHT_EXP))
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -201,16 +232,6 @@ where
     }
 }
 
-/// (1 + k - k * x ^ 2) * x
-fn sin_p3_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    sin_p3_cos_p4_impl(right + k, k, square(z, right), right) * z
-}
-
 /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
 fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
 where
@@ -260,14 +281,16 @@ pub(crate) struct SinP3_16384();
 
 consts_impl!(SinP3_16384, i32);
 
-impl Sin<i32> for SinP3_16384 {
-    fn sin(x: i32) -> i32 {
-        const K: i32 = SinP3_16384::RIGHT / 2;
-        sin_p3_impl(K, x, Self::RIGHT)
+impl SinP3_16384 {
+    pub fn sin_detail(z: i32) -> i32 {
+        const B: i32 = SinP3_16384::RIGHT / 2;
+        const A: i32 = SinP3_16384::RIGHT + B;
+        let z_2 = (z * z) >> Self::RIGHT_EXP;
+        sin_p3_cos_p4_impl!(A, B, z_2) * z
     }
 }
 
-cos_impl_default!(SinP3_16384, i32);
+odd_sin_cos_impl!(SinP3_16384, i32);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
