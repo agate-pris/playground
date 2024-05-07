@@ -127,21 +127,25 @@ macro_rules! sin_p5o_k {
     };
 }
 
+pub(crate) struct SinP3_16384();
+pub(crate) struct SinP5_51472();
+pub(crate) struct SinP5_51437();
 pub(crate) struct CosP2I32();
+pub(crate) struct CosP4_7032();
+pub(crate) struct CosP4_7384();
 
+consts_impl!(SinP3_16384, i32);
+consts_impl!(SinP5_51472, i32);
+consts_impl!(SinP5_51437, i32);
 consts_impl!(CosP2I32, i32);
+consts_impl!(CosP4_7032, i32);
+consts_impl!(CosP4_7384, i32);
 
 impl CosP2I32 {
     pub fn cos_detail(z: i32) -> i32 {
         z * z
     }
 }
-
-even_sin_cos_impl!(CosP2I32, i32);
-
-pub(crate) struct SinP3_16384();
-
-consts_impl!(SinP3_16384, i32);
 
 impl SinP3_16384 {
     /// (1.5 - 0.5 * x ^ 2) * x
@@ -153,29 +157,18 @@ impl SinP3_16384 {
     }
 }
 
-odd_sin_cos_impl!(SinP3_16384, i32);
-
-/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
-///
-/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-/// a = 1 - pi / 4
-pub(crate) struct CosP4_7032();
-
-consts_impl!(CosP4_7032, i32);
-
 impl CosP4_7032 {
     const K: i32 = cos_p4_k!(CosP4_7032) as i32;
+
+    /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
+    ///
+    /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
+    /// a = 1 - pi / 4
     pub fn cos_detail(z: i32) -> i32 {
         const A: i32 = CosP4_7032::K + CosP4_7032::RIGHT;
         cos_p4_sin_p5_impl!(A, CosP4_7032::K, z)
     }
 }
-
-even_sin_cos_impl!(CosP4_7032, i32);
-
-pub(crate) struct CosP4_7384();
-
-consts_impl!(CosP4_7384, i32);
 
 impl CosP4_7384 {
     const K: i32 = cos_p4o_k!(CosP4_7384) as i32;
@@ -187,12 +180,6 @@ impl CosP4_7384 {
     }
 }
 
-even_sin_cos_impl!(CosP4_7384, i32);
-
-pub(crate) struct SinP5_51472();
-
-consts_impl!(SinP5_51472, i32);
-
 impl SinP5_51472 {
     const K: i32 = sin_p5_k!(Self::RIGHT) as i32;
 
@@ -201,12 +188,6 @@ impl SinP5_51472 {
         sin_p5_impl!(SinP5_51472::K, SinP5_51472::RIGHT, z)
     }
 }
-
-odd_sin_cos_impl!(SinP5_51472, i32);
-
-pub(crate) struct SinP5_51437();
-
-consts_impl!(SinP5_51437, i32);
 
 impl SinP5_51437 {
     const K: i32 = sin_p5o_k!(Self::RIGHT) as i32;
@@ -217,6 +198,12 @@ impl SinP5_51437 {
     }
 }
 
+even_sin_cos_impl!(CosP2I32, i32);
+even_sin_cos_impl!(CosP4_7032, i32);
+even_sin_cos_impl!(CosP4_7384, i32);
+
+odd_sin_cos_impl!(SinP3_16384, i32);
+odd_sin_cos_impl!(SinP5_51472, i32);
 odd_sin_cos_impl!(SinP5_51437, i32);
 
 #[cfg(test)]
