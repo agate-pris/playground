@@ -168,16 +168,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-/// pi / 2
-fn sin_p5_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (FRAC_PI_2 * right).round_ties_even().as_()
-}
-
 /// 4 * (3 / pi - 9 / 16)
 fn sin_p5o_k<T>(right: T) -> T
 where
