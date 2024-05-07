@@ -174,6 +174,10 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
+trait RightExp {
+    const RIGHT_EXP: u32;
+}
+
 pub(crate) trait Sin<T> {
     fn sin(x: T) -> T;
 }
