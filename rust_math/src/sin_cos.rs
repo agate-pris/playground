@@ -1,11 +1,4 @@
-use std::{
-    f64::consts::{FRAC_2_PI, FRAC_PI_2, FRAC_PI_4},
-    ops::{Div, Mul},
-};
-
-use num_traits::{AsPrimitive, PrimInt, Signed};
-
-use crate::bits::Bits;
+use std::f64::consts::{FRAC_2_PI, FRAC_PI_2, FRAC_PI_4};
 
 trait Consts<T> {
     const RIGHT_EXP: u32;
@@ -134,64 +127,6 @@ macro_rules! sin_p5o_k {
     };
 }
 
-fn repeat<T>(t: T, length: T) -> T
-where
-    T: Copy + Signed,
-{
-    let rem = t % length;
-    if rem.is_negative() {
-        rem + length
-    } else {
-        rem
-    }
-}
-
-/// ```rust
-/// use rust_math::sin_cos::*;
-/// assert_eq!(calc_default_right::<i8 >(),     8);
-/// assert_eq!(calc_default_right::<i16>(),   128);
-/// assert_eq!(calc_default_right::<i32>(), 32768);
-/// ```
-pub fn calc_default_right<T>() -> T
-where
-    T: 'static + Copy + Bits + PrimInt,
-    i8: AsPrimitive<T>,
-{
-    let base = 2.as_();
-    base.pow(T::BITS / 2 - 1)
-}
-
-fn calc_full<T>(right: T) -> T
-where
-    T: 'static + Copy + Mul<Output = T>,
-    i8: AsPrimitive<T>,
-{
-    right * 4.as_()
-}
-
-fn calc_quadrant<T>(x: T, right: T) -> i8
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    (repeat(x, calc_full(right)) / right).as_()
-}
-
-fn sin_p1<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let rem = repeat(x, right);
-    match calc_quadrant(x, right) {
-        1 => -rem + right,
-        3 => rem - right,
-        2 => -rem,
-        0 => rem,
-        _ => unreachable!(),
-    }
-}
-
 pub(crate) struct CosP2I32();
 
 consts_impl!(CosP2I32, i32);
@@ -296,30 +231,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_repeat() {
-        const LENGTH: i32 = 10;
-        for i in -9..=9 {
-            for (&expected, offset) in [9, 0, 1].iter().zip([-1, 0, 1]) {
-                assert_eq!(expected, repeat(LENGTH * i + offset, LENGTH));
-            }
-        }
-    }
-
-    #[test]
-    fn test_calc_quadrant() {
-        const RIGHT: i32 = 25;
-        for i in -9..=9 {
-            let x = 4 * i * RIGHT;
-            for expected in 0_i8..4 {
-                let x = x + (expected as i32) * RIGHT;
-                for offset in [0, 1, RIGHT - 1] {
-                    assert_eq!(expected, calc_quadrant(offset + x, RIGHT));
-                }
-            }
-        }
-    }
-
-    #[test]
     fn test_cos_p4_k() {
         //assert_eq!(2, CosP4_2::K);
         //assert_eq!(27, CosP4_27::K);
@@ -347,65 +258,49 @@ mod tests {
         assert_eq!(51437, SinP5_51437::K);
     }
 
+    const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+    const STRAIGHT: i32 = 2 * RIGHT;
+    const FULL: i32 = 2 * STRAIGHT;
+    const FULL_MASK: i32 = FULL - 1;
+    const NEG_STRAIGHT: i32 = -STRAIGHT;
+    const NEG_RIGHT: i32 = -RIGHT;
+    const ONE: i32 = RIGHT.pow(2);
+    const NEG_ONE: i32 = -ONE;
+
     #[test]
     fn test_sin() {
-        fn test(f: impl Fn(i32) -> i32, right: i32, one: i32) {
-            #[rustfmt::skip] assert_eq!(f(         0),    0);
-            #[rustfmt::skip] assert_eq!(f( 2 * right),    0);
-            #[rustfmt::skip] assert_eq!(f(-2 * right),    0);
-            #[rustfmt::skip] assert_eq!(f(     right),  one);
-            #[rustfmt::skip] assert_eq!(f(    -right), -one);
+        fn test(f: impl Fn(i32) -> i32) {
+            assert_eq!(f(0), 0);
+            assert_eq!(f(STRAIGHT), 0);
+            assert_eq!(f(NEG_STRAIGHT), 0);
+            assert_eq!(f(RIGHT), ONE);
+            assert_eq!(f(NEG_RIGHT), NEG_ONE);
         }
 
-        let right = calc_default_right::<i32>();
-        let one = right.pow(2);
-
-        test(sin_p2_i32, right, one);
-        test(sin_p3_16384, right, one);
-        test(sin_p4_7032, right, one);
-        test(sin_p5_51472, right, one);
-        test(sin_p4_7384, right, one);
-        test(sin_p5_51437, right, one);
+        test(sin_p2_i32);
+        test(sin_p3_16384);
+        test(sin_p4_7032);
+        test(sin_p5_51472);
+        test(sin_p4_7384);
+        test(sin_p5_51437);
     }
 
     #[test]
     fn test_cos() {
-        fn test(f: impl Fn(i32) -> i32, right: i32, one: i32) {
-            #[rustfmt::skip] assert_eq!(f(         0),  one);
-            #[rustfmt::skip] assert_eq!(f(     right),    0);
-            #[rustfmt::skip] assert_eq!(f(    -right),    0);
-            #[rustfmt::skip] assert_eq!(f( 2 * right), -one);
-            #[rustfmt::skip] assert_eq!(f(-2 * right), -one);
+        fn test(f: impl Fn(i32) -> i32) {
+            assert_eq!(f(0), ONE);
+            assert_eq!(f(RIGHT), 0);
+            assert_eq!(f(NEG_RIGHT), 0);
+            assert_eq!(f(STRAIGHT), NEG_ONE);
+            assert_eq!(f(NEG_STRAIGHT), NEG_ONE);
         }
 
-        let right = calc_default_right::<i32>();
-        let one = right.pow(2);
-
-        test(cos_p2_i32, right, one);
-        test(cos_p3_16384, right, one);
-        test(cos_p4_7032, right, one);
-        test(cos_p5_51472, right, one);
-        test(cos_p4_7384, right, one);
-        test(cos_p5_51437, right, one);
-    }
-
-    #[test]
-    fn test_sin_p1() {
-        const RIGHT: i32 = 25;
-        for i in -9..=9 {
-            #[rustfmt::skip] assert_eq!(        -1, sin_p1((4 * i    ) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         0, sin_p1((4 * i    ) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(         1, sin_p1((4 * i    ) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!( RIGHT - 1, sin_p1((4 * i + 1) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!( RIGHT,     sin_p1((4 * i + 1) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!( RIGHT - 1, sin_p1((4 * i + 1) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         1, sin_p1((4 * i + 2) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(         0, sin_p1((4 * i + 2) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(        -1, sin_p1((4 * i + 2) * RIGHT + 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT - 1, RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT,     sin_p1((4 * i + 3) * RIGHT,     RIGHT));
-            #[rustfmt::skip] assert_eq!(-RIGHT + 1, sin_p1((4 * i + 3) * RIGHT + 1, RIGHT));
-        }
+        test(cos_p2_i32);
+        test(cos_p3_16384);
+        test(cos_p4_7032);
+        test(cos_p5_51472);
+        test(cos_p4_7384);
+        test(cos_p5_51437);
     }
 
     fn test_sin_cos(
@@ -419,23 +314,21 @@ mod tests {
         // 5th mersenne prime
         const STEP: usize = 8191;
 
-        let right = calc_default_right::<i32>();
-        let right_as_usize = right as usize;
-        let full = calc_full(right);
+        let right_as_usize = RIGHT as usize;
         let data = read_data(data_path).unwrap();
 
         assert_eq!(data.len(), right_as_usize + 1);
-        assert_eq!(full % right, 0);
-        assert_eq!(i32::MIN % full, 0);
-        assert_eq!(i32::MAX % full, full - 1);
+        assert_eq!(FULL % RIGHT, 0);
+        assert_eq!(i32::MIN % FULL, 0);
+        assert_eq!(i32::MAX % FULL, FULL - 1);
 
         let data = to_period(&data);
 
-        assert_eq!(data.len(), full as usize);
+        assert_eq!(data.len(), FULL as usize);
 
-        let x = (-full - 1..=full + 1)
-            .chain(i32::MAX - full..=i32::MAX)
-            .chain(i32::MIN..=i32::MIN + full + 1)
+        let x = (-FULL - 1..=FULL + 1)
+            .chain(i32::MAX - FULL..=i32::MAX)
+            .chain(i32::MIN..=i32::MIN + FULL + 1)
             .chain((i32::MIN..=i32::MAX).step_by(right_as_usize))
             .chain((i32::MIN..=i32::MAX).skip(1).step_by(right_as_usize))
             .chain(
@@ -446,12 +339,12 @@ mod tests {
             .chain((i32::MIN..=i32::MAX).step_by(STEP))
             .chain((i32::MIN..=i32::MAX).rev().step_by(STEP));
 
-        let frac_pi_straight = FRAC_PI_2 / right as f64;
+        let frac_pi_straight = FRAC_PI_2 / RIGHT as f64;
         let mut min = f64::INFINITY;
         let mut max = f64::NEG_INFINITY;
 
         for x in x {
-            let expected = data[repeat(x, full) as usize];
+            let expected = data[(x & FULL_MASK) as usize];
 
             // The value can be greater than 1 or less than -1
             //assert!(expected.abs() <= one, "expected: {expected}, one: {one}");
@@ -460,7 +353,7 @@ mod tests {
 
             let actual = f_std(x as f64 * frac_pi_straight);
 
-            if (x % right) != 0 || expected != 0 {
+            if (x % RIGHT) != 0 || expected != 0 {
                 assert_eq!(expected.is_negative(), actual.is_sign_negative());
                 assert_eq!(expected.is_positive(), actual.is_sign_positive());
             }
@@ -508,16 +401,16 @@ mod tests {
         iter.clone().chain(iter.map(f)).collect()
     }
 
-    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
-    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_i32,   calc_default_right::<i32>().pow(2), "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384, calc_default_right::<i32>().pow(2), "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,  calc_default_right::<i32>().pow(2), "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472, calc_default_right::<i32>().pow(2), "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,  calc_default_right::<i32>().pow(2), "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437, calc_default_right::<i32>().pow(2), "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   ONE, "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, ONE, "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  ONE, "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472, ONE, "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,  ONE, "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437, ONE, "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
+    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_i32,   ONE, "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
+    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384, ONE, "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
+    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,  ONE, "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
+    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472, ONE, "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
+    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,  ONE, "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
+    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437, ONE, "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
 }
