@@ -7,7 +7,7 @@ use num_traits::{AsPrimitive, PrimInt, Signed};
 
 use crate::bits::Bits;
 
-const RIGHT_I32_DEFAULT: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 macro_rules! sin_impl_default {
     ($u:ty, $t:ty) => {
@@ -217,7 +217,7 @@ pub(crate) struct CosP2I32();
 
 impl Cos<i32> for CosP2I32 {
     fn cos(x: i32) -> i32 {
-        cos_p2(x, RIGHT_I32_DEFAULT)
+        cos_p2(x, RIGHT_I32)
     }
 }
 
@@ -228,8 +228,8 @@ pub(crate) struct SinP3_16384();
 
 impl Sin<i32> for SinP3_16384 {
     fn sin(x: i32) -> i32 {
-        const K: i32 = RIGHT_I32_DEFAULT / 2;
-        sin_p3_impl(K, x, RIGHT_I32_DEFAULT)
+        const K: i32 = RIGHT_I32 / 2;
+        sin_p3_impl(K, x, RIGHT_I32)
     }
 }
 
@@ -243,8 +243,8 @@ pub(crate) struct CosP4_7032();
 
 impl Cos<i32> for CosP4_7032 {
     fn cos(x: i32) -> i32 {
-        even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
-            cos_p4_impl(cos_p4_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
+        even_cos_impl(x, RIGHT_I32, |z, _| {
+            cos_p4_impl(cos_p4_k(RIGHT_I32), z, RIGHT_I32)
         })
     }
 }
@@ -255,8 +255,8 @@ pub(crate) struct CosP4_7384();
 
 impl Cos<i32> for CosP4_7384 {
     fn cos(x: i32) -> i32 {
-        even_cos_impl(x, RIGHT_I32_DEFAULT, |z, _| {
-            cos_p4_impl(cos_p4o_k(RIGHT_I32_DEFAULT), z, RIGHT_I32_DEFAULT)
+        even_cos_impl(x, RIGHT_I32, |z, _| {
+            cos_p4_impl(cos_p4o_k(RIGHT_I32), z, RIGHT_I32)
         })
     }
 }
@@ -267,7 +267,7 @@ pub(crate) struct SinP5_51472();
 
 impl Sin<i32> for SinP5_51472 {
     fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+        sin_p5_impl(sin_p5_k(RIGHT_I32), x, RIGHT_I32)
     }
 }
 
@@ -277,7 +277,7 @@ pub(crate) struct SinP5_51437();
 
 impl Sin<i32> for SinP5_51437 {
     fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5o_k(RIGHT_I32_DEFAULT), x, RIGHT_I32_DEFAULT)
+        sin_p5_impl(sin_p5o_k(RIGHT_I32), x, RIGHT_I32)
     }
 }
 
