@@ -291,14 +291,16 @@ pub(crate) struct SinP3_16384();
 
 consts_impl!(SinP3_16384, i32);
 
-impl Sin<i32> for SinP3_16384 {
-    fn sin(x: i32) -> i32 {
-        const K: i32 = SinP3_16384::RIGHT / 2;
-        sin_p3_impl(K, x, Self::RIGHT)
+impl SinP3_16384 {
+    pub fn sin_detail(z: i32) -> i32 {
+        const B: i32 = SinP3_16384::RIGHT / 2;
+        const A: i32 = SinP3_16384::RIGHT + B;
+        let z_2 = (z * z) >> Self::RIGHT_EXP;
+        sin_p3_cos_p4_impl!(A, B, z_2) * z
     }
 }
 
-cos_impl_default!(SinP3_16384, i32);
+odd_sin_cos_impl!(SinP3_16384, i32);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
 ///
