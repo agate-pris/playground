@@ -235,6 +235,12 @@ pub(crate) struct CosP2I32();
 
 consts_impl!(CosP2I32, i32);
 
+impl CosP2I32 {
+    pub fn cos_detail(z: i32) -> i32 {
+        z * z
+    }
+}
+
 impl Cos<i32> for CosP2I32 {
     fn cos(x: i32) -> i32 {
         cos_p2(x, RIGHT_I32)
