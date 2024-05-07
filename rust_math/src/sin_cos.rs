@@ -161,23 +161,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    F: Fn(T, T) -> T,
-    i8: AsPrimitive<T>,
-{
-    let rem = repeat(x, right);
-    let k = right.pow(2);
-    match calc_quadrant(x, right) {
-        1 => -k + f(right - rem, right),
-        3 => k - f(right - rem, right),
-        2 => -k + f(rem, right),
-        0 => k - f(rem, right),
-        _ => unreachable!(),
-    }
-}
-
 /// pi / 2
 fn sin_p5_k<T>(right: T) -> T
 where
