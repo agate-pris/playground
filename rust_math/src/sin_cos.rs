@@ -289,6 +289,8 @@ consts_impl!(CosP4_7384, i32);
 
 impl CosP4_7384 {
     const K: i32 = cos_p4o_k!(CosP4_7384) as i32;
+
+    /// (k + 1 - k * z ^ 2) * z ^ 2
     fn cos_detail(z: i32) -> i32 {
         const A: i32 = CosP4_7384::K + CosP4_7384::RIGHT;
         cos_p4_sin_p5_impl!(A, CosP4_7384::K, z)
