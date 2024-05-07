@@ -58,6 +58,30 @@ macro_rules! even_sin_cos_impl {
     };
 }
 
+macro_rules! odd_sin_cos_impl {
+    ($u:ty, $t:ty) => {
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                let masked = x & Self::RIGHT_MASK;
+                let quadrant = (x >> Self::RIGHT_EXP) & 3;
+                let z = match quadrant {
+                    1 => Self::RIGHT - masked,
+                    3 => masked - Self::RIGHT,
+                    2 => -masked,
+                    0 => masked,
+                    _ => unreachable!(),
+                };
+                Self::sin_detail(z)
+            }
+        }
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                Self::sin(x.wrapping_add(Self::RIGHT))
+            }
+        }
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
