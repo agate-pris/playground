@@ -15,6 +15,18 @@ trait Consts<T> {
     const NEG_ONE: T;
 }
 
+macro_rules! consts_impl {
+    ($u:ty, $t:ty) => {
+        impl Consts<$t> for $u {
+            const RIGHT_EXP: u32 = <$t>::BITS / 2 - 1;
+            const RIGHT: $t = 1 << Self::RIGHT_EXP;
+            const RIGHT_MASK: $t = Self::RIGHT - 1;
+            const ONE: $t = Self::RIGHT.pow(2);
+            const NEG_ONE: $t = -Self::ONE;
+        }
+    };
+}
+
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 fn square<T>(b: T, denom: T) -> T
