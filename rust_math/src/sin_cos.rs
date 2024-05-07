@@ -27,6 +27,14 @@ macro_rules! consts_impl {
     };
 }
 
+pub(crate) trait Sin<T> {
+    fn sin(x: T) -> T;
+}
+
+pub(crate) trait Cos<T> {
+    fn cos(x: T) -> T;
+}
+
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 fn square<T>(b: T, denom: T) -> T
@@ -192,14 +200,6 @@ where
     let a = k * 2.as_() - right * 5.as_() / 2.as_();
     let b = k - right * 3.as_() / 2.as_();
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
-}
-
-pub(crate) trait Sin<T> {
-    fn sin(x: T) -> T;
-}
-
-pub(crate) trait Cos<T> {
-    fn cos(x: T) -> T;
 }
 
 macro_rules! sin_impl_default {
