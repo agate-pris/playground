@@ -326,15 +326,14 @@ pub(crate) struct CosP4_7384();
 
 consts_impl!(CosP4_7384, i32);
 
-impl Cos<i32> for CosP4_7384 {
-    fn cos(x: i32) -> i32 {
-        even_cos_impl(x, Self::RIGHT, |z, _| {
-            cos_p4_impl(cos_p4o_k(Self::RIGHT), z, Self::RIGHT)
-        })
+impl CosP4_7384 {
+    const K: i32 = cos_p4o_k!(CosP4_7384) as i32;
+    fn cos_detail(z: i32) -> i32 {
+        cos_p4_impl(Self::K, z, Self::RIGHT)
     }
 }
 
-sin_impl_default!(CosP4_7384, i32);
+even_sin_cos_impl!(CosP4_7384, i32);
 
 pub(crate) struct SinP5_51472();
 
