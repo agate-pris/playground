@@ -210,8 +210,7 @@ macro_rules! sin_impl_default {
     ($u:ty, $t:ty) => {
         impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
-                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
-                Self::cos(x.wrapping_sub(RIGHT))
+                Self::cos(x.wrapping_sub(Self::RIGHT))
             }
         }
     };
@@ -221,8 +220,7 @@ macro_rules! cos_impl_default {
     ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
-                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
-                Self::sin(x.wrapping_add(RIGHT))
+                Self::sin(x.wrapping_add(Self::RIGHT))
             }
         }
     };
