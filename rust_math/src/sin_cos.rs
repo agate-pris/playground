@@ -104,6 +104,13 @@ macro_rules! cos_p4_k {
     };
 }
 
+/// 5 * (1 - 3 / pi)
+macro_rules! cos_p4o_k {
+    ($t:ty) => {
+        (5.0 * (1.0 - 1.5 * FRAC_2_PI) * <$t>::RIGHT as f64 + 0.5)
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -154,23 +161,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-fn even_cos_impl<T, F>(x: T, right: T, f: F) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    F: Fn(T, T) -> T,
-    i8: AsPrimitive<T>,
-{
-    let rem = repeat(x, right);
-    let k = right.pow(2);
-    match calc_quadrant(x, right) {
-        1 => -k + f(right - rem, right),
-        3 => k - f(right - rem, right),
-        2 => -k + f(rem, right),
-        0 => k - f(rem, right),
-        _ => unreachable!(),
-    }
-}
-
 /// pi / 2
 fn sin_p5_k<T>(right: T) -> T
 where
@@ -179,18 +169,6 @@ where
 {
     let right: f64 = right.as_();
     (FRAC_PI_2 * right).round_ties_even().as_()
-}
-
-/// 5 * (1 - 3 / pi)
-fn cos_p4o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (5.0 * (1.0 - 1.5 * FRAC_2_PI) * right)
-        .round_ties_even()
-        .as_()
 }
 
 /// 4 * (3 / pi - 9 / 16)
@@ -247,16 +225,6 @@ where
     let a = k * 2.as_() - right * 5.as_() / 2.as_();
     let b = k - right * 3.as_() / 2.as_();
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
-}
-
-macro_rules! sin_impl_default {
-    ($u:ty, $t:ty) => {
-        impl Sin<$t> for $u {
-            fn sin(x: $t) -> $t {
-                Self::cos(x.wrapping_sub(Self::RIGHT))
-            }
-        }
-    };
 }
 
 macro_rules! cos_impl_default {
@@ -319,15 +287,14 @@ pub(crate) struct CosP4_7384();
 
 consts_impl!(CosP4_7384, i32);
 
-impl Cos<i32> for CosP4_7384 {
-    fn cos(x: i32) -> i32 {
-        even_cos_impl(x, Self::RIGHT, |z, _| {
-            cos_p4_impl(cos_p4o_k(Self::RIGHT), z, Self::RIGHT)
-        })
+impl CosP4_7384 {
+    const K: i32 = cos_p4o_k!(CosP4_7384) as i32;
+    fn cos_detail(z: i32) -> i32 {
+        cos_p4_impl(Self::K, z, Self::RIGHT)
     }
 }
 
-sin_impl_default!(CosP4_7384, i32);
+even_sin_cos_impl!(CosP4_7384, i32);
 
 pub(crate) struct SinP5_51472();
 
@@ -404,9 +371,9 @@ mod tests {
 
     #[test]
     fn test_cos_p4o_k() {
-        assert_eq!(2, cos_p4o_k::<i8>(calc_default_right::<i8>()));
-        assert_eq!(29, cos_p4o_k::<i16>(calc_default_right::<i16>()));
-        assert_eq!(7384, cos_p4o_k::<i32>(calc_default_right::<i32>()));
+        //assert_eq!(2, CosP4_2::K);
+        //assert_eq!(29, CosP4_29::K);
+        assert_eq!(7384, CosP4_7384::K);
     }
 
     #[test]
