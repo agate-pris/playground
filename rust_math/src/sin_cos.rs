@@ -111,6 +111,13 @@ macro_rules! cos_p4o_k {
     };
 }
 
+/// pi / 2
+macro_rules! sin_p5_k {
+    ($right:expr) => {
+        (FRAC_PI_2 * $right as f64 + 0.5)
+    };
+}
+
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
