@@ -97,6 +97,15 @@ macro_rules! cos_p4_sin_p5_impl {
     }};
 }
 
+/// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
+macro_rules! sin_p5_impl {
+    ($k:expr, $right:expr, $z: ident) => {{
+        const A: i32 = $k * 2 - $right * 5 / 2;
+        const B: i32 = $k - $right * 3 / 2;
+        ($k - (cos_p4_sin_p5_impl!(A, B, $z) >> Self::RIGHT_EXP)) * $z
+    }};
+}
+
 /// 1 - pi / 4
 macro_rules! cos_p4_k {
     ($t:ty) => {
@@ -202,18 +211,6 @@ where
     }
 }
 
-/// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
-fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    let a = k * 2.as_() - right * 5.as_() / 2.as_();
-    let b = k - right * 3.as_() / 2.as_();
-    (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
-}
-
 macro_rules! cos_impl_default {
     ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
@@ -292,10 +289,10 @@ consts_impl!(SinP5_51472, i32);
 
 impl SinP5_51472 {
     const K: i32 = sin_p5_k!(Self::RIGHT) as i32;
+
+    /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
     fn sin_detail(z: i32) -> i32 {
-        const A: i32 = SinP5_51472::K * 2 - SinP5_51472::RIGHT * 5 / 2;
-        const B: i32 = SinP5_51472::K - SinP5_51472::RIGHT * 3 / 2;
-        (Self::K - (cos_p4_sin_p5_impl!(A, B, z) >> Self::RIGHT_EXP)) * z
+        sin_p5_impl!(SinP5_51472::K, SinP5_51472::RIGHT, z)
     }
 }
 
@@ -307,10 +304,10 @@ consts_impl!(SinP5_51437, i32);
 
 impl SinP5_51437 {
     const K: i32 = sin_p5o_k!(Self::RIGHT) as i32;
+
+    /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
     fn sin_detail(z: i32) -> i32 {
-        const A: i32 = SinP5_51437::K * 2 - SinP5_51437::RIGHT * 5 / 2;
-        const B: i32 = SinP5_51437::K - SinP5_51437::RIGHT * 3 / 2;
-        (Self::K - (cos_p4_sin_p5_impl!(A, B, z) >> Self::RIGHT_EXP)) * z
+        sin_p5_impl!(SinP5_51437::K, SinP5_51437::RIGHT, z)
     }
 }
 
