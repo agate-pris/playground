@@ -245,6 +245,7 @@ impl Cos<i32> for CosP2I32 {
     }
 }
 
+right_exp_impl!(CosP2I32, i32);
 sin_impl_default!(CosP2I32, i32);
 
 /// (1.5 - 0.5 * x ^ 2) * x
@@ -257,6 +258,7 @@ impl Sin<i32> for SinP3_16384 {
     }
 }
 
+right_exp_impl!(SinP3_16384, i32);
 cos_impl_default!(SinP3_16384, i32);
 
 /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
@@ -273,6 +275,7 @@ impl Cos<i32> for CosP4_7032 {
     }
 }
 
+right_exp_impl!(CosP4_7032, i32);
 sin_impl_default!(CosP4_7032, i32);
 
 pub(crate) struct CosP4_7384();
@@ -285,6 +288,7 @@ impl Cos<i32> for CosP4_7384 {
     }
 }
 
+right_exp_impl!(CosP4_7384, i32);
 sin_impl_default!(CosP4_7384, i32);
 
 pub(crate) struct SinP5_51472();
@@ -295,6 +299,7 @@ impl Sin<i32> for SinP5_51472 {
     }
 }
 
+right_exp_impl!(SinP5_51472, i32);
 cos_impl_default!(SinP5_51472, i32);
 
 pub(crate) struct SinP5_51437();
@@ -305,6 +310,7 @@ impl Sin<i32> for SinP5_51437 {
     }
 }
 
+right_exp_impl!(SinP5_51437, i32);
 cos_impl_default!(SinP5_51437, i32);
 
 #[cfg(test)]
