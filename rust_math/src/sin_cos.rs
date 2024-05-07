@@ -9,28 +9,6 @@ use crate::bits::Bits;
 
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
-macro_rules! sin_impl_default {
-    ($u:ty, $t:ty) => {
-        impl Sin<$t> for $u {
-            fn sin(x: $t) -> $t {
-                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
-                Self::cos(x.wrapping_sub(RIGHT))
-            }
-        }
-    };
-}
-
-macro_rules! cos_impl_default {
-    ($u:ty, $t:ty) => {
-        impl Cos<$t> for $u {
-            fn cos(x: $t) -> $t {
-                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
-                Self::sin(x.wrapping_add(RIGHT))
-            }
-        }
-    };
-}
-
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -202,6 +180,28 @@ pub(crate) trait Sin<T> {
 
 pub(crate) trait Cos<T> {
     fn cos(x: T) -> T;
+}
+
+macro_rules! sin_impl_default {
+    ($u:ty, $t:ty) => {
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
+                Self::cos(x.wrapping_sub(RIGHT))
+            }
+        }
+    };
+}
+
+macro_rules! cos_impl_default {
+    ($u:ty, $t:ty) => {
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                const RIGHT: $t = 1 << (<$t>::BITS / 2 - 1);
+                Self::sin(x.wrapping_add(RIGHT))
+            }
+        }
+    };
 }
 
 /// 1 - x ^ 2
