@@ -84,7 +84,7 @@ macro_rules! odd_sin_cos_impl {
 
 /// a - b * z ^ 2
 macro_rules! sin_p3_cos_p4_impl {
-    ($a:ident, $b:ident, $z_2:ident) => {
+    ($a:ident, $b:expr, $z_2:ident) => {
         ($a - (($z_2 * $b) >> Self::RIGHT_EXP))
     };
 }
