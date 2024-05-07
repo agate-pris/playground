@@ -175,18 +175,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-/// 4 * (3 / pi - 9 / 16)
-fn sin_p5o_k<T>(right: T) -> T
-where
-    T: AsPrimitive<f64>,
-    f64: AsPrimitive<T>,
-{
-    let right: f64 = right.as_();
-    (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * right)
-        .round_ties_even()
-        .as_()
-}
-
 /// a - b * z ^ 2
 fn sin_p3_cos_p4_impl<T: PrimInt>(a: T, b: T, z_2: T, right: T) -> T {
     a - z_2 * b / right
