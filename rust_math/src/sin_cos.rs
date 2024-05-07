@@ -211,18 +211,6 @@ where
     }
 }
 
-/// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
-fn sin_p5_impl<T>(k: T, x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    let z = sin_p1(x, right);
-    let a = k * 2.as_() - right * 5.as_() / 2.as_();
-    let b = k - right * 3.as_() / 2.as_();
-    (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
-}
-
 macro_rules! cos_impl_default {
     ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
