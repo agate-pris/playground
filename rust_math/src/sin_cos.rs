@@ -264,13 +264,7 @@ impl CosP2I32 {
     }
 }
 
-impl Cos<i32> for CosP2I32 {
-    fn cos(x: i32) -> i32 {
-        cos_p2(x, RIGHT_I32)
-    }
-}
-
-sin_impl_default!(CosP2I32, i32);
+even_sin_cos_impl!(CosP2I32, i32);
 
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
