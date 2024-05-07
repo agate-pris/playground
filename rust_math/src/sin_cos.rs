@@ -178,6 +178,14 @@ trait RightExp {
     const RIGHT_EXP: u32;
 }
 
+macro_rules! right_exp_impl {
+    ($u:ty, $t:ty) => {
+        impl RightExp for $u {
+            const RIGHT_EXP: u32 = <$t>::BITS / 2 - 1;
+        }
+    };
+}
+
 pub(crate) trait Sin<T> {
     fn sin(x: T) -> T;
 }
