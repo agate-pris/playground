@@ -130,7 +130,7 @@ macro_rules! sin_p5_k {
 /// 4 * (3 / pi - 9 / 16)
 macro_rules! sin_p5o_k {
     ($right:expr) => {
-        (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * $right as f64)
+        (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * $right as f64 + 0.5)
     };
 }
 
