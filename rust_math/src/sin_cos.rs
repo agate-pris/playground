@@ -27,6 +27,37 @@ macro_rules! consts_impl {
     };
 }
 
+pub(crate) trait Sin<T> {
+    fn sin(x: T) -> T;
+}
+
+pub(crate) trait Cos<T> {
+    fn cos(x: T) -> T;
+}
+
+macro_rules! even_sin_cos_impl {
+    ($u:ty, $t:ty) => {
+        impl Cos<$t> for $u {
+            fn cos(x: $t) -> $t {
+                let masked = x & Self::RIGHT_MASK;
+                let quadrant = (x >> Self::RIGHT_EXP) & 3;
+                match quadrant {
+                    1 => Self::cos_detail(Self::RIGHT - masked) - Self::ONE,
+                    3 => Self::ONE - Self::cos_detail(Self::RIGHT - masked),
+                    2 => Self::cos_detail(masked) - Self::ONE,
+                    0 => Self::ONE - Self::cos_detail(masked),
+                    _ => unreachable!(),
+                }
+            }
+        }
+        impl Sin<$t> for $u {
+            fn sin(x: $t) -> $t {
+                Self::cos(x.wrapping_sub(Self::RIGHT))
+            }
+        }
+    };
+}
+
 const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
 
 fn square<T>(b: T, denom: T) -> T
@@ -194,14 +225,6 @@ where
     (k - cos_p4_sin_p5_impl(a, b, z, right) / right) * z
 }
 
-pub(crate) trait Sin<T> {
-    fn sin(x: T) -> T;
-}
-
-pub(crate) trait Cos<T> {
-    fn cos(x: T) -> T;
-}
-
 macro_rules! sin_impl_default {
     ($u:ty, $t:ty) => {
         impl Sin<$t> for $u {
@@ -235,13 +258,13 @@ pub(crate) struct CosP2I32();
 
 consts_impl!(CosP2I32, i32);
 
-impl Cos<i32> for CosP2I32 {
-    fn cos(x: i32) -> i32 {
-        cos_p2(x, RIGHT_I32)
+impl CosP2I32 {
+    pub fn cos_detail(z: i32) -> i32 {
+        z * z
     }
 }
 
-sin_impl_default!(CosP2I32, i32);
+even_sin_cos_impl!(CosP2I32, i32);
 
 /// (1.5 - 0.5 * x ^ 2) * x
 pub(crate) struct SinP3_16384();
