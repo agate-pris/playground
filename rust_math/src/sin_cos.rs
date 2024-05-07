@@ -58,8 +58,6 @@ macro_rules! even_sin_cos_impl {
     };
 }
 
-const RIGHT_I32: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-
 fn square<T>(b: T, denom: T) -> T
 where
     T: Copy + Mul<Output = T> + Div<Output = T>,
@@ -264,8 +262,8 @@ consts_impl!(SinP3_16384, i32);
 
 impl Sin<i32> for SinP3_16384 {
     fn sin(x: i32) -> i32 {
-        const K: i32 = RIGHT_I32 / 2;
-        sin_p3_impl(K, x, RIGHT_I32)
+        const K: i32 = SinP3_16384::RIGHT / 2;
+        sin_p3_impl(K, x, Self::RIGHT)
     }
 }
 
@@ -281,8 +279,8 @@ consts_impl!(CosP4_7032, i32);
 
 impl Cos<i32> for CosP4_7032 {
     fn cos(x: i32) -> i32 {
-        even_cos_impl(x, RIGHT_I32, |z, _| {
-            cos_p4_impl(cos_p4_k(RIGHT_I32), z, RIGHT_I32)
+        even_cos_impl(x, Self::RIGHT, |z, _| {
+            cos_p4_impl(cos_p4_k(Self::RIGHT), z, Self::RIGHT)
         })
     }
 }
@@ -295,8 +293,8 @@ consts_impl!(CosP4_7384, i32);
 
 impl Cos<i32> for CosP4_7384 {
     fn cos(x: i32) -> i32 {
-        even_cos_impl(x, RIGHT_I32, |z, _| {
-            cos_p4_impl(cos_p4o_k(RIGHT_I32), z, RIGHT_I32)
+        even_cos_impl(x, Self::RIGHT, |z, _| {
+            cos_p4_impl(cos_p4o_k(Self::RIGHT), z, Self::RIGHT)
         })
     }
 }
@@ -309,7 +307,7 @@ consts_impl!(SinP5_51472, i32);
 
 impl Sin<i32> for SinP5_51472 {
     fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5_k(RIGHT_I32), x, RIGHT_I32)
+        sin_p5_impl(sin_p5_k(Self::RIGHT), x, Self::RIGHT)
     }
 }
 
@@ -321,7 +319,7 @@ consts_impl!(SinP5_51437, i32);
 
 impl Sin<i32> for SinP5_51437 {
     fn sin(x: i32) -> i32 {
-        sin_p5_impl(sin_p5o_k(RIGHT_I32), x, RIGHT_I32)
+        sin_p5_impl(sin_p5o_k(Self::RIGHT), x, Self::RIGHT)
     }
 }
 
