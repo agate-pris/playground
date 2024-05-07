@@ -134,13 +134,6 @@ macro_rules! sin_p5o_k {
     };
 }
 
-fn square<T>(b: T, denom: T) -> T
-where
-    T: Copy + Mul<Output = T> + Div<Output = T>,
-{
-    b * b / denom
-}
-
 fn repeat<T>(t: T, length: T) -> T
 where
     T: Copy + Signed,
@@ -184,18 +177,6 @@ where
     (repeat(x, calc_full(right)) / right).as_()
 }
 
-/// a - b * z ^ 2
-fn sin_p3_cos_p4_impl<T: PrimInt>(a: T, b: T, z_2: T, right: T) -> T {
-    a - z_2 * b / right
-}
-
-/// (a - b * z ^ 2) * z ^ 2
-fn cos_p4_sin_p5_impl<T: PrimInt>(a: T, b: T, z: T, right: T) -> T {
-    let z_2 = square(z, right);
-    sin_p3_cos_p4_impl(a, b, z_2, right) * z_2
-}
-
-/// x
 fn sin_p1<T>(x: T, right: T) -> T
 where
     T: AsPrimitive<i8> + PrimInt + Signed,
@@ -209,16 +190,6 @@ where
         0 => rem,
         _ => unreachable!(),
     }
-}
-
-macro_rules! cos_impl_default {
-    ($u:ty, $t:ty) => {
-        impl Cos<$t> for $u {
-            fn cos(x: $t) -> $t {
-                Self::sin(x.wrapping_add(Self::RIGHT))
-            }
-        }
-    };
 }
 
 pub(crate) struct CosP2I32();
