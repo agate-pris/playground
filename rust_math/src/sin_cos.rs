@@ -245,15 +245,6 @@ macro_rules! cos_impl_default {
     };
 }
 
-/// 1 - x ^ 2
-fn cos_p2<T>(x: T, right: T) -> T
-where
-    T: AsPrimitive<i8> + PrimInt + Signed,
-    i8: AsPrimitive<T>,
-{
-    even_cos_impl(x, right, |z, _| z.pow(2))
-}
-
 pub(crate) struct CosP2I32();
 
 consts_impl!(CosP2I32, i32);
