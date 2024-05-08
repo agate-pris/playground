@@ -208,6 +208,8 @@ odd_sin_cos_impl!(SinP5_51437, i32);
 
 #[cfg(test)]
 mod tests {
+    use std::ops::Neg;
+
     use approx::assert_abs_diff_eq;
 
     use crate::{
@@ -350,30 +352,28 @@ mod tests {
         let n = data.len() - 1;
         let iter = data.iter().cloned();
         let iter = iter.clone().take(n).chain(iter.rev().take(n));
-        iter.clone().chain(iter.map(|x| -x)).collect()
+        iter.clone().chain(iter.map(Neg::neg)).collect()
     }
 
     fn to_sin_period_even(data: &[i32]) -> Vec<i32> {
         let n = data.len() - 1;
         let iter = data.iter().cloned();
         let iter = iter.clone().rev().take(n).chain(iter.take(n));
-        iter.clone().chain(iter.map(|x| -x)).collect()
+        iter.clone().chain(iter.map(Neg::neg)).collect()
     }
 
     fn to_cos_period_even(data: &[i32]) -> Vec<i32> {
         let n = data.len() - 1;
-        let f = |x: i32| -x;
         let iter = data.iter().cloned();
-        let iter = iter.clone().take(n).chain(iter.rev().take(n).map(f));
-        iter.clone().chain(iter.map(f)).collect()
+        let iter = iter.clone().take(n).chain(iter.rev().take(n).map(Neg::neg));
+        iter.clone().chain(iter.map(Neg::neg)).collect()
     }
 
     fn to_cos_period_odd(data: &[i32]) -> Vec<i32> {
         let n = data.len() - 1;
-        let f = |x: i32| -x;
         let iter = data.iter().cloned();
-        let iter = iter.clone().rev().take(n).chain(iter.take(n).map(f));
-        iter.clone().chain(iter.map(f)).collect()
+        let iter = iter.clone().rev().take(n).chain(iter.take(n).map(Neg::neg));
+        iter.clone().chain(iter.map(Neg::neg)).collect()
     }
 
     #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   ONE, "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
