@@ -218,28 +218,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_cos_p4_k() {
+    fn test_constants() {
         //assert_eq!(2, CosP4_2::K);
         //assert_eq!(27, CosP4_27::K);
         assert_eq!(7032, CosP4_7032::K);
-    }
-
-    #[test]
-    fn test_sin_p5_k() {
         //assert_eq!(13, SinP5_13::K);
         //assert_eq!(201, SinP5_201::K);
         assert_eq!(51472, SinP5_51472::K);
-    }
-
-    #[test]
-    fn test_cos_p4o_k() {
         //assert_eq!(2, CosP4_2::K);
         //assert_eq!(29, CosP4_29::K);
         assert_eq!(7384, CosP4_7384::K);
-    }
-
-    #[test]
-    fn test_sin_p5o_k() {
         //assert_eq!(13, SinP5_13::K);
         //assert_eq!(201, SinP5_201::K);
         assert_eq!(51437, SinP5_51437::K);
