@@ -99,29 +99,29 @@ macro_rules! sin_p5_impl {
 
 /// 1 - pi / 4
 macro_rules! cos_p4_k {
-    ($t:ty) => {
-        ((1.0 - FRAC_PI_4) * <$t>::RIGHT as f64 + 0.5)
+    () => {
+        ((1.0 - FRAC_PI_4) * Self::RIGHT as f64 + 0.5)
     };
 }
 
 /// 5 * (1 - 3 / pi)
 macro_rules! cos_p4o_k {
-    ($t:ty) => {
-        (5.0 * (1.0 - 1.5 * FRAC_2_PI) * <$t>::RIGHT as f64 + 0.5)
+    () => {
+        (5.0 * (1.0 - 1.5 * FRAC_2_PI) * Self::RIGHT as f64 + 0.5)
     };
 }
 
 /// pi / 2
 macro_rules! sin_p5_k {
-    ($right:expr) => {
-        (FRAC_PI_2 * $right as f64 + 0.5)
+    () => {
+        (FRAC_PI_2 * Self::RIGHT as f64 + 0.5)
     };
 }
 
 /// 4 * (3 / pi - 9 / 16)
 macro_rules! sin_p5o_k {
-    ($right:expr) => {
-        (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * $right as f64 + 0.5)
+    () => {
+        (4.0 * (1.5 * FRAC_2_PI - 9.0 / 16.0) * Self::RIGHT as f64 + 0.5)
     };
 }
 
@@ -156,7 +156,7 @@ impl SinP3_16384 {
 }
 
 impl CosP4_7032 {
-    const K: i32 = cos_p4_k!(CosP4_7032) as i32;
+    const K: i32 = cos_p4_k!() as i32;
 
     /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
     ///
@@ -169,7 +169,7 @@ impl CosP4_7032 {
 }
 
 impl CosP4_7384 {
-    const K: i32 = cos_p4o_k!(CosP4_7384) as i32;
+    const K: i32 = cos_p4o_k!() as i32;
 
     /// (k + 1 - k * z ^ 2) * z ^ 2
     fn cos_detail(z: i32) -> i32 {
@@ -179,7 +179,7 @@ impl CosP4_7384 {
 }
 
 impl SinP5_51472 {
-    const K: i32 = sin_p5_k!(Self::RIGHT) as i32;
+    const K: i32 = sin_p5_k!() as i32;
 
     /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
     fn sin_detail(z: i32) -> i32 {
@@ -188,7 +188,7 @@ impl SinP5_51472 {
 }
 
 impl SinP5_51437 {
-    const K: i32 = sin_p5o_k!(Self::RIGHT) as i32;
+    const K: i32 = sin_p5o_k!() as i32;
 
     /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
     fn sin_detail(z: i32) -> i32 {
