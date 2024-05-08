@@ -370,6 +370,36 @@ mod tests {
         iter.clone().chain(iter.map(Neg::neg)).collect()
     }
 
+    #[rstest]
+    #[case(sin_p2_i32)]
+    #[case(sin_p3_16384)]
+    #[case(sin_p4_7032)]
+    #[case(sin_p5_51472)]
+    #[case(sin_p4_7384)]
+    #[case(sin_p5_51437)]
+    #[case(cos_p2_i32)]
+    #[case(cos_p3_16384)]
+    #[case(cos_p4_7032)]
+    #[case(cos_p5_51472)]
+    #[case(cos_p4_7384)]
+    #[case(cos_p5_51437)]
+    fn test_common(#[case] f: impl Copy + Fn(i32) -> i32) {
+        const FULL_AS_USIZE: usize = FULL as usize;
+        let expected = (0..FULL).map(f).collect::<Vec<_>>();
+        for (i, x) in (NEG_FULL..).take(FULL_AS_USIZE).enumerate() {
+            assert_eq!(f(x), expected[i]);
+        }
+        for (i, x) in (i32::MIN..).take(FULL_AS_USIZE).enumerate() {
+            assert_eq!(f(x), expected[i]);
+        }
+        for (i, x) in (i32::MIN.wrapping_sub(FULL)..=i32::MAX).enumerate() {
+            assert_eq!(f(x), expected[i]);
+        }
+        assert_eq!(expected[0], f(i32::MIN + FULL));
+        assert_eq!(expected[1], f(i32::MIN + FULL + 1));
+        assert_eq!(*expected.last().unwrap(), f(i32::MAX - FULL));
+    }
+
     #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
     #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
     #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
