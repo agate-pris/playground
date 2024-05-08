@@ -245,22 +245,19 @@ mod tests {
     const ONE: i32 = RIGHT.pow(2);
     const NEG_ONE: i32 = -ONE;
 
-    #[test]
-    fn test_sin() {
-        fn test(f: impl Fn(i32) -> i32) {
-            assert_eq!(f(0), 0);
-            assert_eq!(f(STRAIGHT), 0);
-            assert_eq!(f(NEG_STRAIGHT), 0);
-            assert_eq!(f(RIGHT), ONE);
-            assert_eq!(f(NEG_RIGHT), NEG_ONE);
-        }
-
-        test(sin_p2_i32);
-        test(sin_p3_16384);
-        test(sin_p4_7032);
-        test(sin_p5_51472);
-        test(sin_p4_7384);
-        test(sin_p5_51437);
+    #[rstest]
+    #[case(sin_p2_i32)]
+    #[case(sin_p3_16384)]
+    #[case(sin_p4_7032)]
+    #[case(sin_p5_51472)]
+    #[case(sin_p4_7384)]
+    #[case(sin_p5_51437)]
+    fn test_sin(#[case] f: impl Fn(i32) -> i32) {
+        assert_eq!(f(0), 0);
+        assert_eq!(f(STRAIGHT), 0);
+        assert_eq!(f(NEG_STRAIGHT), 0);
+        assert_eq!(f(RIGHT), ONE);
+        assert_eq!(f(NEG_RIGHT), NEG_ONE);
     }
 
     #[rstest]
