@@ -239,9 +239,10 @@ mod tests {
     const STRAIGHT: i32 = 2 * RIGHT;
     const FULL: i32 = 2 * STRAIGHT;
     const FULL_MASK: i32 = FULL - 1;
-    const NEG_STRAIGHT: i32 = -STRAIGHT;
-    const NEG_RIGHT: i32 = -RIGHT;
     const ONE: i32 = RIGHT.pow(2);
+    const NEG_RIGHT: i32 = -RIGHT;
+    const NEG_STRAIGHT: i32 = -STRAIGHT;
+    const NEG_FULL: i32 = -FULL;
     const NEG_ONE: i32 = -ONE;
 
     #[rstest]
