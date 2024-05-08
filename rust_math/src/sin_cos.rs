@@ -211,6 +211,7 @@ mod tests {
     use std::ops::Neg;
 
     use approx::assert_abs_diff_eq;
+    use rstest::rstest;
 
     use crate::{
         cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51437, cos_p5_51472, sin_p2_i32,
@@ -262,22 +263,19 @@ mod tests {
         test(sin_p5_51437);
     }
 
-    #[test]
-    fn test_cos() {
-        fn test(f: impl Fn(i32) -> i32) {
-            assert_eq!(f(0), ONE);
-            assert_eq!(f(RIGHT), 0);
-            assert_eq!(f(NEG_RIGHT), 0);
-            assert_eq!(f(STRAIGHT), NEG_ONE);
-            assert_eq!(f(NEG_STRAIGHT), NEG_ONE);
-        }
-
-        test(cos_p2_i32);
-        test(cos_p3_16384);
-        test(cos_p4_7032);
-        test(cos_p5_51472);
-        test(cos_p4_7384);
-        test(cos_p5_51437);
+    #[rstest]
+    #[case(cos_p2_i32)]
+    #[case(cos_p3_16384)]
+    #[case(cos_p4_7032)]
+    #[case(cos_p5_51472)]
+    #[case(cos_p4_7384)]
+    #[case(cos_p5_51437)]
+    fn test_cos(#[case] f: impl Fn(i32) -> i32) {
+        assert_eq!(f(0), ONE);
+        assert_eq!(f(RIGHT), 0);
+        assert_eq!(f(NEG_RIGHT), 0);
+        assert_eq!(f(STRAIGHT), NEG_ONE);
+        assert_eq!(f(NEG_STRAIGHT), NEG_ONE);
     }
 
     fn test_sin_cos(
