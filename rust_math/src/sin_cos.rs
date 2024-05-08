@@ -220,20 +220,21 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_constants() {
-        //assert_eq!(2, CosP4_2::K);
-        //assert_eq!(27, CosP4_27::K);
-        assert_eq!(7032, CosP4_7032::K);
-        //assert_eq!(13, SinP5_13::K);
-        //assert_eq!(201, SinP5_201::K);
-        assert_eq!(51472, SinP5_51472::K);
-        //assert_eq!(2, CosP4_2::K);
-        //assert_eq!(29, CosP4_29::K);
-        assert_eq!(7384, CosP4_7384::K);
-        //assert_eq!(13, SinP5_13::K);
-        //assert_eq!(201, SinP5_201::K);
-        assert_eq!(51437, SinP5_51437::K);
+    #[rstest]
+    //#[case(2, CosP4_2::K)]
+    //#[case(27, CosP4_27::K)]
+    #[case(7032, CosP4_7032::K)]
+    //#[case(13, SinP5_13::K)]
+    //#[case(201, SinP5_201::K)]
+    #[case(51472, SinP5_51472::K)]
+    //#[case(2, CosP4_2::K)]
+    //#[case(29, CosP4_29::K)]
+    #[case(7384, CosP4_7384::K)]
+    //#[case(13, SinP5_13::K)]
+    //#[case(201, SinP5_201::K)]
+    #[case(51437, SinP5_51437::K)]
+    fn test_constants(#[case] expected: i32, #[case] actual: i32) {
+        assert_eq!(expected, actual);
     }
 
     const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
