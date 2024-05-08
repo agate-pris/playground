@@ -5,7 +5,6 @@ trait Consts<T> {
     const RIGHT: T;
     const RIGHT_MASK: T;
     const ONE: T;
-    const NEG_ONE: T;
 }
 
 macro_rules! consts_impl {
@@ -15,7 +14,6 @@ macro_rules! consts_impl {
             const RIGHT: $t = 1 << Self::RIGHT_EXP;
             const RIGHT_MASK: $t = Self::RIGHT - 1;
             const ONE: $t = Self::RIGHT.pow(2);
-            const NEG_ONE: $t = -Self::ONE;
         }
     };
 }
