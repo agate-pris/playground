@@ -1,0 +1,8 @@
+[package]
+name = "gen_test_data"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = "4"
+rust_math = { path = ".." }
