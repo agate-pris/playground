@@ -262,6 +262,10 @@ dependencies = [
 [[package]]
 name = "gen_test_data"
 version = "0.1.0"
+dependencies = [
+ "clap",
+ "rust_math",
+]
 
 [[package]]
 name = "getrandom"
