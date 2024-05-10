@@ -206,9 +206,12 @@ odd_sin_cos_impl!(SinP5_51437, i32);
 
 #[cfg(test)]
 mod tests {
-    use std::ops::Neg;
+    use std::{fmt::Display, ops::Neg};
 
-    use approx::assert_abs_diff_eq;
+    use anyhow::Context;
+    use anyhow::Result;
+    use approx::{abs_diff_eq, assert_abs_diff_eq};
+    use rand::Rng;
     use rstest::rstest;
 
     use crate::{
@@ -236,14 +239,185 @@ mod tests {
     }
 
     const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+    const RIGHT_AS_USIZE: usize = RIGHT as usize;
+    const RIGHT_MASK: i32 = RIGHT - 1;
+    const RIGHT_MASK_AS_USIZE: usize = RIGHT_MASK as usize;
     const STRAIGHT: i32 = 2 * RIGHT;
     const FULL: i32 = 2 * STRAIGHT;
     const FULL_MASK: i32 = FULL - 1;
     const ONE: i32 = RIGHT.pow(2);
+    const ONE_AS_F64: f64 = ONE as f64;
     const NEG_RIGHT: i32 = -RIGHT;
     const NEG_STRAIGHT: i32 = -STRAIGHT;
     const NEG_FULL: i32 = -FULL;
     const NEG_ONE: i32 = -ONE;
+    const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
+
+    fn ensure_all_eq<A, Actuals>(expected: A, actuals: Actuals) -> Result<()>
+    where
+        A: PartialEq + Display,
+        Actuals: IntoIterator<Item = A>,
+    {
+        for actual in actuals {
+            anyhow::ensure!(expected == actual, "expected: {expected}, actual: {actual}");
+        }
+        Ok(())
+    }
+
+    #[rstest]
+    #[case(sin_p2_i32, cos_p2_i32, "data/sin_p2.json", 0.056010)]
+    #[case(sin_p3_16384, cos_p3_16384, "data/sin_p3.json", 0.020017)]
+    #[case(sin_p4_7032, cos_p4_7032, "data/sin_p4_7032.json", 0.002819)]
+    #[case(sin_p4_7384, cos_p4_7384, "data/sin_p4_7384.json", 0.001174)]
+    #[case(sin_p5_51472, cos_p5_51472, "data/sin_p5_51472.json", 0.000425)]
+    #[case(sin_p5_51437, cos_p5_51437, "data/sin_p5_51437.json", 0.000226)]
+    fn new_sin_test(
+        #[case] sin: impl Fn(i32) -> i32,
+        #[case] cos: impl Fn(i32) -> i32,
+        #[case] data_path: &str,
+        #[case] acceptable_error: f64,
+    ) -> Result<()> {
+        let sin = |x| -> Result<_> {
+            let actual = sin(x);
+            let actual_real = actual as f64 / ONE_AS_F64;
+            let expected = (x as f64 * FRAC_PI_STRAIGHT).sin();
+            anyhow::ensure!(
+                abs_diff_eq!(actual_real, expected, epsilon = acceptable_error),
+                "x: {x}, expected: {expected}, actual_real: {actual_real}, actual: {actual}"
+            );
+            Ok(actual)
+        };
+
+        let cos = |x| -> Result<_> {
+            let actual = cos(x);
+            let actual_real = actual as f64 / ONE_AS_F64;
+            let expected = (x as f64 * FRAC_PI_STRAIGHT).cos();
+            anyhow::ensure!(
+                abs_diff_eq!(actual_real, expected, epsilon = acceptable_error),
+                "x: {x}, expected: {expected}, actual_real: {actual_real}, actual: {actual}"
+            );
+            Ok(actual)
+        };
+
+        let data: Vec<i32> = read_data(data_path)?;
+
+        {
+            let a = data[1];
+            let b = data[RIGHT_MASK_AS_USIZE];
+            anyhow::ensure!(a.is_positive(), "a: {a}");
+            anyhow::ensure!(b.is_positive(), "b: {b}");
+            for x in
+                (0..=u32::MAX / FULL as u32).map(|i| i32::MIN.strict_add_unsigned(i * FULL as u32))
+            {
+                ensure_all_eq(ONE, [cos(x)?, sin(x + RIGHT)?])?;
+                ensure_all_eq(NEG_ONE, [cos(x + STRAIGHT)?, sin(x + STRAIGHT + RIGHT)?])?;
+                ensure_all_eq(
+                    0,
+                    [
+                        sin(x)?,
+                        cos(x + RIGHT)?,
+                        sin(x + STRAIGHT)?,
+                        cos(x + STRAIGHT + RIGHT)?,
+                    ],
+                )?;
+                ensure_all_eq(
+                    a,
+                    [
+                        sin(x + 1)?,
+                        cos(x + RIGHT - 1)?,
+                        sin(x + STRAIGHT - 1)?,
+                        cos(x + STRAIGHT + RIGHT + 1)?,
+                    ],
+                )?;
+                ensure_all_eq(
+                    b,
+                    [
+                        cos(x + 1)?,
+                        sin(x + RIGHT - 1)?,
+                        sin(x + RIGHT + 1)?,
+                        cos(x + FULL_MASK)?,
+                    ],
+                )?;
+                ensure_all_eq(
+                    -a,
+                    [
+                        cos(x + RIGHT + 1)?,
+                        sin(x + STRAIGHT + 1)?,
+                        cos(x + STRAIGHT + RIGHT - 1)?,
+                        sin(x + FULL_MASK)?,
+                    ],
+                )?;
+                ensure_all_eq(
+                    -b,
+                    [
+                        cos(x + STRAIGHT - 1)?,
+                        cos(x + STRAIGHT + 1)?,
+                        sin(x + STRAIGHT + RIGHT - 1)?,
+                        sin(x + STRAIGHT + RIGHT + 1)?,
+                    ],
+                )?;
+            }
+        }
+
+        const STARTS: [i32; 4] = [i32::MIN.wrapping_sub(FULL), i32::MIN, NEG_FULL, 0];
+        for start in STARTS {
+            for x in 2..RIGHT - 1 {
+                let a = data[x as usize];
+                anyhow::ensure!(a.is_positive(), "x: {x}, a: {a}");
+                ensure_all_eq(
+                    a,
+                    [
+                        sin(start + x)?,
+                        sin(start + STRAIGHT - x)?,
+                        cos(start + RIGHT - x)?,
+                        cos(start + RIGHT + x + STRAIGHT)?,
+                    ],
+                )
+                .with_context(|| format!("x: {x}"))?;
+                ensure_all_eq(
+                    -a,
+                    [
+                        sin(start + STRAIGHT + x)?,
+                        sin(start + FULL_MASK - x + 1)?,
+                        cos(start + RIGHT + x)?,
+                        cos(start + RIGHT - x + STRAIGHT)?,
+                    ],
+                )
+                .with_context(|| format!("x: {x}"))?;
+            }
+        }
+
+        let mut rng = rand::thread_rng();
+        for _ in 0..999 {
+            let x = rng.gen_range(i32::MIN..=i32::MAX);
+            let sin = sin(x)?;
+            let cos = cos(x)?;
+            let i = (x & RIGHT_MASK) as usize;
+            let a = data[i];
+            let b = data[RIGHT_AS_USIZE - i];
+            match (x >> (i32::BITS / 2 - 1)) & 3 {
+                0 => {
+                    anyhow::ensure!(sin == a, "x: {x}, sin: {sin}, a: {a}");
+                    anyhow::ensure!(cos == b, "x: {x}, sin: {sin}, b: {b}");
+                }
+                1 => {
+                    anyhow::ensure!(sin == b, "x: {x}, sin: {sin}, b: {b}");
+                    anyhow::ensure!(cos == -a, "x: {x}, sin: {sin}, a: {a}");
+                }
+                2 => {
+                    anyhow::ensure!(sin == -a, "x: {x}, sin: {sin}, a: {a}");
+                    anyhow::ensure!(cos == -b, "x: {x}, sin: {sin}, b: {b}");
+                }
+                3 => {
+                    anyhow::ensure!(sin == -b, "x: {x}, sin: {sin}, b: {b}");
+                    anyhow::ensure!(cos == a, "x: {x}, sin: {sin}, a: {a}");
+                }
+                _ => unreachable!(),
+            }
+        }
+
+        Ok(())
+    }
 
     #[rstest]
     #[case(sin_p2_i32)]
