@@ -54,4 +54,7 @@ fn main() {
     if args.sin_errors {
         print_sin_errors();
     }
+    if args.sin_p2 {
+        print_sin(sin_p2_i32);
+    }
 }
