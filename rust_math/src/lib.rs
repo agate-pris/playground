@@ -12,85 +12,15 @@ mod atan_p5;
 pub mod bits;
 pub mod round_bits;
 pub mod round_bits_ties_even;
-pub mod sin_cos;
-
-use sin_cos::{Cos, CosP2I32, CosP4_7032, CosP4_7384, Sin, SinP3_16384, SinP5_51437, SinP5_51472};
+mod sin_cos;
 
 pub use atan_p2::{atan2_p2_2850, atan_p2_2850};
 pub use atan_p3::{atan2_p3_2555_691, atan_p3_2555_691};
 pub use atan_p5::{atan2_p5_787_2968, atan_p5_787_2968};
-
-pub fn sin_p2_i32(x: i32) -> i32 {
-    CosP2I32::sin(x)
-}
-
-pub fn cos_p2_i32(x: i32) -> i32 {
-    CosP2I32::cos(x)
-}
-
-pub fn sin_p3_16384(x: i32) -> i32 {
-    SinP3_16384::sin(x)
-}
-
-pub fn cos_p3_16384(x: i32) -> i32 {
-    SinP3_16384::cos(x)
-}
-
-/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion.
-pub fn sin_p4_7032(x: i32) -> i32 {
-    CosP4_7032::sin(x)
-}
-
-/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
-///
-/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-/// a = 1 - pi / 4
-pub fn cos_p4_7032(x: i32) -> i32 {
-    CosP4_7032::cos(x)
-}
-
-/// Approximate the sine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn sin_p4_7384(x: i32) -> i32 {
-    CosP4_7384::sin(x)
-}
-
-/// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion  with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-/// a = 5 * (1 - 3 / pi)
-pub fn cos_p4_7384(x: i32) -> i32 {
-    CosP4_7384::cos(x)
-}
-
-/// Approximate the sine function by the 5th order polynomial derived by Taylor expansion.
-///
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = pi / 2
-pub fn sin_p5_51472(x: i32) -> i32 {
-    SinP5_51472::sin(x)
-}
-
-/// Approximate the cosine function by the 5th order polynomial derived by Taylor expansion.
-pub fn cos_p5_51472(x: i32) -> i32 {
-    SinP5_51472::cos(x)
-}
-
-/// Approximate the sine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-///
-/// (a - (2 * a - 2.5 - (a - 1.5) * x ^ 2) * x ^ 2) * x  
-/// a = 4 * (3 / pi - 9 / 16)
-pub fn sin_p5_51437(x: i32) -> i32 {
-    SinP5_51437::sin(x)
-}
-
-/// Approximate the cosine function by the 5th order polynomial derived by Taylor expansion with
-/// coefficients which is adjusted so that the average of the errors is 0.
-pub fn cos_p5_51437(x: i32) -> i32 {
-    SinP5_51437::cos(x)
-}
+pub use sin_cos::{
+    cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51437, cos_p5_51472, sin_p2_i32,
+    sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472,
+};
 
 #[cfg(test)]
 mod tests {
