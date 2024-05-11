@@ -9,8 +9,10 @@ macro_rules! atan_p3_impl {
     }};
 }
 
+#[cfg(test)]
 pub const A_B_I8: [(i8, i8); 2] = [(0, 0), (0, 0)];
 
+#[cfg(test)]
 pub const A_B_I16: [(i16, i16); 8] = [
     (2, 2),
     (2, 5),

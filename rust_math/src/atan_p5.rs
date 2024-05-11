@@ -9,6 +9,7 @@ macro_rules! atan_p5_impl {
     }};
 }
 
+#[cfg(test)]
 pub const A_B_I16: [(i16, i16); 5] = [(5, 14), (6, 22), (13, 46), (27, 93), (69, 204)];
 
 pub const A_B_I32: [(i32, i32); 7] = [
