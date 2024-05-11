@@ -206,11 +206,11 @@ odd_sin_cos_impl!(SinP5_51437, i32);
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Display, ops::Neg};
+    use std::fmt::Display;
 
     use anyhow::Context;
     use anyhow::Result;
-    use approx::{abs_diff_eq, assert_abs_diff_eq};
+    use approx::abs_diff_eq;
     use rand::Rng;
     use rstest::rstest;
 
@@ -247,8 +247,6 @@ mod tests {
     const FULL_MASK: i32 = FULL - 1;
     const ONE: i32 = RIGHT.pow(2);
     const ONE_AS_F64: f64 = ONE as f64;
-    const NEG_RIGHT: i32 = -RIGHT;
-    const NEG_STRAIGHT: i32 = -STRAIGHT;
     const NEG_FULL: i32 = -FULL;
     const NEG_ONE: i32 = -ONE;
     const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
@@ -271,7 +269,7 @@ mod tests {
     #[case(sin_p4_7384, cos_p4_7384, "data/sin_p4_7384.json", 0.001174)]
     #[case(sin_p5_51472, cos_p5_51472, "data/sin_p5_51472.json", 0.000425)]
     #[case(sin_p5_51437, cos_p5_51437, "data/sin_p5_51437.json", 0.000226)]
-    fn new_sin_test(
+    fn sin_test(
         #[case] sin: impl Fn(i32) -> i32,
         #[case] cos: impl Fn(i32) -> i32,
         #[case] data_path: &str,
@@ -418,172 +416,4 @@ mod tests {
 
         Ok(())
     }
-
-    #[rstest]
-    #[case(sin_p2_i32)]
-    #[case(sin_p3_16384)]
-    #[case(sin_p4_7032)]
-    #[case(sin_p5_51472)]
-    #[case(sin_p4_7384)]
-    #[case(sin_p5_51437)]
-    fn test_sin(#[case] f: impl Fn(i32) -> i32) {
-        assert_eq!(f(0), 0);
-        assert_eq!(f(STRAIGHT), 0);
-        assert_eq!(f(NEG_STRAIGHT), 0);
-        assert_eq!(f(RIGHT), ONE);
-        assert_eq!(f(NEG_RIGHT), NEG_ONE);
-    }
-
-    #[rstest]
-    #[case(cos_p2_i32)]
-    #[case(cos_p3_16384)]
-    #[case(cos_p4_7032)]
-    #[case(cos_p5_51472)]
-    #[case(cos_p4_7384)]
-    #[case(cos_p5_51437)]
-    fn test_cos(#[case] f: impl Fn(i32) -> i32) {
-        assert_eq!(f(0), ONE);
-        assert_eq!(f(RIGHT), 0);
-        assert_eq!(f(NEG_RIGHT), 0);
-        assert_eq!(f(STRAIGHT), NEG_ONE);
-        assert_eq!(f(NEG_STRAIGHT), NEG_ONE);
-    }
-
-    fn test_sin_cos(
-        f: impl Fn(i32) -> i32,
-        data_path: &str,
-        to_period: impl Fn(&[i32]) -> Vec<i32>,
-        f_std: impl Fn(f64) -> f64,
-        acceptable_error: f64,
-    ) {
-        // 5th mersenne prime
-        const STEP: usize = 8191;
-
-        let right_as_usize = RIGHT as usize;
-        let data = read_data(data_path).unwrap();
-
-        assert_eq!(data.len(), right_as_usize + 1);
-        assert_eq!(FULL % RIGHT, 0);
-        assert_eq!(i32::MIN % FULL, 0);
-        assert_eq!(i32::MAX % FULL, FULL - 1);
-
-        let data = to_period(&data);
-
-        assert_eq!(data.len(), FULL as usize);
-
-        let x = (-FULL - 1..=FULL + 1)
-            .chain(i32::MAX - FULL..=i32::MAX)
-            .chain(i32::MIN..=i32::MIN + FULL + 1)
-            .chain((i32::MIN..=i32::MAX).step_by(right_as_usize))
-            .chain((i32::MIN..=i32::MAX).skip(1).step_by(right_as_usize))
-            .chain(
-                (i32::MIN..=i32::MAX)
-                    .skip(right_as_usize - 1)
-                    .step_by(right_as_usize),
-            )
-            .chain((i32::MIN..=i32::MAX).step_by(STEP))
-            .chain((i32::MIN..=i32::MAX).rev().step_by(STEP));
-
-        let frac_pi_straight = FRAC_PI_2 / RIGHT as f64;
-        let mut min = f64::INFINITY;
-        let mut max = f64::NEG_INFINITY;
-
-        for x in x {
-            let expected = data[(x & FULL_MASK) as usize];
-
-            // The value can be greater than 1 or less than -1
-            //assert!(expected.abs() <= ONE, "expected: {expected}, ONE: {ONE}");
-
-            assert_eq!(expected, f(x));
-
-            let actual = f_std(x as f64 * frac_pi_straight);
-
-            if (x % RIGHT) != 0 || expected != 0 {
-                assert_eq!(expected.is_negative(), actual.is_sign_negative());
-                assert_eq!(expected.is_positive(), actual.is_sign_positive());
-            }
-
-            let expected = expected as f64 / ONE as f64;
-
-            assert_abs_diff_eq!(expected, actual, epsilon = acceptable_error);
-
-            let diff = actual - expected;
-
-            min = min.min(diff);
-            max = max.max(diff);
-        }
-
-        println!("min: {min}, max: {max}");
-    }
-
-    fn to_sin_period_odd(data: &[i32]) -> Vec<i32> {
-        let n = data.len() - 1;
-        let iter = data.iter().cloned();
-        let iter = iter.clone().take(n).chain(iter.rev().take(n));
-        iter.clone().chain(iter.map(Neg::neg)).collect()
-    }
-
-    fn to_sin_period_even(data: &[i32]) -> Vec<i32> {
-        let n = data.len() - 1;
-        let iter = data.iter().cloned();
-        let iter = iter.clone().rev().take(n).chain(iter.take(n));
-        iter.clone().chain(iter.map(Neg::neg)).collect()
-    }
-
-    fn to_cos_period_even(data: &[i32]) -> Vec<i32> {
-        let n = data.len() - 1;
-        let iter = data.iter().cloned();
-        let iter = iter.clone().take(n).chain(iter.rev().take(n).map(Neg::neg));
-        iter.clone().chain(iter.map(Neg::neg)).collect()
-    }
-
-    fn to_cos_period_odd(data: &[i32]) -> Vec<i32> {
-        let n = data.len() - 1;
-        let iter = data.iter().cloned();
-        let iter = iter.clone().rev().take(n).chain(iter.take(n).map(Neg::neg));
-        iter.clone().chain(iter.map(Neg::neg)).collect()
-    }
-
-    #[rstest]
-    #[case(sin_p2_i32)]
-    #[case(sin_p3_16384)]
-    #[case(sin_p4_7032)]
-    #[case(sin_p5_51472)]
-    #[case(sin_p4_7384)]
-    #[case(sin_p5_51437)]
-    #[case(cos_p2_i32)]
-    #[case(cos_p3_16384)]
-    #[case(cos_p4_7032)]
-    #[case(cos_p5_51472)]
-    #[case(cos_p4_7384)]
-    #[case(cos_p5_51437)]
-    fn test_common(#[case] f: impl Copy + Fn(i32) -> i32) {
-        const FULL_AS_USIZE: usize = FULL as usize;
-        let expected = (0..FULL).map(f).collect::<Vec<_>>();
-        for (i, x) in (NEG_FULL..).take(FULL_AS_USIZE).enumerate() {
-            assert_eq!(f(x), expected[i]);
-        }
-        for (i, x) in (i32::MIN..).take(FULL_AS_USIZE).enumerate() {
-            assert_eq!(f(x), expected[i]);
-        }
-        for (i, x) in (i32::MIN.wrapping_sub(FULL)..=i32::MAX).enumerate() {
-            assert_eq!(f(x), expected[i]);
-        }
-        assert_eq!(expected[0], f(i32::MIN + FULL));
-        assert_eq!(expected[1], f(i32::MIN + FULL + 1));
-        assert_eq!(*expected.last().unwrap(), f(i32::MAX - FULL));
-    }
-
-    #[rustfmt::skip] #[test] fn test_sin_p2()  { test_sin_cos(sin_p2_i32,   "data/cos_p2.json",  to_sin_period_even, f64::sin, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_sin_p3()  { test_sin_cos(sin_p3_16384, "data/sin_p3.json",  to_sin_period_odd,  f64::sin, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_sin_p4()  { test_sin_cos(sin_p4_7032,  "data/cos_p4.json",  to_sin_period_even, f64::sin, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_sin_p5()  { test_sin_cos(sin_p5_51472, "data/sin_p5.json",  to_sin_period_odd,  f64::sin, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_sin_p4o() { test_sin_cos(sin_p4_7384,  "data/cos_p4o.json", to_sin_period_even, f64::sin, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_sin_p5o() { test_sin_cos(sin_p5_51437, "data/sin_p5o.json", to_sin_period_odd,  f64::sin, 0.000226); }
-    #[rustfmt::skip] #[test] fn test_cos_p2()  { test_sin_cos(cos_p2_i32,   "data/cos_p2.json",  to_cos_period_even, f64::cos, 0.056010); }
-    #[rustfmt::skip] #[test] fn test_cos_p3()  { test_sin_cos(cos_p3_16384, "data/sin_p3.json",  to_cos_period_odd,  f64::cos, 0.020017); }
-    #[rustfmt::skip] #[test] fn test_cos_p4()  { test_sin_cos(cos_p4_7032,  "data/cos_p4.json",  to_cos_period_even, f64::cos, 0.002819); }
-    #[rustfmt::skip] #[test] fn test_cos_p5()  { test_sin_cos(cos_p5_51472, "data/sin_p5.json",  to_cos_period_odd,  f64::cos, 0.000425); }
-    #[rustfmt::skip] #[test] fn test_cos_p4o() { test_sin_cos(cos_p4_7384,  "data/cos_p4o.json", to_cos_period_even, f64::cos, 0.001174); }
-    #[rustfmt::skip] #[test] fn test_cos_p5o() { test_sin_cos(cos_p5_51437, "data/sin_p5o.json", to_cos_period_odd,  f64::cos, 0.000226); }
 }
