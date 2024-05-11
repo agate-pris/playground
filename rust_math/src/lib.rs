@@ -10,8 +10,6 @@ mod atan_p2;
 mod atan_p3;
 mod atan_p5;
 mod bits;
-pub mod round_bits;
-pub mod round_bits_ties_even;
 mod sin_cos;
 
 pub use atan_p2::{atan2_p2_2850, atan_p2_2850};
