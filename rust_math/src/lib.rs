@@ -1,5 +1,6 @@
 #![feature(array_try_from_fn)]
 #![feature(array_try_map)]
+#![feature(strict_overflow_ops)]
 
 #[cfg(test)]
 extern crate num_cpus;
