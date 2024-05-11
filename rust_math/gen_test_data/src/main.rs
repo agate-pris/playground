@@ -3,10 +3,15 @@ use std::f64::consts::FRAC_PI_2;
 use clap::Parser;
 use rust_math::{sin_p2_i32, sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472};
 
+const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+
 #[derive(Parser)]
 struct Args {
     #[arg(long)]
     sin_errors: bool,
+
+    #[arg(long)]
+    sin_p2: bool,
 }
 
 fn print_sin_errors() {
@@ -34,9 +39,22 @@ fn print_sin_errors() {
     }
 }
 
+fn print_sin(f: impl Fn(i32) -> i32) {
+    println!("[");
+    for x in 0..RIGHT {
+        print!("{}", f(x));
+        println!(",");
+    }
+    println!("{}", f(RIGHT));
+    println!("]");
+}
+
 fn main() {
     let args = Args::parse();
     if args.sin_errors {
         print_sin_errors();
+    }
+    if args.sin_p2 {
+        print_sin(sin_p2_i32);
     }
 }
