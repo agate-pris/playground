@@ -48,9 +48,9 @@ fn print_sin_errors() {
         ("sin_p5_51472", f(sin_p5_51472)),
         ("sin_p5_51437", f(sin_p5_51437)),
     ];
-    println!("{:<12} | {:<9}", "func", "max error");
+    println!("{:>12} | max error", "func");
     for (name, result) in results.iter() {
-        println!("{:<12} | {:9.6}", name, result);
+        println!("{:>12} | {:10.7}", name, result);
     }
 }
 
