@@ -9,6 +9,9 @@ const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
 struct Args {
     #[arg(long)]
     sin_errors: bool,
+
+    #[arg(long)]
+    sin_p2: bool,
 }
 
 fn print_sin_errors() {
