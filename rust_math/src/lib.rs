@@ -6,43 +6,19 @@
 extern crate num_cpus;
 
 pub(crate) mod atan;
-pub mod atan_p2;
-pub mod atan_p3;
-pub mod atan_p5;
+mod atan_p2;
+mod atan_p3;
+mod atan_p5;
 pub mod bits;
 pub mod round_bits;
 pub mod round_bits_ties_even;
 pub mod sin_cos;
 
-use atan::AtanUtil;
-use atan_p2::AtanP2I32Util;
-use atan_p3::AtanP3I32Util;
-use atan_p5::AtanP5I32Util;
 use sin_cos::{Cos, CosP2I32, CosP4_7032, CosP4_7384, Sin, SinP3_16384, SinP5_51437, SinP5_51472};
 
-pub fn atan_p2_2850(x: i32) -> i32 {
-    AtanP2I32Util::atan(x)
-}
-
-pub fn atan2_p2_2850(y: i32, x: i32) -> i32 {
-    AtanP2I32Util::atan2(y, x)
-}
-
-pub fn atan_p3_2555_691(x: i32) -> i32 {
-    AtanP3I32Util::atan(x)
-}
-
-pub fn atan2_p3_2555_691(y: i32, x: i32) -> i32 {
-    AtanP3I32Util::atan2(y, x)
-}
-
-pub fn atan_p5_787_2968(x: i32) -> i32 {
-    AtanP5I32Util::atan(x)
-}
-
-pub fn atan2_p5_787_2968(y: i32, x: i32) -> i32 {
-    AtanP5I32Util::atan2(y, x)
-}
+pub use atan_p2::{atan2_p2_2850, atan_p2_2850};
+pub use atan_p3::{atan2_p3_2555_691, atan_p3_2555_691};
+pub use atan_p5::{atan2_p5_787_2968, atan_p5_787_2968};
 
 pub fn sin_p2_i32(x: i32) -> i32 {
     CosP2I32::sin(x)

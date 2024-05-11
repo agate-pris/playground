@@ -86,6 +86,14 @@ impl AtanUtil<i32> for AtanP3I32Util {
     }
 }
 
+pub fn atan_p3_2555_691(x: i32) -> i32 {
+    AtanP3I32Util::atan(x)
+}
+
+pub fn atan2_p3_2555_691(y: i32, x: i32) -> i32 {
+    AtanP3I32Util::atan2(y, x)
+}
+
 #[cfg(test)]
 mod tests {
     use std::{

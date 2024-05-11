@@ -64,6 +64,14 @@ impl AtanUtil<i32> for AtanP5I32Util {
     }
 }
 
+pub fn atan_p5_787_2968(x: i32) -> i32 {
+    AtanP5I32Util::atan(x)
+}
+
+pub fn atan2_p5_787_2968(y: i32, x: i32) -> i32 {
+    AtanP5I32Util::atan2(y, x)
+}
+
 #[cfg(test)]
 mod tests {
     use std::{
