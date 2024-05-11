@@ -46,7 +46,7 @@ fn print_sin(f: impl Fn(i32) -> i32) {
         println!(",");
     }
     println!("{}", f(RIGHT));
-    println!("]");
+    print!("]");
 }
 
 fn main() {
