@@ -36,6 +36,16 @@ fn print_sin_errors() {
     }
 }
 
+fn print_sin(f: impl Fn(i32) -> i32) {
+    println!("[");
+    for x in 0..RIGHT {
+        print!("{}", f(x));
+        println!(",");
+    }
+    println!("{}", f(RIGHT));
+    println!("]");
+}
+
 fn main() {
     let args = Args::parse();
     if args.sin_errors {
