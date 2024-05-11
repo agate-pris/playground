@@ -3,6 +3,8 @@ use std::f64::consts::FRAC_PI_2;
 use clap::Parser;
 use rust_math::{sin_p2_i32, sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472};
 
+const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+
 #[derive(Parser)]
 struct Args {
     #[arg(long)]
