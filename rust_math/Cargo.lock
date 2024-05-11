@@ -510,7 +510,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "approx",
- "clap",
  "itertools",
  "num-traits",
  "num_cpus",
