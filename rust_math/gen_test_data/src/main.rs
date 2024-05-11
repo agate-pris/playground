@@ -1,7 +1,10 @@
 use std::f64::consts::FRAC_PI_2;
 
 use clap::Parser;
-use rust_math::{sin_p2_i32, sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472};
+use rust_math::{
+    atan_p2_2850, atan_p3_2555_691, atan_p5_787_2968, sin_p2_i32, sin_p3_16384, sin_p4_7032,
+    sin_p4_7384, sin_p5_51437, sin_p5_51472,
+};
 
 const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
 
@@ -27,6 +30,15 @@ struct Args {
 
     #[arg(long)]
     sin_p5_51437: bool,
+
+    #[arg(long)]
+    atan_p2: bool,
+
+    #[arg(long)]
+    atan_p3: bool,
+
+    #[arg(long)]
+    atan_p5: bool,
 }
 
 fn print_sin_errors() {
@@ -54,14 +66,22 @@ fn print_sin_errors() {
     }
 }
 
-fn print_sin(f: impl Fn(i32) -> i32) {
+fn print(f: impl Fn(i32) -> i32, last: i32) {
     println!("[");
-    for x in 0..RIGHT {
+    for x in 0..last {
         print!("{}", f(x));
         println!(",");
     }
-    println!("{}", f(RIGHT));
+    println!("{}", f(last));
     print!("]");
+}
+
+fn print_sin(f: impl Fn(i32) -> i32) {
+    print(f, RIGHT);
+}
+
+fn print_atan(f: impl Fn(i32) -> i32) {
+    print(f, 1 << (i32::BITS / 2 - 1));
 }
 
 fn main() {
@@ -86,5 +106,15 @@ fn main() {
     }
     if args.sin_p5_51437 {
         print_sin(sin_p5_51437);
+    }
+
+    if args.atan_p2 {
+        print_atan(atan_p2_2850);
+    }
+    if args.atan_p3 {
+        print_atan(atan_p3_2555_691);
+    }
+    if args.atan_p5 {
+        print_atan(atan_p5_787_2968);
     }
 }
