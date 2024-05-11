@@ -12,6 +12,21 @@ struct Args {
 
     #[arg(long)]
     sin_p2: bool,
+
+    #[arg(long)]
+    sin_p3: bool,
+
+    #[arg(long)]
+    sin_p4_7032: bool,
+
+    #[arg(long)]
+    sin_p4_7384: bool,
+
+    #[arg(long)]
+    sin_p5_51472: bool,
+
+    #[arg(long)]
+    sin_p5_51437: bool,
 }
 
 fn print_sin_errors() {
@@ -46,7 +61,7 @@ fn print_sin(f: impl Fn(i32) -> i32) {
         println!(",");
     }
     println!("{}", f(RIGHT));
-    println!("]");
+    print!("]");
 }
 
 fn main() {
@@ -56,5 +71,20 @@ fn main() {
     }
     if args.sin_p2 {
         print_sin(sin_p2_i32);
+    }
+    if args.sin_p3 {
+        print_sin(sin_p3_16384);
+    }
+    if args.sin_p4_7032 {
+        print_sin(sin_p4_7032);
+    }
+    if args.sin_p4_7384 {
+        print_sin(sin_p4_7384);
+    }
+    if args.sin_p5_51472 {
+        print_sin(sin_p5_51472);
+    }
+    if args.sin_p5_51437 {
+        print_sin(sin_p5_51437);
     }
 }
