@@ -54,14 +54,18 @@ fn print_sin_errors() {
     }
 }
 
-fn print_sin(f: impl Fn(i32) -> i32) {
+fn print(f: impl Fn(i32) -> i32, last: i32) {
     println!("[");
-    for x in 0..RIGHT {
+    for x in 0..last {
         print!("{}", f(x));
         println!(",");
     }
-    println!("{}", f(RIGHT));
+    println!("{}", f(last));
     print!("]");
+}
+
+fn print_sin(f: impl Fn(i32) -> i32) {
+    print(f, RIGHT);
 }
 
 fn main() {
