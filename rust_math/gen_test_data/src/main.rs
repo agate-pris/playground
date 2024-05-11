@@ -12,6 +12,9 @@ struct Args {
 
     #[arg(long)]
     sin_p2: bool,
+
+    #[arg(long)]
+    sin_p3: bool,
 }
 
 fn print_sin_errors() {
@@ -56,5 +59,8 @@ fn main() {
     }
     if args.sin_p2 {
         print_sin(sin_p2_i32);
+    }
+    if args.sin_p3 {
+        print_sin(sin_p3_16384);
     }
 }
