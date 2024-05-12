@@ -93,15 +93,15 @@ mod tests {
     {
         use Ordering::*;
 
-        let (a, b) = {
+        let (one, frac_k_4, a, b) = {
             let mut rng = rand::thread_rng();
             let base: T = 2.as_();
-            let quarter = base.pow(T::BITS - 2 - exp) / 4.as_();
-            let mut a = (0.as_()..=quarter).collect::<Vec<_>>();
+            let frac_k_4 = base.pow(T::BITS - 2 - exp) / 4.as_();
+            let mut a = (0.as_()..=frac_k_4).collect::<Vec<_>>();
             let mut b = a.clone();
             a.shuffle(&mut rng);
             b.shuffle(&mut rng);
-            (a, b)
+            (base.pow(exp), frac_k_4, a, b)
         };
 
         let num = num_cpus::get();
@@ -116,8 +116,8 @@ mod tests {
                     .take(a.len() * (n + 1) / num - a.len() * n / num)
                     .flat_map(|&a| b.iter().map(move |&b| (a, b)));
 
-                find_optimal_constants(exp, &atan_expected, search_range, |x, one, k, ab| {
-                    atan_p5_impl!(x, one, ab.0, ab.1, k / 4.as_() - ab.0 + ab.1)
+                find_optimal_constants(exp, &atan_expected, search_range, |x, ab| {
+                    atan_p5_impl!(x, one, ab.0, ab.1, frac_k_4 - ab.0 + ab.1)
                 })
             })
             .reduce(

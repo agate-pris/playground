@@ -534,7 +534,7 @@ pub(crate) mod tests {
             + PrimitivePromotionExt
             + Signed,
         R: Iterator,
-        F: Fn(T, T, T, R::Item) -> T,
+        F: Fn(T, R::Item) -> T,
         T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         R::Item: Clone,
         RangeInclusive<T>: Iterator<Item = T>,
@@ -542,13 +542,13 @@ pub(crate) mod tests {
     {
         use Ordering::*;
 
-        let (one, k, to_rad) = {
+        let (one, to_rad) = {
             let base: T = 2.as_();
             let to_rad = {
                 let pi: f64 = base.pow(T::BITS - 2).as_();
                 PI / pi
             };
-            (base.pow(exp), base.pow(T::BITS - 2 - exp), to_rad)
+            (base.pow(exp), to_rad)
         };
 
         let time = std::time::Instant::now();
@@ -568,7 +568,7 @@ pub(crate) mod tests {
                 match (T::ZERO..=one).try_fold((0.0, 0.0), |(max_error, error_sum), x| {
                     let i: usize = x.as_();
                     let expected = expected[i];
-                    let actual: f64 = f(x, one, k, item.clone()).as_();
+                    let actual: f64 = f(x, item.clone()).as_();
                     let error = to_rad * actual - expected;
 
                     let error_sum = error_sum + error;
