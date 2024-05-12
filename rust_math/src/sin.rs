@@ -26,7 +26,7 @@ pub(crate) trait Cos<T> {
     fn cos(x: T) -> T;
 }
 
-macro_rules! even_sin_cos_impl {
+macro_rules! sin_cos_impl_even {
     ($u:ty, $t:ty) => {
         impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
@@ -198,9 +198,9 @@ impl SinP5_51437 {
     }
 }
 
-even_sin_cos_impl!(CosP2I32, i32);
-even_sin_cos_impl!(CosP4_7032, i32);
-even_sin_cos_impl!(CosP4_7384, i32);
+sin_cos_impl_even!(CosP2I32, i32);
+sin_cos_impl_even!(CosP4_7032, i32);
+sin_cos_impl_even!(CosP4_7384, i32);
 
 odd_sin_cos_impl!(SinP3_16384, i32);
 odd_sin_cos_impl!(SinP5_51472, i32);
