@@ -1,5 +1,3 @@
-use num_traits::Signed;
-
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
 macro_rules! atan_p2_impl {
@@ -18,18 +16,6 @@ const A_I32: [i32; 21] = [
     3, 5, 8, 14, 25, 47, 91, 180, 358, 714, 1426, 2850, 5699, 11395, 22789, 45575, 91148, 182295,
     364590, 729188, 1458371,
 ];
-
-trait AtanP2Consts<T> {
-    const ONE: T;
-    const FRAC_K_4: T;
-    const A: T;
-    fn calc(x: T) -> T
-    where
-        T: Copy + Signed,
-    {
-        atan_p2_impl!(x, Self::ONE, Self::FRAC_K_4, Self::A)
-    }
-}
 
 struct AtanP2I32Util();
 
@@ -70,7 +56,7 @@ mod tests {
         ops::RangeInclusive,
     };
 
-    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::*;
     use rayon::prelude::*;
