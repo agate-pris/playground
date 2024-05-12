@@ -524,7 +524,6 @@ pub(crate) mod tests {
     where
         T: Debug
             + Sync
-            + AsPrimitive<T::PrimitivePromotion>
             + AsPrimitive<f64>
             + AsPrimitive<usize>
             + Bits
@@ -535,7 +534,6 @@ pub(crate) mod tests {
             + Signed,
         R: Iterator,
         F: Fn(T, R::Item) -> T,
-        T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         R::Item: Clone,
         RangeInclusive<T>: Iterator<Item = T>,
         i8: AsPrimitive<T>,

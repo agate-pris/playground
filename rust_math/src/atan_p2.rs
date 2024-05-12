@@ -74,7 +74,6 @@ mod tests {
             + Display
             + Send
             + Sync
-            + AsPrimitive<T::PrimitivePromotion>
             + AsPrimitive<f64>
             + AsPrimitive<usize>
             + Bits
@@ -83,7 +82,6 @@ mod tests {
             + PrimInt
             + PrimitivePromotionExt
             + Signed,
-        T::PrimitivePromotion: PartialOrd + AsPrimitive<T> + Signed,
         RangeInclusive<T>: Iterator<Item = T>,
         f64: AsPrimitive<T>,
         i8: AsPrimitive<T>,
