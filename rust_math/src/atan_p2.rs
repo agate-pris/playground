@@ -151,9 +151,13 @@ mod tests {
 
     #[test]
     fn test_optimal_constants_i8() {
-        test_optimal_constants(3, Vec::<i8>::from([0, 1]));
-        test_optimal_constants(2, vec![A_I6F2]);
-        test_optimal_constants(1, Vec::<i8>::from([2, 3]));
+        [
+            (3, Vec::<i8>::from([0, 1])),
+            (2, vec![A_I6F2]),
+            (1, Vec::<i8>::from([2, 3])),
+        ]
+        .into_iter()
+        .for_each(|(exp, expected)| test_optimal_constants(exp, expected));
     }
 
     #[test]
