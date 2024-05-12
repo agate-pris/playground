@@ -461,7 +461,7 @@ mod tests {
             let i = (x & RIGHT_MASK) as usize;
             let a = data[i];
             let b = data[RIGHT_AS_USIZE - i];
-            match (x >> (i32::BITS / 2 - 1)) & 3 {
+            match (x >> RIGHT_EXP) & 3 {
                 0 => {
                     anyhow::ensure!(sin == a, "x: {x}, sin: {sin}, a: {a}");
                     anyhow::ensure!(cos == b, "x: {x}, sin: {sin}, b: {b}");
