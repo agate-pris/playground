@@ -18,11 +18,11 @@ macro_rules! consts_impl {
     )*};
 }
 
-pub(crate) trait Sin<T> {
+trait Sin<T> {
     fn sin(x: T) -> T;
 }
 
-pub(crate) trait Cos<T> {
+trait Cos<T> {
     fn cos(x: T) -> T;
 }
 
