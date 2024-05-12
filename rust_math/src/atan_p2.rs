@@ -56,7 +56,9 @@ impl AtanUtil<i32> for AtanP2I32Util {
         div_i32_f15(x, y)
     }
     fn calc(x: i32) -> i32 {
-        AtanP2ConstsI32::calc(x)
+        const FRAC_K_4: i32 = 1 << (i32::BITS / 2 - 3);
+        const A: i32 = A_I32[11];
+        atan_p2_impl!(x, Self::ONE, FRAC_K_4, A)
     }
 }
 
