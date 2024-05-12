@@ -17,9 +17,9 @@ const A_I32: [i32; 21] = [
     364590, 729188, 1458371,
 ];
 
-struct AtanP2I32Util();
+struct AtanP2I32();
 
-impl AtanUtil<i32> for AtanP2I32Util {
+impl AtanUtil<i32> for AtanP2I32 {
     type Output = i32;
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
@@ -41,11 +41,11 @@ impl AtanUtil<i32> for AtanP2I32Util {
 }
 
 pub fn atan_p2_2850(x: i32) -> i32 {
-    AtanP2I32Util::atan(x)
+    AtanP2I32::atan(x)
 }
 
 pub fn atan2_p2_2850(y: i32, x: i32) -> i32 {
-    AtanP2I32Util::atan2(y, x)
+    AtanP2I32::atan2(y, x)
 }
 
 #[cfg(test)]
