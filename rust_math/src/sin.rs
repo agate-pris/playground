@@ -8,14 +8,14 @@ trait Consts<T> {
 }
 
 macro_rules! consts_impl {
-    ($u:ty, $t:ty) => {
+    ($(($u:ty, $t:ty)),*) => {$(
         impl Consts<$t> for $u {
             const RIGHT_EXP: u32 = <$t>::BITS / 2 - 1;
             const RIGHT: $t = 1 << Self::RIGHT_EXP;
             const RIGHT_MASK: $t = Self::RIGHT - 1;
             const ONE: $t = Self::RIGHT.pow(2);
         }
-    };
+    )*};
 }
 
 pub(crate) trait Sin<T> {
@@ -132,12 +132,14 @@ pub(crate) struct CosP2I32();
 pub(crate) struct CosP4_7032();
 pub(crate) struct CosP4_7384();
 
-consts_impl!(SinP3_16384, i32);
-consts_impl!(SinP5_51472, i32);
-consts_impl!(SinP5_51437, i32);
-consts_impl!(CosP2I32, i32);
-consts_impl!(CosP4_7032, i32);
-consts_impl!(CosP4_7384, i32);
+consts_impl!(
+    (SinP3_16384, i32),
+    (SinP5_51472, i32),
+    (SinP5_51437, i32),
+    (CosP2I32, i32),
+    (CosP4_7032, i32),
+    (CosP4_7384, i32)
+);
 
 impl CosP2I32 {
     pub fn cos_detail(z: i32) -> i32 {
