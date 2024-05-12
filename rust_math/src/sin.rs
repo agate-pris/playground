@@ -125,12 +125,12 @@ macro_rules! sin_p5o_k {
     };
 }
 
-pub(crate) struct SinP3_16384();
-pub(crate) struct SinP5_51472();
-pub(crate) struct SinP5_51437();
-pub(crate) struct CosP2I32();
-pub(crate) struct CosP4_7032();
-pub(crate) struct CosP4_7384();
+struct SinP3_16384();
+struct SinP5_51472();
+struct SinP5_51437();
+struct CosP2I32();
+struct CosP4_7032();
+struct CosP4_7384();
 
 consts_impl![
     (SinP3_16384, i32),
