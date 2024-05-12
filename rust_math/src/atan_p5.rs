@@ -1,5 +1,3 @@
-use std::ops::{Add, Div, Mul, Sub};
-
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
 macro_rules! atan_p5_impl {
@@ -22,31 +20,9 @@ const A_B_I32: [(i32, i32); 7] = [
     (50981, 190506),
 ];
 
-trait AtanP5Consts<T> {
-    const ONE: T;
-    const A: T;
-    const B: T;
-    const C: T;
-    fn calc(x: T) -> T
-    where
-        T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
-    {
-        atan_p5_impl!(x, Self::ONE, Self::A, Self::B, Self::C)
-    }
-}
+struct AtanP5I32();
 
-struct AtanP5ConstsI32();
-
-impl AtanP5Consts<i32> for AtanP5ConstsI32 {
-    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-    const A: i32 = A_B_I32[0].0;
-    const B: i32 = A_B_I32[0].1;
-    const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
-}
-
-struct AtanP5I32Util();
-
-impl AtanUtil<i32> for AtanP5I32Util {
+impl AtanUtil<i32> for AtanP5I32 {
     type Output = i32;
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
@@ -61,16 +37,19 @@ impl AtanUtil<i32> for AtanP5I32Util {
         div_i32_f15(x, y)
     }
     fn calc(x: i32) -> i32 {
-        AtanP5ConstsI32::calc(x)
+        const A: i32 = A_B_I32[0].0;
+        const B: i32 = A_B_I32[0].1;
+        const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + B - A;
+        atan_p5_impl!(x, Self::ONE, A, B, C)
     }
 }
 
 pub fn atan_p5_787_2968(x: i32) -> i32 {
-    AtanP5I32Util::atan(x)
+    AtanP5I32::atan(x)
 }
 
 pub fn atan2_p5_787_2968(y: i32, x: i32) -> i32 {
-    AtanP5I32Util::atan2(y, x)
+    AtanP5I32::atan2(y, x)
 }
 
 #[cfg(test)]
