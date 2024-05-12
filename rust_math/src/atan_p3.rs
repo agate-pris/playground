@@ -1,5 +1,3 @@
-use num_traits::Signed;
-
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
 macro_rules! atan_p3_impl {
@@ -45,31 +43,9 @@ const A_B_I32: [(i32, i32); 18] = [
     (163355, 44265),
 ];
 
-trait AtanP3Consts<T> {
-    const ONE: T;
-    const FRAC_K_4: T;
-    const A: T;
-    const B: T;
-    fn calc(x: T) -> T
-    where
-        T: Copy + Signed,
-    {
-        atan_p3_impl!(x, Self::ONE, Self::FRAC_K_4, Self::A, Self::B)
-    }
-}
+struct AtanP3I32();
 
-struct AtanP3ConstsI32();
-
-impl AtanP3Consts<i32> for AtanP3ConstsI32 {
-    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-    const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
-    const A: i32 = A_B_I32[11].0;
-    const B: i32 = A_B_I32[11].1;
-}
-
-struct AtanP3I32Util();
-
-impl AtanUtil<i32> for AtanP3I32Util {
+impl AtanUtil<i32> for AtanP3I32 {
     type Output = i32;
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
     const NEG_ONE: i32 = -Self::ONE;
@@ -84,16 +60,19 @@ impl AtanUtil<i32> for AtanP3I32Util {
         div_i32_f15(x, y)
     }
     fn calc(x: i32) -> i32 {
-        AtanP3ConstsI32::calc(x)
+        const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
+        const A: i32 = A_B_I32[11].0;
+        const B: i32 = A_B_I32[11].1;
+        atan_p3_impl!(x, Self::ONE, FRAC_K_4, A, B)
     }
 }
 
 pub fn atan_p3_2555_691(x: i32) -> i32 {
-    AtanP3I32Util::atan(x)
+    AtanP3I32::atan(x)
 }
 
 pub fn atan2_p3_2555_691(y: i32, x: i32) -> i32 {
-    AtanP3I32Util::atan2(y, x)
+    AtanP3I32::atan2(y, x)
 }
 
 #[cfg(test)]
@@ -104,7 +83,7 @@ mod tests {
         ops::RangeInclusive,
     };
 
-    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt};
+    use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
     use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::*;
     use rayon::prelude::*;
