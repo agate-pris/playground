@@ -1,8 +1,9 @@
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
+/// x * (0.25 + (A * (1 - x.abs)))
 macro_rules! atan_p2_impl {
-    ($x:ident,$one:expr,$frac_k_4:expr,$a:expr) => {
-        $x * (($frac_k_4) + ($a) * (($one) - $x.abs()) / ($one))
+    ($x:ident,$one:expr,$one_exp:expr,$frac_k_4:expr,$a:expr) => {
+        $x * (($frac_k_4) + (($a) * (($one) - $x.abs()) >> ($one_exp)))
     };
 }
 
@@ -19,9 +20,13 @@ const A_I32: [i32; 21] = [
 
 struct AtanP2I32();
 
+impl AtanP2I32 {
+    const ONE_EXP: u32 = i32::BITS / 2 - 1;
+}
+
 impl AtanUtil<i32> for AtanP2I32 {
     type Output = i32;
-    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const ONE: i32 = 1 << Self::ONE_EXP;
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_ONE: i32 = -Self::ONE;
@@ -35,7 +40,7 @@ impl AtanUtil<i32> for AtanP2I32 {
     fn calc(x: i32) -> i32 {
         const FRAC_K_4: i32 = 1 << (i32::BITS / 2 - 3);
         const A: i32 = A_I32[11];
-        atan_p2_impl!(x, Self::ONE, FRAC_K_4, A)
+        atan_p2_impl!(x, Self::ONE, Self::ONE_EXP, FRAC_K_4, A)
     }
 }
 
@@ -52,7 +57,7 @@ mod tests {
     use std::{
         cmp::Ordering,
         fmt::{Debug, Display},
-        ops::RangeInclusive,
+        ops::{RangeInclusive, Shr},
     };
 
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
@@ -73,6 +78,7 @@ mod tests {
         T: Debug
             + Display
             + Send
+            + Shr<u32, Output = T>
             + Sync
             + AsPrimitive<f64>
             + AsPrimitive<usize>
@@ -109,7 +115,7 @@ mod tests {
                     .take(a.len() * (n + 1) / num - a.len() * n / num);
 
                 find_optimal_constants(exp, &atan_expected, search_range, |x, a| {
-                    atan_p2_impl!(x, one, frac_k_4, a)
+                    atan_p2_impl!(x, one, exp, frac_k_4, a)
                 })
             })
             .reduce(
