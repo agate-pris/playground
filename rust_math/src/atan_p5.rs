@@ -85,7 +85,6 @@ mod tests {
     use primitive_promotion::PrimitivePromotionExt;
     use rand::prelude::SliceRandom;
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
-    use rstest::rstest;
 
     use crate::{
         atan::tests::{compare_error, find_optimal_constants},
@@ -157,12 +156,17 @@ mod tests {
         assert_eq!(expected, k);
     }
 
-    #[rstest]
-    #[case(1, vec![(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8)])]
-    #[case(2, vec![(1, 2), (2, 3)])]
-    #[case(3, vec![(0, 0), (1, 1), (2, 2)])]
-    fn test_optimal_constants_i8(#[case] exp: u32, #[case] expected: Vec<(i8, i8)>) {
-        test_optimal_constants(exp, expected);
+    #[test]
+    fn test_optimal_constants_i8() {
+        [
+            (3, vec![(0, 0), (1, 1), (2, 2)]),
+            (2, vec![(1, 2), (2, 3)]),
+            (1, (0..8).map(|a| (a, a + 1)).collect()),
+        ]
+        .into_iter()
+        .for_each(|(exp, expected): (u32, Vec<(i8, i8)>)| {
+            test_optimal_constants(exp, expected);
+        });
     }
 
     #[test]
