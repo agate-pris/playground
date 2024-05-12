@@ -25,11 +25,11 @@ struct AtanP5I32();
 impl AtanUtil<i32> for AtanP5I32 {
     type Output = i32;
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
-    const NEG_ONE: i32 = -Self::ONE;
-    const RIGHT: i32 = Self::STRAIGHT / 2;
-    const NEG_RIGHT: i32 = -Self::RIGHT;
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
+    const RIGHT: i32 = Self::STRAIGHT / 2;
+    const NEG_ONE: i32 = -Self::ONE;
     const NEG_STRAIGHT: i32 = -Self::STRAIGHT;
+    const NEG_RIGHT: i32 = -Self::RIGHT;
     fn inv(x: i32) -> i32 {
         inv_i32_f15(x)
     }

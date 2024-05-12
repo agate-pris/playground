@@ -21,11 +21,11 @@ pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
 pub(crate) trait AtanUtil<T> {
     type Output;
     const ONE: T;
-    const NEG_ONE: T;
-    const RIGHT: Self::Output;
-    const NEG_RIGHT: Self::Output;
     const STRAIGHT: Self::Output;
+    const RIGHT: Self::Output;
+    const NEG_ONE: T;
     const NEG_STRAIGHT: Self::Output;
+    const NEG_RIGHT: Self::Output;
     fn inv(x: T) -> T;
     fn div(a: T, b: T) -> T;
     fn calc(x: T) -> Self::Output;
