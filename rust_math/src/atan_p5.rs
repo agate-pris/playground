@@ -10,9 +10,9 @@ macro_rules! atan_p5_impl {
 }
 
 #[cfg(test)]
-pub const A_B_I16: [(i16, i16); 5] = [(5, 14), (6, 22), (13, 46), (27, 93), (69, 204)];
+const A_B_I16: [(i16, i16); 5] = [(5, 14), (6, 22), (13, 46), (27, 93), (69, 204)];
 
-pub const A_B_I32: [(i32, i32); 7] = [
+const A_B_I32: [(i32, i32); 7] = [
     (787, 2968),
     (1582, 5947),
     (3169, 11901),
@@ -22,7 +22,7 @@ pub const A_B_I32: [(i32, i32); 7] = [
     (50981, 190506),
 ];
 
-pub trait AtanP5Consts<T> {
+trait AtanP5Consts<T> {
     const ONE: T;
     const A: T;
     const B: T;
@@ -44,7 +44,7 @@ impl AtanP5Consts<i32> for AtanP5ConstsI32 {
     const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + Self::B - Self::A;
 }
 
-pub(crate) struct AtanP5I32Util();
+struct AtanP5I32Util();
 
 impl AtanUtil<i32> for AtanP5I32Util {
     type Output = i32;

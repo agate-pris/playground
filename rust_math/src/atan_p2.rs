@@ -9,17 +9,17 @@ macro_rules! atan_p2_impl {
 }
 
 #[cfg(test)]
-pub const A_I6F2: i8 = 3;
+const A_I6F2: i8 = 3;
 
 #[cfg(test)]
-pub const A_I16: [i16; 8] = [3, 5, 8, 13, 24, 47, 91, 179];
+const A_I16: [i16; 8] = [3, 5, 8, 13, 24, 47, 91, 179];
 
-pub const A_I32: [i32; 21] = [
+const A_I32: [i32; 21] = [
     3, 5, 8, 14, 25, 47, 91, 180, 358, 714, 1426, 2850, 5699, 11395, 22789, 45575, 91148, 182295,
     364590, 729188, 1458371,
 ];
 
-pub trait AtanP2Consts<T> {
+trait AtanP2Consts<T> {
     const ONE: T;
     const FRAC_K_4: T;
     const A: T;
@@ -31,7 +31,7 @@ pub trait AtanP2Consts<T> {
     }
 }
 
-pub(crate) struct AtanP2ConstsI32();
+struct AtanP2ConstsI32();
 
 impl AtanP2Consts<i32> for AtanP2ConstsI32 {
     const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
@@ -39,7 +39,7 @@ impl AtanP2Consts<i32> for AtanP2ConstsI32 {
     const A: i32 = A_I32[11];
 }
 
-pub(crate) struct AtanP2I32Util();
+struct AtanP2I32Util();
 
 impl AtanUtil<i32> for AtanP2I32Util {
     type Output = i32;

@@ -10,10 +10,10 @@ macro_rules! atan_p3_impl {
 }
 
 #[cfg(test)]
-pub const A_B_I8: [(i8, i8); 2] = [(0, 0), (0, 0)];
+const A_B_I8: [(i8, i8); 2] = [(0, 0), (0, 0)];
 
 #[cfg(test)]
-pub const A_B_I16: [(i16, i16); 8] = [
+const A_B_I16: [(i16, i16); 8] = [
     (2, 2),
     (2, 5),
     (4, 7),
@@ -24,7 +24,7 @@ pub const A_B_I16: [(i16, i16); 8] = [
     (159, 46),
 ];
 
-pub const A_B_I32: [(i32, i32); 18] = [
+const A_B_I32: [(i32, i32); 18] = [
     (2, 2),
     (2, 5),
     (4, 7),
@@ -45,7 +45,7 @@ pub const A_B_I32: [(i32, i32); 18] = [
     (163355, 44265),
 ];
 
-pub trait AtanP3Consts<T> {
+trait AtanP3Consts<T> {
     const ONE: T;
     const FRAC_K_4: T;
     const A: T;
@@ -67,7 +67,7 @@ impl AtanP3Consts<i32> for AtanP3ConstsI32 {
     const B: i32 = A_B_I32[11].1;
 }
 
-pub(crate) struct AtanP3I32Util();
+struct AtanP3I32Util();
 
 impl AtanUtil<i32> for AtanP3I32Util {
     type Output = i32;
