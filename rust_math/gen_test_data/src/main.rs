@@ -6,7 +6,8 @@ use rust_math::{
     sin_p4_7384, sin_p5_51437, sin_p5_51472,
 };
 
-const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+const UNIT_EXP: u32 = i32::BITS / 2 - 1;
+const UNIT: i32 = 1 << UNIT_EXP;
 
 #[derive(Parser)]
 struct Args {
@@ -43,11 +44,9 @@ struct Args {
 
 fn print_sin_errors() {
     fn f(f: impl Fn(i32) -> i32) -> f64 {
-        const RIGHT_EXP: u32 = i32::BITS / 2 - 1;
-        const RIGHT: i32 = 1 << RIGHT_EXP;
-        (0..=RIGHT).fold(0.0, |acc, x| {
-            const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
-            const ONE: f64 = (1 << (2 * RIGHT_EXP)) as f64;
+        (0..=UNIT).fold(0.0, |acc, x| {
+            const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / UNIT as f64;
+            const ONE: f64 = (1 << (2 * UNIT_EXP)) as f64;
             let err = f(x) as f64 / ONE - (x as f64 * FRAC_PI_STRAIGHT).sin();
             std::cmp::max_by(err, acc, |a, b| a.abs().total_cmp(&b.abs()))
         })
@@ -66,22 +65,14 @@ fn print_sin_errors() {
     }
 }
 
-fn print(f: impl Fn(i32) -> i32, last: i32) {
+fn print(f: impl Fn(i32) -> i32) {
     println!("[");
-    for x in 0..last {
+    for x in 0..UNIT {
         print!("{}", f(x));
         println!(",");
     }
-    println!("{}", f(last));
+    println!("{}", f(UNIT));
     print!("]");
-}
-
-fn print_sin(f: impl Fn(i32) -> i32) {
-    print(f, RIGHT);
-}
-
-fn print_atan(f: impl Fn(i32) -> i32) {
-    print(f, 1 << (i32::BITS / 2 - 1));
 }
 
 fn main() {
@@ -90,31 +81,31 @@ fn main() {
         print_sin_errors();
     }
     if args.sin_p2 {
-        print_sin(sin_p2_i32);
+        print(sin_p2_i32);
     }
     if args.sin_p3 {
-        print_sin(sin_p3_16384);
+        print(sin_p3_16384);
     }
     if args.sin_p4_7032 {
-        print_sin(sin_p4_7032);
+        print(sin_p4_7032);
     }
     if args.sin_p4_7384 {
-        print_sin(sin_p4_7384);
+        print(sin_p4_7384);
     }
     if args.sin_p5_51472 {
-        print_sin(sin_p5_51472);
+        print(sin_p5_51472);
     }
     if args.sin_p5_51437 {
-        print_sin(sin_p5_51437);
+        print(sin_p5_51437);
     }
 
     if args.atan_p2 {
-        print_atan(atan_p2_2850);
+        print(atan_p2_2850);
     }
     if args.atan_p3 {
-        print_atan(atan_p3_2555_691);
+        print(atan_p3_2555_691);
     }
     if args.atan_p5 {
-        print_atan(atan_p5_787_2968);
+        print(atan_p5_787_2968);
     }
 }
