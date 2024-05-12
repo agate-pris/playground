@@ -304,14 +304,16 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    const RIGHT: i32 = 1 << (i32::BITS / 2 - 1);
+    const RIGHT_EXP: u32 = i32::BITS / 2 - 1;
+    const RIGHT: i32 = 1 << RIGHT_EXP;
     const RIGHT_AS_USIZE: usize = RIGHT as usize;
     const RIGHT_MASK: i32 = RIGHT - 1;
     const RIGHT_MASK_AS_USIZE: usize = RIGHT_MASK as usize;
     const STRAIGHT: i32 = 2 * RIGHT;
     const FULL: i32 = 2 * STRAIGHT;
     const FULL_MASK: i32 = FULL - 1;
-    const ONE: i32 = RIGHT.pow(2);
+    const ONE_EXP: u32 = 2 * RIGHT_EXP;
+    const ONE: i32 = 1 << ONE_EXP;
     const ONE_AS_F64: f64 = ONE as f64;
     const NEG_FULL: i32 = -FULL;
     const NEG_ONE: i32 = -ONE;
