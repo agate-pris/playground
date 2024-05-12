@@ -50,7 +50,7 @@ macro_rules! sin_cos_impl_even {
 }
 
 macro_rules! sin_cos_impl_odd {
-    ($u:ty, $t:ty) => {
+    ($(($u:ty, $t:ty)),*) => {$(
         impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
                 let masked = x & Self::RIGHT_MASK;
@@ -70,7 +70,7 @@ macro_rules! sin_cos_impl_odd {
                 Self::sin(x.wrapping_add(Self::RIGHT))
             }
         }
-    };
+    )*};
 }
 
 /// a - b * z ^ 2
@@ -199,10 +199,7 @@ impl SinP5_51437 {
 }
 
 sin_cos_impl_even![(CosP2I32, i32), (CosP4_7032, i32), (CosP4_7384, i32)];
-
-sin_cos_impl_odd!(SinP3_16384, i32);
-sin_cos_impl_odd!(SinP5_51472, i32);
-sin_cos_impl_odd!(SinP5_51437, i32);
+sin_cos_impl_odd![(SinP3_16384, i32), (SinP5_51472, i32), (SinP5_51437, i32)];
 
 pub fn sin_p2_i32(x: i32) -> i32 {
     CosP2I32::sin(x)
