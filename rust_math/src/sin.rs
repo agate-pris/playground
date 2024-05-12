@@ -74,6 +74,9 @@ macro_rules! sin_cos_impl_odd {
 }
 
 /// a - b * z ^ 2
+///
+/// NOTE: only correctly works for b is not odd negative number.
+/// Use div ops for b is 0 or positive or negative even.
 macro_rules! sin_p3_cos_p4_impl {
     ($a:ident, $b:expr, $z_2:ident) => {
         ($a - (($z_2 * $b) >> Self::RIGHT_EXP))
@@ -81,6 +84,9 @@ macro_rules! sin_p3_cos_p4_impl {
 }
 
 /// (a - b * z ^ 2) * z ^ 2
+///
+/// NOTE: only correctly works for b is not odd negative number.
+/// Use div ops for b is 0 or positive or negative even.
 macro_rules! cos_p4_sin_p5_impl {
     ($a:ident, $b:expr, $z:ident) => {{
         let z_2 = ($z * $z) >> Self::RIGHT_EXP;
@@ -89,6 +95,8 @@ macro_rules! cos_p4_sin_p5_impl {
 }
 
 /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
+///
+/// NOTE: Prerequisition 1.5 <= k
 macro_rules! sin_p5_impl {
     ($k:expr, $right:expr, $z: ident) => {{
         const A: i32 = $k * 2 - $right * 5 / 2;
