@@ -132,14 +132,14 @@ pub(crate) struct CosP2I32();
 pub(crate) struct CosP4_7032();
 pub(crate) struct CosP4_7384();
 
-consts_impl!(
+consts_impl![
     (SinP3_16384, i32),
     (SinP5_51472, i32),
     (SinP5_51437, i32),
     (CosP2I32, i32),
     (CosP4_7032, i32),
     (CosP4_7384, i32)
-);
+];
 
 impl CosP2I32 {
     pub fn cos_detail(z: i32) -> i32 {
