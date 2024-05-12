@@ -24,7 +24,6 @@ pub(crate) trait AtanUtil<T> {
     const STRAIGHT: Self::Output;
     const RIGHT: Self::Output;
     const NEG_ONE: T;
-    const NEG_STRAIGHT: Self::Output;
     const NEG_RIGHT: Self::Output;
     fn inv(x: T) -> T;
     fn div(a: T, b: T) -> T;
@@ -56,7 +55,7 @@ pub(crate) trait AtanUtil<T> {
                     Self::NEG_RIGHT - Self::calc(x)
                 } else {
                     let x = Self::div(y, x);
-                    Self::NEG_STRAIGHT + Self::calc(x)
+                    Self::calc(x) - Self::STRAIGHT
                 }
             }
             (Less, Equal) => Self::NEG_RIGHT,
