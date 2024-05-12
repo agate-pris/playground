@@ -1,9 +1,13 @@
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
+/// Calculate the arctangent of `x` using the polynomial approximation.
+///   x * (0.25 - (x.abs - 1) * (A + x.abs * B))
+/// = x * (0.25 + (1 - x.abs) * (A + x.abs * B))
 macro_rules! atan_p3_impl {
-    ($x:ident,$one:expr,$frac_k_4:expr,$a:expr,$b:expr) => {{
+    ($x:ident,$one:expr,$one_exp:expr,$frac_k_4:expr,$a:expr,$b:expr) => {{
         let x_abs = $x.abs();
-        $x * (($frac_k_4) - (x_abs - ($one)) * (($a) + x_abs * ($b) / ($one)) / ($one))
+        $x * (($frac_k_4)
+            + ((($one) - x_abs) * (($a) + (x_abs * ($b) >> ($one_exp))) >> ($one_exp)))
     }};
 }
 
@@ -45,9 +49,13 @@ const A_B_I32: [(i32, i32); 18] = [
 
 struct AtanP3I32();
 
+impl AtanP3I32 {
+    const ONE_EXP: u32 = i32::BITS / 2 - 1;
+}
+
 impl AtanUtil<i32> for AtanP3I32 {
     type Output = i32;
-    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const ONE: i32 = 1 << Self::ONE_EXP;
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_ONE: i32 = -Self::ONE;
@@ -62,7 +70,7 @@ impl AtanUtil<i32> for AtanP3I32 {
         const FRAC_K_4: i32 = 2_i32.pow(i32::BITS / 2 - 3);
         const A: i32 = A_B_I32[11].0;
         const B: i32 = A_B_I32[11].1;
-        atan_p3_impl!(x, Self::ONE, FRAC_K_4, A, B)
+        atan_p3_impl!(x, Self::ONE, Self::ONE_EXP, FRAC_K_4, A, B)
     }
 }
 
@@ -79,7 +87,7 @@ mod tests {
     use std::{
         cmp::Ordering,
         fmt::{Debug, Display},
-        ops::RangeInclusive,
+        ops::{RangeInclusive, Shr},
     };
 
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
@@ -99,6 +107,7 @@ mod tests {
         T: Debug
             + Display
             + Send
+            + Shr<u32, Output = T>
             + Sync
             + AsPrimitive<f64>
             + AsPrimitive<usize>
@@ -138,7 +147,7 @@ mod tests {
                     .flat_map(|&a| b.iter().map(move |&b| (a, b)));
 
                 find_optimal_constants(exp, &atan_expected, search_range, |x, ab| {
-                    atan_p3_impl!(x, one, frac_k_4, ab.0, ab.1)
+                    atan_p3_impl!(x, one, exp, frac_k_4, ab.0, ab.1)
                 })
             })
             .reduce(
