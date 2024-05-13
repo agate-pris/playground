@@ -1,9 +1,11 @@
 use crate::atan::{div_i32_f15, inv_i32_f15, AtanUtil};
 
+///   ((A * (x ^ 2) - B) * (x ^ 2) + C) * x
+/// = (C - (B - A * (x ^ 2)) * (x ^ 2)) * x
 macro_rules! atan_p5_impl {
-    ($x:ident,$one:expr,$a:expr,$b:expr,$c:expr) => {{
-        let x_2 = $x * $x / ($one);
-        ((($a) * x_2 / ($one) - ($b)) * x_2 / ($one) + ($c)) * $x
+    ($x:ident,$one:expr,$one_exp:expr,$a:expr,$b:expr,$c:expr) => {{
+        let x_2 = $x * $x >> ($one_exp);
+        (($c) - ((($b) - (($a) * x_2 >> ($one_exp))) * x_2 >> ($one_exp))) * $x
     }};
 }
 
@@ -22,9 +24,13 @@ const A_B_I32: [(i32, i32); 7] = [
 
 struct AtanP5I32();
 
+impl AtanP5I32 {
+    const ONE_EXP: u32 = i32::BITS / 2 - 1;
+}
+
 impl AtanUtil<i32> for AtanP5I32 {
     type Output = i32;
-    const ONE: i32 = 2_i32.pow(i32::BITS / 2 - 1);
+    const ONE: i32 = 1 << Self::ONE_EXP;
     const STRAIGHT: i32 = 2_i32.pow(i32::BITS - 2);
     const RIGHT: i32 = Self::STRAIGHT / 2;
     const NEG_ONE: i32 = -Self::ONE;
@@ -39,7 +45,7 @@ impl AtanUtil<i32> for AtanP5I32 {
         const A: i32 = A_B_I32[0].0;
         const B: i32 = A_B_I32[0].1;
         const C: i32 = 2_i32.pow(i32::BITS / 2 - 3) + B - A;
-        atan_p5_impl!(x, Self::ONE, A, B, C)
+        atan_p5_impl!(x, Self::ONE, Self::ONE_EXP, A, B, C)
     }
 }
 
@@ -56,7 +62,7 @@ mod tests {
     use std::{
         cmp::Ordering,
         fmt::{Debug, Display},
-        ops::RangeInclusive,
+        ops::{RangeInclusive, Shr},
     };
 
     use num_traits::{AsPrimitive, ConstOne, ConstZero, PrimInt, Signed};
@@ -76,6 +82,7 @@ mod tests {
         T: Debug
             + Display
             + Send
+            + Shr<u32, Output = T>
             + Sync
             + AsPrimitive<f64>
             + AsPrimitive<usize>
@@ -115,7 +122,7 @@ mod tests {
                     .flat_map(|&a| b.iter().map(move |&b| (a, b)));
 
                 find_optimal_constants(exp, &atan_expected, search_range, |x, ab| {
-                    atan_p5_impl!(x, one, ab.0, ab.1, frac_k_4 - ab.0 + ab.1)
+                    atan_p5_impl!(x, one, exp, ab.0, ab.1, frac_k_4 - ab.0 + ab.1)
                 })
             })
             .reduce(
