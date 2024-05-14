@@ -8,7 +8,7 @@ use num_traits::ConstZero;
 pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
     const K: i64 = 2_i64.pow(2 * 15 + 1);
     let x = x as i64;
-    ((K + x.abs()) / (2 * x)) as i32
+    ((K + x.abs()) / (x << 1)) as i32
 }
 
 pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
