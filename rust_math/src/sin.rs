@@ -291,7 +291,9 @@ pub fn cos_p5_51437(x: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
+    use std::fmt::Display;
+
+    use anyhow::{Context, Result};
     use approx::abs_diff_eq;
     use num_traits::Zero;
     use rand::Rng;
@@ -329,6 +331,25 @@ mod tests {
     const NEG_FULL: i32 = -FULL;
     const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
 
+    fn to_real(x: i32) -> f64 {
+        x as f64 / ONE_AS_F64
+    }
+    fn to_rad(x: i32) -> f64 {
+        x as f64 * FRAC_PI_STRAIGHT
+    }
+    fn ensure_eq<T>(l: T, r: T) -> Result<()>
+    where
+        T: Display + PartialEq,
+    {
+        Ok(anyhow::ensure!(l == r, "l: {l}, r: {r}"))
+    }
+    fn ensure_abs_diff_eq(l: f64, r: f64, epsilon: f64) -> Result<()> {
+        Ok(anyhow::ensure!(
+            abs_diff_eq!(l, r, epsilon = epsilon),
+            "l: {l}, r: {r}"
+        ))
+    }
+
     #[rstest]
     #[case(sin_p2_i32, cos_p2_i32, "data/sin_p2.json", 0.056010)]
     #[case(sin_p3_16384, cos_p3_16384, "data/sin_p3.json", 0.020017)]
@@ -344,11 +365,11 @@ mod tests {
     ) -> Result<()> {
         let data: Vec<i32> = read_data(data_path)?;
         anyhow::ensure!(data[0].is_zero());
-        anyhow::ensure!(data[RIGHT_AS_USIZE] == ONE);
-        anyhow::ensure!(data.len() == RIGHT_AS_USIZE + 1);
         anyhow::ensure!(data.iter().skip(1).cloned().all(i32::is_positive));
+        ensure_eq(data[RIGHT_AS_USIZE], ONE)?;
+        ensure_eq(data.len(), RIGHT_AS_USIZE + 1)?;
 
-        let test_sin = |x| -> Result<_> {
+        let test_sin = |x| -> Result<()> {
             let actual = sin(x);
             {
                 let masked = (x & RIGHT_MASK) as usize;
@@ -359,20 +380,10 @@ mod tests {
                     3 => -data[RIGHT_AS_USIZE - masked],
                     _ => unreachable!(),
                 };
-                anyhow::ensure!(
-                    expected == actual,
-                    "x: {x}, expected: {expected}, actual: {actual}"
-                );
+                ensure_eq(expected, actual).with_context(|| format!("x: {x}"))?;
             }
-            {
-                let actual_real = actual as f64 / ONE_AS_F64;
-                let expected = (x as f64 * FRAC_PI_STRAIGHT).sin();
-                anyhow::ensure!(
-                    abs_diff_eq!(actual_real, expected, epsilon = acceptable_error),
-                    "x: {x}, expected: {expected}, actual_real: {actual_real}, actual: {actual}"
-                );
-            }
-            Ok(actual)
+            ensure_abs_diff_eq(to_rad(x).sin(), to_real(actual), acceptable_error)
+                .with_context(|| format!("x: {x}, actual: {actual}"))
         };
 
         let test_cos = |x| -> Result<_> {
@@ -386,20 +397,10 @@ mod tests {
                     3 => data[masked],
                     _ => unreachable!(),
                 };
-                anyhow::ensure!(
-                    expected == actual,
-                    "x: {x}, expected: {expected}, actual: {actual}"
-                );
+                ensure_eq(expected, actual).with_context(|| format!("x: {x}"))?;
             }
-            {
-                let actual_real = actual as f64 / ONE_AS_F64;
-                let expected = (x as f64 * FRAC_PI_STRAIGHT).cos();
-                anyhow::ensure!(
-                    abs_diff_eq!(expected, actual_real, epsilon = acceptable_error),
-                    "x: {x}, expected: {expected}, actual_real: {actual_real}, actual: {actual}"
-                );
-            }
-            Ok(actual)
+            ensure_abs_diff_eq(to_rad(x).cos(), to_real(actual), acceptable_error)
+                .with_context(|| format!("x: {x}, actual: {actual}"))
         };
 
         for x in (0..=u32::MAX / RIGHT_AS_U32).map(|i| (i * RIGHT_AS_U32) as i32) {
