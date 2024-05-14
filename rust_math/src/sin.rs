@@ -31,8 +31,7 @@ macro_rules! sin_cos_impl_even {
         impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
                 let masked = x & Self::RIGHT_MASK;
-                let quadrant = (x >> Self::RIGHT_EXP) & 3;
-                match quadrant {
+                match (x >> Self::RIGHT_EXP) & 3 {
                     1 => Self::cos_detail(Self::RIGHT - masked) - Self::ONE,
                     3 => Self::ONE - Self::cos_detail(Self::RIGHT - masked),
                     2 => Self::cos_detail(masked) - Self::ONE,
@@ -54,8 +53,7 @@ macro_rules! sin_cos_impl_odd {
         impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
                 let masked = x & Self::RIGHT_MASK;
-                let quadrant = (x >> Self::RIGHT_EXP) & 3;
-                let z = match quadrant {
+                let z = match (x >> Self::RIGHT_EXP) & 3 {
                     1 => Self::RIGHT - masked,
                     3 => masked - Self::RIGHT,
                     2 => -masked,
