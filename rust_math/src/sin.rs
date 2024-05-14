@@ -94,6 +94,13 @@ macro_rules! cos_p4_sin_p5_impl {
     }};
 }
 
+macro_rules! cos_p4_impl {
+    ($t:ty, $z: ident) => {{
+        const A: i32 = <$t>::K + <$t>::RIGHT;
+        cos_p4_sin_p5_impl!(A, <$t>::K, $z)
+    }};
+}
+
 /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
 ///
 /// NOTE: Prerequisition 1.5 <= k
@@ -173,8 +180,7 @@ impl CosP4_7032 {
     /// (k + 1 - k * z ^ 2) * z ^ 2  
     /// k = 1 - pi / 4
     pub fn cos_detail(z: i32) -> i32 {
-        const A: i32 = CosP4_7032::K + CosP4_7032::RIGHT;
-        cos_p4_sin_p5_impl!(A, CosP4_7032::K, z)
+        cos_p4_impl!(CosP4_7032, z)
     }
 }
 
@@ -184,8 +190,7 @@ impl CosP4_7384 {
     /// (k + 1 - k * z ^ 2) * z ^ 2  
     /// k = 5 * (1 - 3 / pi)
     fn cos_detail(z: i32) -> i32 {
-        const A: i32 = CosP4_7384::K + CosP4_7384::RIGHT;
-        cos_p4_sin_p5_impl!(A, CosP4_7384::K, z)
+        cos_p4_impl!(CosP4_7384, z)
     }
 }
 
