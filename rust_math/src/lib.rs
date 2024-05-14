@@ -26,6 +26,7 @@ mod tests {
     use std::{fs::File, io::BufReader};
 
     use anyhow::Result;
+    use num_traits::{Signed, Zero};
     use serde::de::DeserializeOwned;
 
     pub(crate) fn read_data<T>(data_path: &str) -> Result<Vec<T>>
@@ -35,5 +36,31 @@ mod tests {
         let inner = File::open(data_path)?;
         let rdr = BufReader::new(inner);
         Ok(serde_json::from_reader(rdr)?)
+    }
+
+    #[test]
+    fn test_ops() {
+        // Always truncate toward 0, regardless of the sign of the divisor and the dividend.
+        {
+            assert_eq!(1 / 2, 0);
+            assert_eq!(3 / 2, 1);
+            assert_eq!(1 / -2, 0);
+            assert_eq!(3 / -2, -1);
+            assert_eq!(-1 / 2, 0);
+            assert_eq!(-3 / 2, -1);
+            assert_eq!(-1 / -2, 0);
+            assert_eq!(-3 / -2, 1);
+        }
+
+        // When not overflowing, a left shift is always equivalent to a multiplication by a power
+        // of 2. The right shift produces a different result only for negative odd numbers.
+        for i in -9..9 {
+            assert_eq!(i << 1, 2 * i);
+            if i.is_positive() || ((i % 2).is_zero()) {
+                assert_eq!(i >> 1, i / 2);
+            } else {
+                assert_eq!(i >> 1, i / 2 - 1);
+            }
+        }
     }
 }
