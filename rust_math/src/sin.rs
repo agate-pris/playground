@@ -98,10 +98,10 @@ macro_rules! cos_p4_sin_p5_impl {
 ///
 /// NOTE: Prerequisition 1.5 <= k
 macro_rules! sin_p5_impl {
-    ($k:expr, $right:expr, $z: ident) => {{
-        const A: i32 = $k * 2 - $right * 5 / 2;
-        const B: i32 = $k - $right * 3 / 2;
-        ($k - (cos_p4_sin_p5_impl!(A, B, $z) >> Self::RIGHT_EXP)) * $z
+    ($t:ty, $z: ident) => {{
+        const A: i32 = <$t>::K * 2 - <$t>::RIGHT * 5 / 2;
+        const B: i32 = <$t>::K - <$t>::RIGHT * 3 / 2;
+        (<$t>::K - (cos_p4_sin_p5_impl!(A, B, $z) >> Self::RIGHT_EXP)) * $z
     }};
 }
 
@@ -195,7 +195,7 @@ impl SinP5_51472 {
     /// (k - (2 * k - 2.5 - (k - 1.5) * z ^ 2) * z ^ 2) * z  
     /// k = pi / 2
     fn sin_detail(z: i32) -> i32 {
-        sin_p5_impl!(SinP5_51472::K, SinP5_51472::RIGHT, z)
+        sin_p5_impl!(SinP5_51472, z)
     }
 }
 
@@ -205,7 +205,7 @@ impl SinP5_51437 {
     /// (k - (2 * k - 2.5 - (k - 1.5) * z ^ 2) * z ^ 2) * z  
     /// k = 4 * (3 / pi - 9 / 16)
     fn sin_detail(z: i32) -> i32 {
-        sin_p5_impl!(SinP5_51437::K, SinP5_51437::RIGHT, z)
+        sin_p5_impl!(SinP5_51437, z)
     }
 }
 
