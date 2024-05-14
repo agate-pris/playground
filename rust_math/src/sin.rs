@@ -291,7 +291,7 @@ pub fn cos_p5_51437(x: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use std::fmt::Display;
+    use std::fmt::Debug;
 
     use anyhow::{Context, Result};
     use approx::abs_diff_eq;
@@ -339,9 +339,9 @@ mod tests {
     }
     fn ensure_eq<T>(l: T, r: T) -> Result<()>
     where
-        T: Display + PartialEq,
+        T: Debug + PartialEq,
     {
-        Ok(anyhow::ensure!(l == r, "l: {l}, r: {r}"))
+        Ok(anyhow::ensure!(l == r, "l: {:?}, r: {:?}", l, r))
     }
     fn ensure_abs_diff_eq(l: f64, r: f64, epsilon: f64) -> Result<()> {
         Ok(anyhow::ensure!(
@@ -364,8 +364,12 @@ mod tests {
         #[case] acceptable_error: f64,
     ) -> Result<()> {
         let data: Vec<i32> = read_data(data_path)?;
-        anyhow::ensure!(data[0].is_zero());
-        anyhow::ensure!(data.iter().skip(1).cloned().all(i32::is_positive));
+        anyhow::ensure!(data[0].is_zero(), "{:?}", data[0]);
+        anyhow::ensure!(
+            data.iter().skip(1).cloned().all(i32::is_positive),
+            "{:?}",
+            data
+        );
         ensure_eq(data[RIGHT_AS_USIZE], ONE)?;
         ensure_eq(data.len(), RIGHT_AS_USIZE + 1)?;
 
