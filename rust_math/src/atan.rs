@@ -12,10 +12,9 @@ pub(crate) const fn inv_i32_f15(x: i32) -> i32 {
 }
 
 pub(crate) const fn div_i32_f15(a: i32, b: i32) -> i32 {
-    const K: i64 = 1 << (15 + 1);
-    let a = a as i64 * K;
+    let a = (a as i64) << 16;
     let b = b as i64;
-    ((a + a.signum() * b.abs()) / (2 * b)) as i32
+    ((a + a.signum() * b.abs()) / (b << 1)) as i32
 }
 
 pub(crate) trait AtanUtil<T> {
