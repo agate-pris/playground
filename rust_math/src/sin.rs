@@ -156,7 +156,7 @@ impl CosP2I32 {
 }
 
 impl SinP3_16384 {
-    /// (1.5 - 0.5 * x ^ 2) * x
+    /// (1.5 - 0.5 * z ^ 2) * z
     pub fn sin_detail(z: i32) -> i32 {
         const B: i32 = SinP3_16384::RIGHT / 2;
         const A: i32 = SinP3_16384::RIGHT + B;
@@ -192,7 +192,8 @@ impl CosP4_7384 {
 impl SinP5_51472 {
     const K: i32 = sin_p5_k!() as i32;
 
-    /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
+    /// (k - (2 * k - 2.5 - (k - 1.5) * z ^ 2) * z ^ 2) * z  
+    /// k = pi / 2
     fn sin_detail(z: i32) -> i32 {
         sin_p5_impl!(SinP5_51472::K, SinP5_51472::RIGHT, z)
     }
@@ -201,7 +202,8 @@ impl SinP5_51472 {
 impl SinP5_51437 {
     const K: i32 = sin_p5o_k!() as i32;
 
-    /// (k - (2 * k - 2.5 - (k - 1.5) * x ^ 2) * x ^ 2) * x
+    /// (k - (2 * k - 2.5 - (k - 1.5) * z ^ 2) * z ^ 2) * z  
+    /// k = 4 * (3 / pi - 9 / 16)
     fn sin_detail(z: i32) -> i32 {
         sin_p5_impl!(SinP5_51437::K, SinP5_51437::RIGHT, z)
     }
