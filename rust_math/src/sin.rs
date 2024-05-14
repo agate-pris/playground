@@ -318,14 +318,13 @@ mod tests {
     const RIGHT_MASK: i32 = RIGHT - 1;
     const FULL: i32 = 4 * RIGHT;
     const ONE: i32 = 1 << (2 * RIGHT_EXP);
-    const ONE_AS_F64: f64 = ONE as f64;
-    const NEG_FULL: i32 = -FULL;
-    const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
 
     fn to_real(x: i32) -> f64 {
+        const ONE_AS_F64: f64 = ONE as f64;
         x as f64 / ONE_AS_F64
     }
     fn to_rad(x: i32) -> f64 {
+        const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
         x as f64 * FRAC_PI_STRAIGHT
     }
     fn ensure_eq<T>(l: T, r: T) -> Result<()>
@@ -407,7 +406,7 @@ mod tests {
             test_cos(x + RIGHT_MASK)?;
         }
 
-        const STARTS: [i32; 4] = [i32::MIN.wrapping_sub(FULL), i32::MIN, NEG_FULL, 0];
+        const STARTS: [i32; 4] = [i32::MIN.wrapping_sub(FULL), i32::MIN, -FULL, 0];
         for q in 0..4 {
             let q = q * RIGHT;
             for start in STARTS {
