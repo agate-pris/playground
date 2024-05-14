@@ -170,8 +170,8 @@ impl CosP4_7032 {
 
     /// Approximate the cosine function by the 4th order polynomial derived by Taylor expansion.
     ///
-    /// 1 - (a + 1 - a * z ^ 2) * z ^ 2  
-    /// a = 1 - pi / 4
+    /// (k + 1 - k * z ^ 2) * z ^ 2  
+    /// k = 1 - pi / 4
     pub fn cos_detail(z: i32) -> i32 {
         const A: i32 = CosP4_7032::K + CosP4_7032::RIGHT;
         cos_p4_sin_p5_impl!(A, CosP4_7032::K, z)
@@ -181,7 +181,8 @@ impl CosP4_7032 {
 impl CosP4_7384 {
     const K: i32 = cos_p4o_k!() as i32;
 
-    /// (k + 1 - k * z ^ 2) * z ^ 2
+    /// (k + 1 - k * z ^ 2) * z ^ 2  
+    /// k = 5 * (1 - 3 / pi)
     fn cos_detail(z: i32) -> i32 {
         const A: i32 = CosP4_7384::K + CosP4_7384::RIGHT;
         cos_p4_sin_p5_impl!(A, CosP4_7384::K, z)
