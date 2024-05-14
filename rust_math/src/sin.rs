@@ -157,14 +157,14 @@ consts_impl![
 ];
 
 impl CosP2I32 {
-    pub fn cos_detail(z: i32) -> i32 {
+    fn cos_detail(z: i32) -> i32 {
         z * z
     }
 }
 
 impl SinP3_16384 {
     /// (1.5 - 0.5 * z ^ 2) * z
-    pub fn sin_detail(z: i32) -> i32 {
+    fn sin_detail(z: i32) -> i32 {
         const B: i32 = SinP3_16384::RIGHT / 2;
         const A: i32 = SinP3_16384::RIGHT + B;
         let z_2 = (z * z) >> Self::RIGHT_EXP;
@@ -179,7 +179,7 @@ impl CosP4_7032 {
     ///
     /// (k + 1 - k * z ^ 2) * z ^ 2  
     /// k = 1 - pi / 4
-    pub fn cos_detail(z: i32) -> i32 {
+    fn cos_detail(z: i32) -> i32 {
         cos_p4_impl!(CosP4_7032, z)
     }
 }
