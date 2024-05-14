@@ -20,15 +20,12 @@ macro_rules! consts_impl {
 
 trait Sin<T> {
     fn sin(x: T) -> T;
-}
-
-trait Cos<T> {
     fn cos(x: T) -> T;
 }
 
 macro_rules! sin_cos_impl_even {
     ($(($u:ty, $t:ty)),*) => {$(
-        impl Cos<$t> for $u {
+        impl Sin<$t> for $u {
             fn cos(x: $t) -> $t {
                 let masked = x & Self::RIGHT_MASK;
                 match (x >> Self::RIGHT_EXP) & 3 {
@@ -39,8 +36,6 @@ macro_rules! sin_cos_impl_even {
                     _ => unreachable!(),
                 }
             }
-        }
-        impl Sin<$t> for $u {
             fn sin(x: $t) -> $t {
                 Self::cos(x.wrapping_sub(Self::RIGHT))
             }
@@ -62,8 +57,6 @@ macro_rules! sin_cos_impl_odd {
                 };
                 Self::sin_detail(z)
             }
-        }
-        impl Cos<$t> for $u {
             fn cos(x: $t) -> $t {
                 Self::sin(x.wrapping_add(Self::RIGHT))
             }
