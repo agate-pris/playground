@@ -320,12 +320,11 @@ mod tests {
 
     const RIGHT_EXP: u32 = i32::BITS / 2 - 1;
     const RIGHT: i32 = 1 << RIGHT_EXP;
+    const RIGHT_AS_U32: u32 = RIGHT as u32;
     const RIGHT_AS_USIZE: usize = RIGHT as usize;
     const RIGHT_MASK: i32 = RIGHT - 1;
-    const STRAIGHT: i32 = 2 * RIGHT;
-    const FULL: i32 = 2 * STRAIGHT;
-    const ONE_EXP: u32 = 2 * RIGHT_EXP;
-    const ONE: i32 = 1 << ONE_EXP;
+    const FULL: i32 = 4 * RIGHT;
+    const ONE: i32 = 1 << (2 * RIGHT_EXP);
     const ONE_AS_F64: f64 = ONE as f64;
     const NEG_FULL: i32 = -FULL;
     const FRAC_PI_STRAIGHT: f64 = FRAC_PI_2 / RIGHT as f64;
@@ -403,7 +402,7 @@ mod tests {
             Ok(actual)
         };
 
-        for x in (0..=u32::MAX / RIGHT as u32).map(|i| (i * RIGHT as u32) as i32) {
+        for x in (0..=u32::MAX / RIGHT_AS_U32).map(|i| (i * RIGHT_AS_U32) as i32) {
             test_sin(x)?;
             test_cos(x)?;
             test_sin(x + 1)?;
