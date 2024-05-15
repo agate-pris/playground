@@ -11,6 +11,7 @@ mod atan_p3;
 mod atan_p5;
 mod bits;
 mod sin;
+mod sqrt;
 
 pub use atan_p2::{atan2_p2_2850, atan_p2_2850};
 pub use atan_p3::{atan2_p3_2555_691, atan_p3_2555_691};
@@ -20,6 +21,7 @@ pub use sin::{
     cos_p2_i32, cos_p3_16384, cos_p4_7032, cos_p4_7384, cos_p5_51437, cos_p5_51472, sin_p2_i32,
     sin_p3_16384, sin_p4_7032, sin_p4_7384, sin_p5_51437, sin_p5_51472,
 };
+pub use sqrt::sqrt;
 
 #[cfg(test)]
 mod tests {
