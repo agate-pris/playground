@@ -25,5 +25,5 @@ opt-level = 3
 
 [workspace]
 members = [
-    "gen_test_data",
+    "gen_test_data", "plot",
 ]
