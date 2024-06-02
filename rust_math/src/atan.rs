@@ -282,19 +282,31 @@ pub(crate) mod tests {
             const X: i32 = i32::MAX - (WIDTH - 1);
             const X_BEGIN: i32 = X + 1;
 
-            let points = (X_BEGIN..=i32::MAX)
-                .map(|x| {
-                    let y = {
-                        const WIDTH_AS_I64: i64 = WIDTH as i64;
-                        let mul = x as i64 * (2 * n + 1) as i64;
-                        let rem = mul % WIDTH_AS_I64;
-                        mul / WIDTH_AS_I64 - if rem == 0 { 1 } else { 0 }
-                    } as i32;
-                    [x, y]
-                })
-                .collect::<Vec<_>>();
+            fn make_point(x: i32, n: i32) -> [i32; 2] {
+                let y = {
+                    const WIDTH_AS_I64: i64 = WIDTH as i64;
+                    let mul = x as i64 * (2 * n + 1) as i64;
+                    let rem = mul % WIDTH_AS_I64;
+                    mul / WIDTH_AS_I64 - if rem == 0 { 1 } else { 0 }
+                } as i32;
+                [x, y]
+            }
 
-            points.into_iter().max_set_by(compare_steep)
+            let mut max = make_point(X_BEGIN, n);
+            let mut v = vec![max];
+            for x in (X_BEGIN + 1)..=i32::MAX {
+                let p = make_point(x, n);
+                match compare_steep(&max,&p) {
+                    Ordering::Less => {
+                        max = p;
+                        v.clear();
+                        v.push(max);
+                    }
+                    Ordering::Equal => { v.push(max); }
+                    Ordering::Greater => {}
+                }
+            }
+            v
         }
 
         fn fold_errors(
